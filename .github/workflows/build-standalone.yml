@@ -12,6 +12,8 @@ on:
       - "dependencies.json"
       - "build-standalone.ps1"
       - "build-standalone.bat"
+      - "scripts/build-self-extract.ps1"
+      - "scripts/verify-self-extract.ps1"
       - ".github/workflows/build-standalone.yml"
 
 permissions:
@@ -35,7 +37,9 @@ jobs:
           name: standalone-html-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             dist/index.html
+            dist/index.self-extract.html
             dist/dependency-manifest.json
+            dist/self-extract-manifest.json
             dist/.nojekyll
           if-no-files-found: error
           retention-days: 14

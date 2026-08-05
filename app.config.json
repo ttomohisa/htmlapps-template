@@ -13,6 +13,10 @@
   },
   "build": {
     "output": "dist/index.html",
-    "blockRuntimeNetwork": true
+    "blockRuntimeNetwork": true,
+    "selfExtract": {
+      "enabled": true,
+      "output": "dist/index.self-extract.html"
+    }
   }
 }

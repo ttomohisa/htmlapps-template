@@ -1,7 +1,7 @@
 # Offline Verification
 
 1. Run `build-standalone.bat`.
-2. Open `dist/index.html` directly.
+2. Open `dist/index.html` and `dist/index.self-extract.html` directly.
 3. Open browser developer tools and clear the Network panel.
 4. Enable offline mode or disconnect the device.
 5. Reload the local HTML.
@@ -10,3 +10,8 @@
 8. Confirm output files still open correctly.
 
 For GitHub Pages, one initial request downloads the HTML. Clear the Network panel after the page has loaded, then test the complete app flow.
+
+
+## Self-extracting variant
+
+Open `dist/index.self-extract.html` directly, confirm that the loading screen disappears, and repeat the same offline checks. Verify that the browser console contains no decompression or CSP errors.

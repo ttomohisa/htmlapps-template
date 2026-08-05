@@ -14,7 +14,7 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 
 ## Highlights
 
-- One release artifact: `dist/index.html`
+- Generate both `dist/index.html` and the gzip self-extracting `dist/index.self-extract.html`
 - Double-click `build-standalone.bat` on Windows
 - No Python or Node.js required
 - Exact npm versions with only explicitly selected files embedded as Base64
@@ -22,7 +22,7 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 - No runtime CDN, remote font, API, analytics, or telemetry
 - Content Security Policy with `connect-src 'none'`
 - GitHub Actions for pull request validation and GitHub Pages deployment
-- Starter implementation for bilingual UI, themes, responsive layout, and keyboard access
+- Starter implementation for bilingual UI, a light-only interface, responsive layout, and keyboard access
 - `AGENTS.md`, `APP_SPEC.md`, and a reusable LLM request included
 
 ## Read these first
@@ -34,7 +34,8 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 | `app.config.json` | Application name, slug, version, and description |
 | `dependencies.json` | npm packages and files to embed |
 | `src/index.template.html` | Editable application source |
-| `build-standalone.ps1` | Standalone HTML builder |
+| `build-standalone.ps1` | Standalone and self-extracting HTML builder |
+| `scripts/build-self-extract.ps1` | Gzip and wrap the normal HTML in a self-extracting loader |
 | `docs/LLM_WORKFLOW.md` | Recommended LLM workflow and request |
 
 ## Create a new app
@@ -45,7 +46,7 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 4. Update `app.config.json`.
 5. Tell the coding LLM to begin with `AGENTS.md`.
 6. After implementation, run `build-standalone.bat` on Windows.
-7. Open `dist/index.html` directly and test the main flow with the network disabled.
+7. Open both `dist/index.html` and `dist/index.self-extract.html` directly and test the main flow with the network disabled.
 
 A ready-to-use request is in [LLM Workflow](docs/LLM_WORKFLOW.md).
 
@@ -68,11 +69,13 @@ Generated output:
 ```text
 dist/
 ├─ index.html
+├─ index.self-extract.html
 ├─ dependency-manifest.json
+├─ self-extract-manifest.json
 └─ .nojekyll
 ```
 
-`dist/index.html` is generated. Edit `src/index.template.html` and rebuild instead of modifying the output directly.
+`dist/index.html` and `dist/index.self-extract.html` are generated. Edit `src/index.template.html` and rebuild instead of modifying either output directly.
 
 ## Embed a third-party library
 
@@ -82,15 +85,33 @@ See `examples/dependencies.dayjs.json` and [Adding Embedded Dependencies](docs/D
 
 The builder downloads the package tarball from the official npm registry and embeds only the listed files. The generated application does not contact a CDN at runtime.
 
+## Self-extracting HTML
+
+A normal build creates two variants:
+
+- `dist/index.html`: readable and suitable for debugging, SEO, and the default GitHub Pages entry point
+- `dist/index.self-extract.html`: the original HTML is gzip-compressed and restored in the browser with `DecompressionStream`
+
+The self-extracting variant stays offline and dependency-free, but it requires JavaScript and a browser with `DecompressionStream`. Keep the normal HTML as the GitHub Pages entry point; treat the self-extracting file as an optional download artifact for size-constrained distribution.
+
+To skip it:
+
+```powershell
+.\build-standalone.ps1 -SkipSelfExtract
+```
+
 ## GitHub Pages
+
+After creating a new repository, first open **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**. This is a one-time setting for each repository.
 
 `.github/workflows/deploy-pages.yml` runs on every push to `main`:
 
 1. Build the standalone HTML on a Windows runner.
-2. reject external runtime references and unresolved placeholders.
-3. Publish `dist` to GitHub Pages.
+2. Reject external runtime references and unresolved placeholders.
+3. Publish `dist` when GitHub Pages is enabled.
+4. Skip only the deployment and show setup instructions in the Actions summary when Pages is not configured yet.
 
-Select GitHub Actions as the Pages deployment source in repository settings.
+After enabling Pages, open Actions and choose **Re-run all jobs**. The generated standalone HTML is still saved as a normal Actions artifact when Pages is not yet enabled.
 
 ## Repository layout
 
@@ -103,7 +124,9 @@ Select GitHub Actions as the Pages deployment source in repository settings.
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
+│  ├─ build-self-extract.ps1
 │  ├─ check-repository.ps1
+│  ├─ verify-self-extract.ps1
 │  └─ verify-standalone.ps1
 ├─ docs/
 ├─ examples/
@@ -115,7 +138,7 @@ Select GitHub Actions as the Pages deployment source in repository settings.
 
 ## Security and privacy
 
-The starter CSP blocks runtime network connections. A GitHub Pages deployment needs one initial HTML request, but application processing then stays inside the page. For a fully disconnected session, open the generated `dist/index.html` locally.
+The starter CSP blocks runtime network connections. A GitHub Pages deployment needs one initial HTML request, but application processing then stays inside the page. For a fully disconnected session, open the generated `dist/index.html` or `dist/index.self-extract.html` locally.
 
 Static checks are guardrails rather than proof. Before publishing, also inspect the browser network panel.
 

@@ -4,7 +4,7 @@
 
 Give the coding LLM the repository and this instruction:
 
-> Read `AGENTS.md` first, then `APP_SPEC.md` and `docs/ARCHITECTURE.md`. Implement the complete application described by the spec. Preserve the single-HTML, local-first, no-runtime-network constraints. Update source, configuration, notices, README files, changelog, and tests as needed. Build and verify the repository before reporting completion. Do not edit `dist/index.html` by hand.
+> Read `AGENTS.md` first, then `APP_SPEC.md` and `docs/ARCHITECTURE.md`. Implement the complete application described by the spec. Preserve the single-HTML, local-first, no-runtime-network constraints. Update source, configuration, notices, README files, changelog, and tests as needed. Build and verify the repository before reporting completion. Do not edit either generated file in `dist/` by hand.
 
 ## Recommended development loop
 
@@ -14,7 +14,7 @@ Give the coding LLM the repository and this instruction:
 4. Let the LLM add exact dependencies only when justified.
 5. Require the LLM to build after each meaningful implementation phase.
 6. Review `dist/dependency-manifest.json` for unexpected packages or assets.
-7. Open `dist/index.html` directly and test the core flow.
+7. Open both generated HTML variants directly and test the core flow.
 8. Publish only after the no-network check passes.
 
 ## Information that improves LLM output
@@ -39,7 +39,7 @@ Provide concrete details instead of style adjectives:
 - Claim complete offline behavior while a worker, WASM file, font, or dictionary remains external.
 - Paste third-party minified source into the template.
 - hide missing functionality behind non-working buttons.
-- modify generated `dist/index.html` instead of source.
+- modify generated files in `dist/` instead of source.
 
 ## Review checkpoints
 

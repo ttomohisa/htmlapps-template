@@ -1,8 +1,8 @@
 # Single HTML App Template
 
-[![GitHub Pages](https://github.com/ttomohisa/htmlapps-xxxxx/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-xxxxx/actions/workflows/deploy-pages.yml)
+[![GitHub Pages](https://github.com/ttomohisa/htmlapps-template/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-template/actions/workflows/deploy-pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Single HTML](https://img.shields.io/badge/distribution-single%20HTML-0ea5e9)](https://ttomohisa.github.io/htmlapps-xxxxx/)
+[![Single HTML](https://img.shields.io/badge/distribution-single%20HTML-0ea5e9)](https://ttomohisa.github.io/htmlapps-template/)
 
 [English README](README.md)
 
@@ -14,7 +14,7 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 
 ## このテンプレートの特徴
 
-- 最終成果物は `dist/index.html` の1ファイル
+- 通常版 `dist/index.html` と、gzip自己解凍版 `dist/index.self-extract.html` を同時生成
 - Windowsでは `build-standalone.bat` をダブルクリックしてビルド可能
 - PythonやNode.jsは不要
 - npmパッケージのバージョンを固定し、必要ファイルだけをBase64で内包
@@ -22,7 +22,7 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 - 実行時のCDN、外部フォント、API、分析タグを使わない
 - `connect-src 'none'` のContent Security Policy
 - GitHub ActionsでPull Requestのビルド検証とGitHub Pages公開
-- 日英UI、ライト・ダーク、スマートフォン、キーボード操作の基本実装
+- 日英UI、ライトモード固定、スマートフォン、キーボード操作の基本実装
 - LLM向けの `AGENTS.md`、仕様書 `APP_SPEC.md`、推奨プロンプトを同梱
 
 ## 最初に確認するファイル
@@ -34,7 +34,8 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 | `app.config.json` | アプリ名、slug、バージョン、説明 |
 | `dependencies.json` | 内包するnpmパッケージとファイル |
 | `src/index.template.html` | 編集するアプリ本体 |
-| `build-standalone.ps1` | 完全内包HTMLの生成 |
+| `build-standalone.ps1` | 完全内包HTMLと自己解凍版の生成 |
+| `scripts/build-self-extract.ps1` | 通常版HTMLをgzip圧縮して自己解凍HTMLへ変換 |
 | `docs/LLM_WORKFLOW.ja.md` | LLMへ依頼する手順 |
 
 ## 新しいアプリを作る
@@ -45,7 +46,7 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 4. `app.config.json` を変更します。
 5. LLMへ `AGENTS.md` から読むよう指示します。
 6. 実装後、Windowsで `build-standalone.bat` を実行します。
-7. `dist/index.html` を直接開き、ネットワークを切った状態でも主要機能を確認します。
+7. `dist/index.html` と `dist/index.self-extract.html` を直接開き、ネットワークを切った状態でも主要機能を確認します。
 
 そのまま使える依頼文は [LLMでアプリを作る手順](docs/LLM_WORKFLOW.ja.md) にあります。
 
@@ -68,11 +69,13 @@ build-standalone.bat -ForceDownload
 ```text
 dist/
 ├─ index.html
+├─ index.self-extract.html
 ├─ dependency-manifest.json
+├─ self-extract-manifest.json
 └─ .nojekyll
 ```
 
-`dist/index.html` は生成物です。直接編集せず、`src/index.template.html` を変更して再ビルドしてください。
+`dist/index.html` と `dist/index.self-extract.html` は生成物です。直接編集せず、`src/index.template.html` を変更して再ビルドしてください。
 
 ## 外部ライブラリを内包する
 
@@ -82,15 +85,33 @@ dist/
 
 ビルド処理はnpm公式レジストリからtarballを取得し、指定ファイルだけをHTMLへ内包します。実行時にCDNへアクセスすることはありません。
 
+## 自己解凍HTML
+
+通常のビルドでは次の2種類を同時に生成します。
+
+- `dist/index.html`：可読性、デバッグ、SEO、GitHub Pagesの既定ページに向く通常版
+- `dist/index.self-extract.html`：元HTMLをgzip圧縮し、ブラウザーの `DecompressionStream` で展開する配布向け版
+
+自己解凍版も外部ライブラリを使わず、1ファイルのままオフラインで動作します。JavaScriptが無効な環境や `DecompressionStream` 非対応ブラウザーでは開けません。GitHub Pagesのトップページには通常版を使い、自己解凍版はダウンロード配布や容量制限のある場所向けの副成果物として扱う設計です。
+
+自己解凍版を生成しない場合：
+
+```powershell
+.\build-standalone.ps1 -SkipSelfExtract
+```
+
 ## GitHub Pages
+
+新しいリポジトリを作成したら、最初に **Settings → Pages → Build and deployment → Source** で **GitHub Actions** を選択してください。これはリポジトリごとに一度だけ必要な設定です。
 
 `.github/workflows/deploy-pages.yml` は `main` へのpushごとに次を行います。
 
 1. Windows runnerで完全内包HTMLを生成
 2. 外部ランタイム参照と未置換プレースホルダーを検査
-3. `dist` をGitHub Pagesへ公開
+3. Pagesが有効なら `dist` をGitHub Pagesへ公開
+4. Pagesが未設定なら公開だけをスキップし、設定手順をActionsの概要へ表示
 
-リポジトリのPages設定では、公開元にGitHub Actionsを選択してください。
+Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を実行してください。Pages未設定でも生成済みHTMLは通常のActions artifactとして保存されます。
 
 ## リポジトリ構成
 
@@ -103,7 +124,9 @@ dist/
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
+│  ├─ build-self-extract.ps1
 │  ├─ check-repository.ps1
+│  ├─ verify-self-extract.ps1
 │  └─ verify-standalone.ps1
 ├─ docs/
 ├─ examples/
@@ -115,7 +138,7 @@ dist/
 
 ## セキュリティとプライバシー
 
-初期テンプレートは実行時通信をCSPで遮断します。GitHub Pages版は最初にHTMLを取得しますが、その後のアプリ処理はページ内で完結します。完全にネットワークを切って使う場合は、生成された `dist/index.html` をローカルで開いてください。
+初期テンプレートは実行時通信をCSPで遮断します。GitHub Pages版は最初にHTMLを取得しますが、その後のアプリ処理はページ内で完結します。完全にネットワークを切って使う場合は、生成された `dist/index.html` または `dist/index.self-extract.html` をローカルで開いてください。
 
 静的検査だけで完全性を証明することはできません。公開前にブラウザーの開発者ツールでも通信がないことを確認してください。
 

@@ -12,7 +12,7 @@ This file is the first instruction for any coding LLM or agent working in this r
 
 ## Non-negotiable product constraints
 
-- The release artifact is one file: `dist/index.html`.
+- Generate two one-file release variants: readable `dist/index.html` and gzip self-extracting `dist/index.self-extract.html`.
 - The app must work when `dist/index.html` is opened directly with `file://` unless `APP_SPEC.md` explicitly says otherwise.
 - No runtime CDN, external font, analytics, telemetry, API request, or hidden network dependency.
 - User-selected files and entered data must stay in the browser unless `APP_SPEC.md` explicitly defines an export initiated by the user.
@@ -21,7 +21,7 @@ This file is the first instruction for any coding LLM or agent working in this r
 - Keyboard navigation, visible focus, labels, sufficient contrast, and reduced-motion behavior are required.
 - Japanese and English should live in the same HTML when the app is intended for both languages.
 - Do not use generic emoji as the main interface iconography. Prefer simple inline SVG icons.
-- Do not edit `dist/index.html` manually. Edit `src/index.template.html`, config, and build scripts; then rebuild.
+- Do not edit `dist/index.html` or `dist/index.self-extract.html` manually. Edit `src/index.template.html`, config, and build scripts; then rebuild.
 
 ## Dependency rules
 
@@ -66,12 +66,12 @@ Then verify at minimum:
 - Exported file contents and filename.
 - Reload persistence where persistence exists.
 - Japanese and English.
-- Light, dark, and system theme behavior.
+- Light-only visual behavior at desktop and mobile widths.
 - Narrow smartphone width and desktop width.
 - Keyboard-only operation.
 - No console error.
 - No runtime network request after the initial HTML load on GitHub Pages.
-- Direct local opening of `dist/index.html`.
+- Direct local opening of both generated HTML variants.
 
 ## Documentation required with code changes
 

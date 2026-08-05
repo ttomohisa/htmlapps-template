@@ -76,7 +76,9 @@ jobs:
           name: standalone-html-${{ github.sha }}
           path: |
             dist/index.html
+            dist/index.self-extract.html
             dist/dependency-manifest.json
+            dist/self-extract-manifest.json
             dist/.nojekyll
           if-no-files-found: error
           retention-days: 14

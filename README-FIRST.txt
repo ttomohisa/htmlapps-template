@@ -6,6 +6,6 @@ Single HTML App Template
 3. Update app.config.json.
 4. Give the repository to the coding LLM and tell it to read AGENTS.md first.
 5. Run build-standalone.bat on Windows.
-6. Open dist\index.html directly and test it with the network disabled.
+6. Open dist\index.html and dist\index.self-extract.html directly and test both with the network disabled.
 
-Do not edit dist\index.html manually.
+Do not edit either generated HTML in dist\ manually.

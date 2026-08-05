@@ -7,7 +7,7 @@ This file is the product contract for the application created from this template
 - **Working name:** Single HTML App Starter
 - **One-sentence purpose:** Demonstrate the template's local-first, responsive, bilingual, single-file application foundation.
 - **Primary users:** Developers and LLM coding agents starting a new browser utility.
-- **Release artifact:** `dist/index.html`
+- **Release artifacts:** `dist/index.html` and `dist/index.self-extract.html`
 
 ## 2. Problem and outcome
 
@@ -37,7 +37,7 @@ A successful replacement app should state here:
 - Download UTF-8 plain text.
 - Save the current text in local storage when available.
 - Switch Japanese and English without reloading.
-- Support light, dark, and system themes.
+- Use a light-only interface; do not add a dark-mode or theme switcher.
 - Expose build version, generation timestamp, and embedded dependency count.
 
 ## 5. Data and privacy
@@ -76,12 +76,12 @@ Current stable desktop and mobile versions of Chromium, Firefox, and Safari. Dir
 
 ## 10. Acceptance criteria
 
-- `build-standalone.ps1` produces `dist/index.html`.
+- `build-standalone.ps1` produces the readable HTML and a gzip self-extracting variant.
 - `scripts/verify-standalone.ps1` passes.
 - The generated HTML contains no unresolved build placeholder.
 - The generated HTML contains no external script, stylesheet, frame, module import, or CSS asset URL.
 - Runtime CSP includes `connect-src 'none'`.
-- The full core user flow works after opening `dist/index.html` directly.
+- The full core user flow works after opening either generated HTML directly.
 - No data leaves the page.
 - Japanese and English copy both fit at 360px width.
 

@@ -11,10 +11,11 @@ dependencies.json            Exact npm packages and files to embed
 src/index.template.html      Editable application source
 build-standalone.ps1         Dependency fetch, hash, embed, and build
 scripts/verify-standalone.ps1 Static release checks
-dist/index.html              Generated release artifact
+dist/index.html              Generated readable release artifact
+dist/index.self-extract.html Generated gzip self-extracting artifact
 ```
 
-`dist/index.html` is generated and must not be edited manually.
+`dist/index.html` and `dist/index.self-extract.html` are generated and must not be edited manually.
 
 ## Build pipeline
 
@@ -26,8 +27,10 @@ dist/index.html              Generated release artifact
 6. Calculate SHA-256 hashes for the package tarball and every embedded asset.
 7. Store assets as Base64 in an embedded JSON bundle.
 8. Replace the three source placeholders exactly once.
-9. Write `dist/index.html`, `dist/dependency-manifest.json`, and `dist/.nojekyll`.
-10. Reject unresolved placeholders and common external runtime resource references.
+9. Write and verify `dist/index.html`.
+10. Gzip that HTML, embed it into a small native `DecompressionStream` loader, and write `dist/index.self-extract.html`.
+11. Verify byte-for-byte restoration and write both manifests plus `dist/.nojekyll`.
+12. Reject unresolved placeholders and common external runtime resource references.
 
 ## Build placeholders
 
@@ -69,7 +72,7 @@ Static scanning is a guardrail, not a proof. Browser developer tools should stil
 
 Keep source in one HTML while it remains understandable. When an app grows substantially, development files may be split under `src/` and assembled by the build script. Preserve these properties:
 
-- One generated HTML release.
+- Two generated one-file release variants.
 - Pinned and auditable dependencies.
 - No runtime external resource.
 - Clear state ownership.

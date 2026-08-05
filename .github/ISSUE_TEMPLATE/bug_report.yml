@@ -43,6 +43,7 @@ body:
       label: How was the app opened?
       options:
         - Local dist/index.html
+        - Local dist/index.self-extract.html
         - GitHub Pages
         - Other static hosting
     validations:
