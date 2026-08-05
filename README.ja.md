@@ -1,5 +1,9 @@
 # Single HTML App Template
 
+[![GitHub Pages](https://github.com/ttomohisa/htmlapps-xxxxx/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-xxxxx/actions/workflows/deploy-pages.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Single HTML](https://img.shields.io/badge/distribution-single%20HTML-0ea5e9)](https://ttomohisa.github.io/htmlapps-xxxxx/)
+
 [English README](README.md)
 
 LLMと人が、**配布物が1つのHTMLだけで完結するブラウザーアプリ**を継続的に作るためのGitHubリポジトリテンプレートです。
