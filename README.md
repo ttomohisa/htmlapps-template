@@ -1,8 +1,8 @@
 # Single HTML App Template
 
-[![GitHub Pages](https://github.com/ttomohisa/htmlapps-xxxxx/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-xxxxx/actions/workflows/deploy-pages.yml)
+[![GitHub Pages](https://github.com/ttomohisa/htmlapps-template/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-template/actions/workflows/deploy-pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Single HTML](https://img.shields.io/badge/distribution-single%20HTML-0ea5e9)](https://ttomohisa.github.io/htmlapps-xxxxx/)
+[![Single HTML](https://img.shields.io/badge/distribution-single%20HTML-0ea5e9)](https://ttomohisa.github.io/htmlapps-template/)
 
 [日本語 README](README.ja.md)
 
