@@ -16,7 +16,7 @@ Describe the user-visible change.
 - [ ] Narrow-screen/touch behavior tested.
 - [ ] Keyboard-only flow tested.
 - [ ] Japanese and English checked where applicable.
-- [ ] Light and dark themes checked where applicable.
+- [ ] The light-only interface was checked at desktop and mobile widths.
 - [ ] Browser console checked.
 - [ ] Runtime network panel checked after initial load.
 

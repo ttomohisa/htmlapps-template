@@ -97,3 +97,14 @@ Replace these with explicit decisions before implementation:
 - Error and recovery behavior.
 - Required third-party libraries.
 - Whether bilingual UI is required.
+
+## In-app help
+
+The upper-right header includes a compact help button. It opens a bilingual “使い方と注意事項” dialog containing:
+
+- the real user workflow,
+- privacy and local-processing behavior,
+- limitations and data-loss risks,
+- any browser or device constraints relevant to the app.
+
+Acceptance criteria: help content is updated together with each user-facing behavior change and contains no leftover starter instructions.

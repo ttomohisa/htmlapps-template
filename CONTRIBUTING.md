@@ -28,3 +28,7 @@ Describe:
 - Known limitations.
 
 A pull request should not add a remote runtime resource, unpinned package, generated-only fix, or undocumented user-data flow.
+
+## Help content checklist
+
+When a pull request changes the user workflow, also update the in-app help section between `APP:HELP:BEGIN` and `APP:HELP:END`. Confirm the dialog opens from the upper-right button, follows the selected language, closes by button / `Esc` / backdrop click, and remains usable on a narrow mobile viewport.

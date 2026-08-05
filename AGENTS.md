@@ -94,3 +94,11 @@ Return a concise report containing:
 5. Known limitations or unverified items.
 
 Do not claim a browser, device, build, or network test was performed unless it was actually performed.
+
+## Help dialog
+
+- Keep a compact help button in the upper-right header next to the language switcher.
+- The button opens a native `<dialog>` titled “使い方と注意事項” / “How to use & notes”.
+- Whenever application behavior changes, update the content between `APP:HELP:BEGIN` and `APP:HELP:END` in the same change.
+- Include actual basic operations, privacy behavior, limitations, and data-loss risks. Do not leave starter-specific help in a finished app.
+- The dialog must close with its close button, `Esc`, and a click on the backdrop.

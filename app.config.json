@@ -3,7 +3,7 @@
   "name": "Single HTML App Starter",
   "nameJa": "単一HTMLアプリ スターター",
   "slug": "single-html-app-starter",
-  "version": "0.1.0",
+  "version": "1.0",
   "description": "A reusable starter for privacy-friendly, fully self-contained browser apps.",
   "descriptionJa": "プライバシーに配慮した完全内包型ブラウザーアプリの再利用テンプレートです。",
   "defaultLanguage": "auto",

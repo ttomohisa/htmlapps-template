@@ -120,3 +120,5 @@ Static checks are guardrails rather than proof. Before publishing, also inspect 
 Copyright © 2026 ttomohisa
 
 Released under the [MIT License](LICENSE). Update authorship and third-party notices appropriately in applications created from this template.
+
+- A standard upper-right “How to use & notes” dialog
