@@ -4,18 +4,19 @@
 
 Give the coding LLM the repository and this instruction:
 
-> Read `AGENTS.md` first, then `APP_SPEC.md` and `docs/ARCHITECTURE.md`. Implement the complete application described by the spec. Preserve the single-HTML, local-first, no-runtime-network constraints. Update source, configuration, notices, README files, changelog, and tests as needed. Build and verify the repository before reporting completion. Do not edit either generated file in `dist/` by hand.
+> Read `AGENTS.md` first, then `APP_SPEC.md` and `docs/ARCHITECTURE.md`. Inspect `components/` before recreating common UI such as confirmation dialogs. Implement the complete application described by the spec. Preserve the single-HTML, local-first, no-runtime-network constraints. Update source, configuration, notices, README files, changelog, and tests as needed. Build and verify the repository before reporting completion. Do not edit either generated file in `dist/` by hand.
 
 ## Recommended development loop
 
 1. Rewrite `APP_SPEC.md` with the concrete product.
-2. Update `app.config.json`.
-3. Ask the LLM to inspect the existing source before replacing the sample.
-4. Let the LLM add exact dependencies only when justified.
-5. Require the LLM to build after each meaningful implementation phase.
-6. Review `dist/dependency-manifest.json` for unexpected packages or assets.
-7. Open both generated HTML variants directly and test the core flow.
-8. Publish only after the no-network check passes.
+2. Inspect `components/` and reuse generic source snippets where they fit.
+3. Update `app.config.json`.
+4. Ask the LLM to inspect the existing source before replacing the sample.
+5. Let the LLM add exact dependencies only when justified.
+6. Require the LLM to build after each meaningful implementation phase.
+7. Review `dist/dependency-manifest.json` for unexpected packages or assets.
+8. Open both generated HTML variants directly and test the core flow.
+9. Publish only after the no-network check passes.
 
 ## Information that improves LLM output
 

@@ -23,6 +23,7 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 - Content Security Policy with `connect-src 'none'`
 - GitHub Actions for pull request validation and GitHub Pages deployment
 - Starter implementation for bilingual UI, a light-only interface, responsive layout, and keyboard access
+- Reusable confirmation dialog: centered modal on desktop and safe-area-aware bottom sheet on smartphones
 - `AGENTS.md`, `APP_SPEC.md`, and a reusable LLM request included
 
 ## Read these first
@@ -34,6 +35,7 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 | `app.config.json` | Application name, slug, version, and description |
 | `dependencies.json` | npm packages and files to embed |
 | `src/index.template.html` | Editable application source |
+| `components/confirm-dialog.html` | Reusable confirmation UI for delete, clear-all, and similar actions |
 | `build-standalone.ps1` | Standalone and self-extracting HTML builder |
 | `scripts/build-self-extract.ps1` | Gzip and wrap the normal HTML in a self-extracting loader |
 | `docs/LLM_WORKFLOW.md` | Recommended LLM workflow and request |
@@ -44,9 +46,10 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 2. Create a new repository with **Use this template**.
 3. Rewrite `APP_SPEC.md` with the concrete product.
 4. Update `app.config.json`.
-5. Tell the coding LLM to begin with `AGENTS.md`.
-6. After implementation, run `build-standalone.bat` on Windows.
-7. Open both `dist/index.html` and `dist/index.self-extract.html` directly and test the main flow with the network disabled.
+5. Inspect `components/` and reuse generic UI pieces where appropriate.
+6. Tell the coding LLM to begin with `AGENTS.md`.
+7. After implementation, run `build-standalone.bat` on Windows.
+8. Open both `dist/index.html` and `dist/index.self-extract.html` directly and test the main flow with the network disabled.
 
 A ready-to-use request is in [LLM Workflow](docs/LLM_WORKFLOW.md).
 
@@ -121,6 +124,8 @@ After enabling Pages, open Actions and choose **Re-run all jobs**. The generated
 ├─ APP_SPEC.md
 ├─ app.config.json
 ├─ dependencies.json
+├─ components/
+│  └─ confirm-dialog.html
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
@@ -135,6 +140,12 @@ After enabling Pages, open Actions and choose **Re-run all jobs**. The generated
 ├─ build-standalone.ps1
 └─ .github/workflows/
 ```
+
+## Reusable UI components
+
+`components/` contains dependency-free source snippets that can be copied into finished apps. The first standard component is `confirm-dialog.html`, intended for deletion, clear-all, overwrite, and similar confirmation flows. The starter's Clear action uses the same `AppConfirm.ask()` pattern.
+
+It renders as a centered modal on desktop and a safe-area-aware bottom sheet on smartphones. See [Reusable UI components](docs/COMPONENTS.md) for usage.
 
 ## Security and privacy
 

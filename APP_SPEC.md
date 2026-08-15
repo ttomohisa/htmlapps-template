@@ -26,7 +26,8 @@ A successful replacement app should state here:
 2. Enter or paste text.
 3. See character, word, and line counts update immediately.
 4. Copy or download the text.
-5. Reload and recover the locally saved text.
+5. Use Clear and confirm the destructive action in the app-provided confirmation dialog.
+6. Reload and recover the locally saved text.
 
 ## 4. Functional requirements
 
@@ -36,6 +37,7 @@ A successful replacement app should state here:
 - Copy text with a compatibility fallback.
 - Download UTF-8 plain text.
 - Save the current text in local storage when available.
+- Confirm destructive clearing with the reusable `AppConfirm.ask()` UI instead of `window.confirm()`.
 - Switch Japanese and English without reloading.
 - Use a light-only interface; do not add a dark-mode or theme switcher.
 - Expose build version, generation timestamp, and embedded dependency count.
@@ -61,7 +63,8 @@ A successful replacement app should state here:
 - All controls have visible labels or accessible names.
 - Keyboard focus is visible.
 - Motion respects `prefers-reduced-motion`.
-- Destructive actions are visually distinct.
+- Destructive actions are visually distinct and use the reusable confirmation component.
+- Confirmation is centered on desktop and presented as a safe-area-aware bottom sheet on smartphones.
 - Status messages use an `aria-live` region.
 
 ## 8. Performance expectations
@@ -84,6 +87,7 @@ Current stable desktop and mobile versions of Chromium, Firefox, and Safari. Dir
 - The full core user flow works after opening either generated HTML directly.
 - No data leaves the page.
 - Japanese and English copy both fit at 360px width.
+- Clear requires an in-app confirmation; Cancel, `Esc`, the close button, and a backdrop tap leave the text unchanged.
 
 ## 11. Open decisions for a new app
 

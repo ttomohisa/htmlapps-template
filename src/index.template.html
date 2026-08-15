@@ -305,6 +305,71 @@
       background: var(--accent-soft);
       color: var(--text) !important;
     }
+
+    /* Reusable confirmation component. Canonical source: components/confirm-dialog.html */
+    .app-confirm-dialog { width: min(420px, calc(100% - 24px)); max-width: 100%; }
+    .app-confirm-dialog::backdrop { background: rgba(15, 17, 14, .48); backdrop-filter: blur(3px); }
+    .app-confirm-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 18px 13px;
+      border-bottom: 1px solid var(--line);
+    }
+    .app-confirm-title { margin: 0; font-size: 17px; letter-spacing: -.01em; }
+    .app-confirm-close {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .app-confirm-close:hover { background: var(--surface-hover); }
+    .app-confirm-close svg { width: 19px; height: 19px; }
+    .app-confirm-body { padding: 18px; }
+    .app-confirm-message {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+    .app-confirm-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .app-confirm-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+      cursor: pointer;
+    }
+    .app-confirm-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
+    .app-confirm-button.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .app-confirm-button.primary:hover { border-color: var(--accent-hover); background: var(--accent-hover); }
+    .app-confirm-button.danger { border-color: var(--danger); background: var(--danger); color: #fff; }
+    .app-confirm-button:focus-visible, .app-confirm-close:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 55%, transparent);
+      outline-offset: 2px;
+    }
+
     code { padding: 1px 5px; border-radius: 5px; background: var(--surface-muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     @media (max-width: 820px) {
@@ -332,6 +397,19 @@
       .toolbar, .button-row { width: 100%; }
       .button-row .button { flex: 1 1 auto; }
       textarea { min-height: 235px; }
+      .app-confirm-dialog {
+        width: 100%;
+        max-width: none;
+        margin: auto 0 0;
+        border-width: 1px 0 0;
+        border-radius: 22px 22px 0 0;
+      }
+      .app-confirm-dialog::backdrop { background: rgba(0, 0, 0, .42); backdrop-filter: blur(2px); }
+      .app-confirm-header { padding: 14px 18px 12px; }
+      .app-confirm-body { padding: 12px 18px calc(env(safe-area-inset-bottom) + 18px); }
+      .app-confirm-message { font-size: 14px; line-height: 1.75; }
+      .app-confirm-actions { grid-template-columns: 1fr; gap: 10px; margin-top: 16px; }
+      .app-confirm-button { min-height: 48px; font-size: 14px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -431,6 +509,23 @@
   <footer><span id="footerName">Single HTML App Starter</span> · MIT License · <span data-i18n="footer">Generated as one self-contained HTML file</span></footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- Reusable confirmation component. Keep in sync with components/confirm-dialog.html. -->
+  <dialog class="app-confirm-dialog" id="appConfirmDialog" aria-labelledby="appConfirmTitle" aria-describedby="appConfirmMessage">
+    <div class="app-confirm-header">
+      <h2 class="app-confirm-title" id="appConfirmTitle">確認</h2>
+      <button class="app-confirm-close" id="appConfirmClose" type="button" data-i18n-aria-label="close" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="app-confirm-body">
+      <p class="app-confirm-message" id="appConfirmMessage"></p>
+      <div class="app-confirm-actions">
+        <button class="app-confirm-button" id="appConfirmCancel" type="button">キャンセル</button>
+        <button class="app-confirm-button primary" id="appConfirmOk" type="button">実行する</button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="helpDialog" aria-labelledby="helpTitle">
     <div class="dialog-header">
       <h2 id="helpTitle" data-i18n="helpTitle">使い方と注意事項</h2>
@@ -444,7 +539,7 @@
       <ol>
         <li data-i18n="helpStep1">作業領域へテキストを入力します。内容は入力のたびに端末内へ保存されます。</li>
         <li data-i18n="helpStep2">「コピー」または「テキスト保存」で、入力内容を取り出せます。</li>
-        <li data-i18n="helpStep3">「サンプルに戻す」で初期例を復元し、「消去」ですべて削除できます。</li>
+        <li data-i18n="helpStep3">「サンプルに戻す」で初期例を復元し、「消去」は確認後にすべて削除します。</li>
       </ol>
 
       <h3 data-i18n="helpPrivacyTitle">プライバシー</h3>
@@ -546,7 +641,7 @@
           helpBasicsTitle: '基本操作',
           helpStep1: '作業領域へテキストを入力します。内容は入力のたびに端末内へ保存されます。',
           helpStep2: '「コピー」または「テキスト保存」で、入力内容を取り出せます。',
-          helpStep3: '「サンプルに戻す」で初期例を復元し、「消去」ですべて削除できます。',
+          helpStep3: '「サンプルに戻す」で初期例を復元し、「消去」は確認後にすべて削除します。',
           helpPrivacyTitle: 'プライバシー',
           helpPrivacyBody: '入力内容と操作はブラウザー内で処理され、このアプリから外部へ送信されません。必要なコードと依存ファイルも配布用HTMLに内包されます。',
           helpNotesTitle: '注意事項',
@@ -561,6 +656,7 @@
           workspaceBody: '入力内容はこのブラウザー内だけに保存され、このアプリから送信されません。',
           characters: '文字', words: '単語', lines: '行', editorLabel: 'テキスト入力',
           copy: 'コピー', download: 'テキスト保存', sample: 'サンプルに戻す', clear: '消去', savedLocally: '端末内に保存済み',
+          confirmTitle: '確認', confirmClearMessage: '入力内容をすべて消去しますか？', confirmClearAction: '消去する', cancel: 'キャンセル',
           guaranteesTitle: 'テンプレートの基本保証',
           guaranteesBody: 'アプリ仕様で明示的に変更しない限り、この制約を維持します。',
           card1Title: '配布物はひとつ', card1Body: 'リリース成果物は dist/index.html。直接開くことも、静的サイトとして公開することもできます。',
@@ -576,7 +672,7 @@
           helpBasicsTitle: 'Basics',
           helpStep1: 'Enter text in the workspace. The content is saved locally as you type.',
           helpStep2: 'Use Copy or Download text to take the content out of the app.',
-          helpStep3: 'Restore the initial example with Restore sample, or remove everything with Clear.',
+          helpStep3: 'Restore the initial example with Restore sample, or use Clear and confirm before removing everything.',
           helpPrivacyTitle: 'Privacy',
           helpPrivacyBody: 'Your content and actions are processed in the browser and are not sent outside by this app. Required code and dependencies are embedded in the distributable HTML.',
           helpNotesTitle: 'Notes',
@@ -591,6 +687,7 @@
           workspaceBody: 'Text stays in this browser. It is never sent by this app.',
           characters: 'Characters', words: 'Words', lines: 'Lines', editorLabel: 'Text editor',
           copy: 'Copy', download: 'Download text', sample: 'Restore sample', clear: 'Clear', savedLocally: 'Saved locally',
+          confirmTitle: 'Confirm', confirmClearMessage: 'Clear all text from the workspace?', confirmClearAction: 'Clear', cancel: 'Cancel',
           guaranteesTitle: 'Template guarantees',
           guaranteesBody: 'Keep these constraints unless the product specification explicitly changes them.',
           card1Title: 'One deliverable', card1Body: 'The release artifact is dist/index.html. It opens directly and can be hosted as a static page.',
@@ -616,6 +713,57 @@
       const toast = $('#toast');
       let toastTimer = 0;
       let language = readStorage(storageKeys.language) || detectLanguage();
+
+      // Reusable Promise-based confirmation API. Canonical source: components/confirm-dialog.html.
+      const AppConfirm = (() => {
+        const dialog = $('#appConfirmDialog');
+        const title = $('#appConfirmTitle');
+        const message = $('#appConfirmMessage');
+        const closeButton = $('#appConfirmClose');
+        const cancelButton = $('#appConfirmCancel');
+        const okButton = $('#appConfirmOk');
+        let resolver = null;
+        let restoreFocus = null;
+
+        function finish(result) {
+          if (!dialog.open) return;
+          const currentResolver = resolver;
+          resolver = null;
+          dialog.close();
+          if (restoreFocus instanceof HTMLElement && restoreFocus.isConnected) restoreFocus.focus({ preventScroll: true });
+          restoreFocus = null;
+          if (currentResolver) currentResolver(result);
+        }
+
+        function ask({ title: heading, message: body, confirmLabel, cancelLabel, tone = 'default' } = {}) {
+          if (dialog.open) finish(false);
+          title.textContent = heading || translate('confirmTitle');
+          message.textContent = body || '';
+          cancelButton.textContent = cancelLabel || translate('cancel');
+          okButton.textContent = confirmLabel || translate('confirmClearAction');
+          okButton.classList.toggle('danger', tone === 'danger');
+          okButton.classList.toggle('primary', tone !== 'danger');
+          restoreFocus = document.activeElement;
+          return new Promise(resolve => {
+            resolver = resolve;
+            dialog.showModal();
+            requestAnimationFrame(() => cancelButton.focus({ preventScroll: true }));
+          });
+        }
+
+        closeButton.addEventListener('click', () => finish(false));
+        cancelButton.addEventListener('click', () => finish(false));
+        okButton.addEventListener('click', () => finish(true));
+        dialog.addEventListener('cancel', event => { event.preventDefault(); finish(false); });
+        dialog.addEventListener('click', event => {
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) finish(false);
+        });
+
+        return Object.freeze({ ask });
+      })();
+      window.AppConfirm = AppConfirm;
 
       function readStorage(key) {
         try { return localStorage.getItem(key); } catch { return null; }
@@ -696,7 +844,21 @@
       $('#copyButton').addEventListener('click', copyText);
       $('#downloadButton').addEventListener('click', downloadText);
       $('#sampleButton').addEventListener('click', () => { editor.value = sampleText[language]; saveText(); showToast(translate('restored')); });
-      $('#clearButton').addEventListener('click', () => { editor.value = ''; saveText(); editor.focus(); showToast(translate('cleared')); });
+      $('#clearButton').addEventListener('click', async () => {
+        if (!editor.value) return;
+        const ok = await AppConfirm.ask({
+          title: translate('confirmTitle'),
+          message: translate('confirmClearMessage'),
+          confirmLabel: translate('confirmClearAction'),
+          cancelLabel: translate('cancel'),
+          tone: 'danger'
+        });
+        if (!ok) return;
+        editor.value = '';
+        saveText();
+        editor.focus();
+        showToast(translate('cleared'));
+      });
 
       editor.value = readStorage(storageKeys.text) || sampleText[language];
       $('#versionBadge').textContent = `v${APP_CONFIG.version}`;

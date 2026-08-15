@@ -8,6 +8,7 @@ The repository separates editable source from the release artifact:
 app.config.json              Product metadata
 APP_SPEC.md                  Product behavior and acceptance contract
 dependencies.json            Exact npm packages and files to embed
+components/                   Reusable source snippets copied/adapted into apps
 src/index.template.html      Editable application source
 build-standalone.ps1         Dependency fetch, hash, embed, and build
 scripts/verify-standalone.ps1 Static release checks
@@ -16,6 +17,13 @@ dist/index.self-extract.html Generated gzip self-extracting artifact
 ```
 
 `dist/index.html` and `dist/index.self-extract.html` are generated and must not be edited manually.
+
+
+## Reusable component layer
+
+`components/` contains dependency-free source snippets for common UI patterns. These files are not loaded at runtime and are not a separate bundle layer. An app copies or adapts the needed CSS, HTML, and JavaScript into `src/index.template.html`, preserving the one-file runtime model.
+
+The starter includes `components/confirm-dialog.html` and exposes the matching `window.AppConfirm` API in the default source. It is intended to replace native `window.confirm()` for delete, clear-all, overwrite, and similar user-visible destructive flows. See `docs/COMPONENTS.md`.
 
 ## Build pipeline
 

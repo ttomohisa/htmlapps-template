@@ -44,10 +44,22 @@ Inside `src/index.template.html`:
 - Keep application state explicit and serializable where practical.
 - Mark the replaceable app area with `APP:BEGIN` and `APP:END` comments.
 - Keep translations in one clearly named object.
-- Avoid global mutable state except the documented `window.StandaloneAssets` API.
+- Avoid global mutable state except the documented `window.StandaloneAssets` API and reusable component APIs such as `window.AppConfirm`.
 - Add comments for non-obvious algorithms, browser workarounds, and performance-sensitive paths.
 
 If the application becomes too large for safe single-file source editing, split development source under `src/` and update the builder to concatenate it. The release must still be one HTML file.
+
+## Reusable UI components
+
+- Inspect `components/` before implementing common UI from scratch.
+- `components/confirm-dialog.html` is the canonical confirmation UI for this template. It is centered on desktop and becomes a safe-area-aware bottom sheet on smartphones.
+- Component files are source snippets, not runtime dependencies. Copy or adapt the needed CSS, HTML, and JavaScript into `src/index.template.html` so the final release remains one self-contained HTML file.
+- Prefer `AppConfirm.ask()` over `window.confirm()` for deletion, clear-all, overwrite, and other meaningful destructive actions.
+- Use `tone: 'danger'` for destructive confirmation buttons.
+- Pass localized title, message, and button labels from the application's translation object whenever practical.
+- Preserve `Esc`, backdrop cancellation, visible focus, focus restoration, smartphone safe-area handling, and keyboard access when adapting a component.
+- Avoid `window.alert()`, `window.confirm()`, and `window.prompt()` in finished product UI unless `APP_SPEC.md` explicitly requires native browser dialogs or there is a documented technical reason.
+- See `docs/COMPONENTS.md` / `docs/COMPONENTS.ja.md` for usage and maintenance rules.
 
 ## Required checks before completion
 
@@ -82,6 +94,7 @@ Update these when relevant:
 - `CHANGELOG.md`: notable changes.
 - `THIRD_PARTY_NOTICES.md`: dependency additions, removals, or upgrades.
 - `SECURITY.md`: changed trust boundaries or file handling.
+- `docs/COMPONENTS.md` and `docs/COMPONENTS.ja.md`: reusable UI component behavior and API.
 
 ## Completion report format
 

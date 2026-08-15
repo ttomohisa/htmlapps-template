@@ -23,6 +23,7 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 - `connect-src 'none'` のContent Security Policy
 - GitHub ActionsでPull Requestのビルド検証とGitHub Pages公開
 - 日英UI、ライトモード固定、スマートフォン、キーボード操作の基本実装
+- PCではモーダル、スマホではボトムシートになる汎用確認ダイアログを標準装備
 - LLM向けの `AGENTS.md`、仕様書 `APP_SPEC.md`、推奨プロンプトを同梱
 
 ## 最初に確認するファイル
@@ -34,6 +35,7 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 | `app.config.json` | アプリ名、slug、バージョン、説明 |
 | `dependencies.json` | 内包するnpmパッケージとファイル |
 | `src/index.template.html` | 編集するアプリ本体 |
+| `components/confirm-dialog.html` | 削除・全消去などに使う汎用確認ダイアログ |
 | `build-standalone.ps1` | 完全内包HTMLと自己解凍版の生成 |
 | `scripts/build-self-extract.ps1` | 通常版HTMLをgzip圧縮して自己解凍HTMLへ変換 |
 | `docs/LLM_WORKFLOW.ja.md` | LLMへ依頼する手順 |
@@ -44,9 +46,10 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 2. **Use this template** から新しいリポジトリを作成します。
 3. `APP_SPEC.md` を新しいアプリの具体的な仕様へ書き換えます。
 4. `app.config.json` を変更します。
-5. LLMへ `AGENTS.md` から読むよう指示します。
-6. 実装後、Windowsで `build-standalone.bat` を実行します。
-7. `dist/index.html` と `dist/index.self-extract.html` を直接開き、ネットワークを切った状態でも主要機能を確認します。
+5. `components/` を確認し、確認ダイアログなど再利用できる部品をアプリへ取り込みます。
+6. LLMへ `AGENTS.md` から読むよう指示します。
+7. 実装後、Windowsで `build-standalone.bat` を実行します。
+8. `dist/index.html` と `dist/index.self-extract.html` を直接開き、ネットワークを切った状態でも主要機能を確認します。
 
 そのまま使える依頼文は [LLMでアプリを作る手順](docs/LLM_WORKFLOW.ja.md) にあります。
 
@@ -121,6 +124,8 @@ Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を�
 ├─ APP_SPEC.md
 ├─ app.config.json
 ├─ dependencies.json
+├─ components/
+│  └─ confirm-dialog.html
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
@@ -135,6 +140,12 @@ Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を�
 ├─ build-standalone.ps1
 └─ .github/workflows/
 ```
+
+## 汎用UIコンポーネント
+
+`components/` には、完成アプリへコピーして使える依存なしのUI部品を置きます。現在は、削除・全消去・上書き確認などに使う `confirm-dialog.html` を用意しています。スターター画面の「消去」でも同じ `AppConfirm.ask()` パターンを使っています。
+
+PCでは中央モーダル、スマートフォンではSafe Area対応のボトムシートとして表示されます。詳しくは [再利用UIコンポーネント](docs/COMPONENTS.ja.md) を参照してください。
 
 ## セキュリティとプライバシー
 
