@@ -61,6 +61,8 @@ Windows 10/11で `build-standalone.bat` をダブルクリックします。
 build-standalone.bat
 ```
 
+必須のビルドスクリプトは `Get-FileHash` と `::new()` に依存せず、制約のあるWindows PowerShell環境でも動きやすい構成にしています。SHA-256は.NETの暗号化APIで計算します。
+
 依存パッケージをキャッシュから削除して再取得する場合：
 
 ```text
@@ -112,7 +114,7 @@ dist/
 `.github/workflows/deploy-pages.yml` は `main` へのpushごとに次を行います。
 
 1. Windows runnerで完全内包HTMLを生成
-2. 外部ランタイム参照と未置換プレースホルダーを検査
+2. 外部ランタイム参照と、宣言済みの未置換ビルドプレースホルダーを検査
 3. Pagesが有効なら `dist` をGitHub Pagesへ公開
 4. Pagesが未設定なら公開だけをスキップし、設定手順をActionsの概要へ表示
 

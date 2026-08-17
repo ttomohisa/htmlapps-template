@@ -61,6 +61,8 @@ Double-click `build-standalone.bat` on Windows 10/11, or run:
 build-standalone.bat
 ```
 
+The required build scripts avoid `Get-FileHash` and `::new()` so they remain usable in more constrained Windows PowerShell environments. SHA-256 values are calculated through the .NET cryptography API.
+
 Discard the package cache and fetch pinned packages again:
 
 ```text
@@ -112,7 +114,7 @@ After creating a new repository, first open **Settings → Pages → Build and d
 `.github/workflows/deploy-pages.yml` runs on every push to `main`:
 
 1. Build the standalone HTML on a Windows runner.
-2. Reject external runtime references and unresolved placeholders.
+2. Reject external runtime references and the declared unresolved build placeholders.
 3. Publish `dist` when GitHub Pages is enabled.
 4. Skip only the deployment and show setup instructions in the Actions summary when Pages is not configured yet.
 

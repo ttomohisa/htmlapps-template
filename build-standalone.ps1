@@ -34,6 +34,19 @@ function Get-Json([string]$Path) {
   return Get-Content -Raw -Encoding UTF8 $Path | ConvertFrom-Json
 }
 
+function Get-Sha256FileHex([string]$Path) {
+  if (-not (Test-Path $Path)) { throw "File not found for SHA-256: $Path" }
+  $stream = [System.IO.File]::OpenRead($Path)
+  $algorithm = [System.Security.Cryptography.SHA256]::Create()
+  try {
+    $hashBytes = $algorithm.ComputeHash($stream)
+    return (($hashBytes | ForEach-Object { $_.ToString("x2") }) -join "")
+  } finally {
+    $algorithm.Dispose()
+    $stream.Dispose()
+  }
+}
+
 function Get-SafeId([string]$Value) {
   if ([string]::IsNullOrWhiteSpace($Value)) { throw "Dependency id cannot be empty." }
   if ($Value -notmatch '^[a-z0-9][a-z0-9._-]*$') { throw "Dependency id '$Value' must use lowercase letters, numbers, dot, underscore, or hyphen." }
@@ -90,7 +103,7 @@ function Get-NpmPackage([string]$PackageName, [string]$Version) {
   return [ordered]@{
     Root = $packageDir
     Archive = $archivePath
-    ArchiveSha256 = (Get-FileHash -Algorithm SHA256 -Path $archivePath).Hash.ToLowerInvariant()
+    ArchiveSha256 = (Get-Sha256FileHex $archivePath)
   }
 }
 
@@ -251,7 +264,10 @@ New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
 [System.IO.File]::WriteAllText((Join-Path $outputDirectory "dependency-manifest.json"), ($manifest | ConvertTo-Json -Depth 40), (New-Object System.Text.UTF8Encoding($false)))
 [System.IO.File]::WriteAllText((Join-Path $outputDirectory ".nojekyll"), "", (New-Object System.Text.UTF8Encoding($false)))
 
-& $VerifyPath -Path $OutputPath -RequireNetworkBlock ([bool]$appConfig.build.blockRuntimeNetwork)
+& $VerifyPath `
+  -Path $OutputPath `
+  -RequireNetworkBlock ([bool]$appConfig.build.blockRuntimeNetwork) `
+  -ForbiddenPlaceholders @($replacements.Keys)
 
 $selfExtractEnabled = $false
 $selfExtractOutputPath = ""
@@ -289,7 +305,7 @@ if (-not $SkipSelfExtract -and ($appConfig.build.PSObject.Properties.Name -conta
   }
 }
 
-$outputHash = (Get-FileHash -Algorithm SHA256 -Path $OutputPath).Hash.ToLowerInvariant()
+$outputHash = Get-Sha256FileHex $OutputPath
 $outputSizeMb = [Math]::Round((Get-Item $OutputPath).Length / 1MB, 2)
 Write-Host ""
 Write-Host "[OK] Standalone HTML: $OutputPath" -ForegroundColor Green

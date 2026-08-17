@@ -39,7 +39,7 @@ The starter includes `components/confirm-dialog.html` and exposes the matching `
 10. Gzip that HTML, embed it into a small ASCII-only native `DecompressionStream` loader, inherit the readable HTML favicon, and write `dist/index.self-extract.html`.
 11. Verify that the loader stays ASCII-only and embedded-only, the favicon matches the readable HTML, and the gzip payload restores byte-for-byte.
 12. Write both manifests plus `dist/.nojekyll`.
-13. Reject unresolved placeholders and common external runtime resource references.
+13. Reject the declared unresolved build placeholders and common external runtime resource references.
 
 ## Build placeholders
 
@@ -49,7 +49,7 @@ The source template contains exactly one of each:
 - `__BUILD_MANIFEST_JSON__`
 - `__EMBEDDED_ASSET_BUNDLE_BASE64__`
 
-Do not rename or duplicate them without changing the builder and verifier.
+Do not rename or duplicate them without changing the builder and verifier. Other runtime identifiers that happen to use a `__NAME__` convention are allowed and must not be rejected as build placeholders.
 
 ## Embedded asset API
 

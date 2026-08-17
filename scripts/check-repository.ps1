@@ -46,6 +46,40 @@ for ($index = $selfExtractBuilderStart; $index -lt $selfExtractBuilderBytes.Leng
   }
 }
 
+$buildCompatibilityFiles = @(
+  "build-standalone.ps1",
+  "scripts\build-self-extract.ps1",
+  "scripts\verify-standalone.ps1",
+  "scripts\verify-self-extract.ps1"
+)
+foreach ($relative in $buildCompatibilityFiles) {
+  $compatibilityPath = Join-Path $Root $relative
+  $compatibilityText = Get-Content -Raw -Encoding UTF8 $compatibilityPath
+  if ($compatibilityText -match '(?i)\bGet-FileHash\b') {
+    throw "$relative must not depend on Get-FileHash; use the .NET SHA-256 helper for broader Windows PowerShell compatibility."
+  }
+  if ($compatibilityText -match '::new\s*\(') {
+    throw "$relative must not use ::new(); use New-Object or older-compatible .NET construction syntax."
+  }
+}
+
+# Regression check: runtime identifiers like __APP_INTERNAL_STATE__ are not build placeholders.
+$verifyPath = Join-Path $Root "scripts\verify-standalone.ps1"
+$tempVerifyPath = Join-Path ([System.IO.Path]::GetTempPath()) ("single-html-template-verify-" + [Guid]::NewGuid().ToString("N") + ".html")
+$syntheticHtml = @'
+<!doctype html>
+<html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'">
+</head><body><script>const __APP_INTERNAL_STATE__ = 1;</script></body></html>
+'@
+try {
+  [System.IO.File]::WriteAllText($tempVerifyPath, $syntheticHtml, (New-Object System.Text.UTF8Encoding($false)))
+  & $verifyPath -Path $tempVerifyPath -RequireNetworkBlock $true
+} finally {
+  Remove-Item -Force -ErrorAction SilentlyContinue $tempVerifyPath
+}
+
 $app = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "app.config.json") | ConvertFrom-Json
 if ([string]::IsNullOrWhiteSpace([string]$app.name)) { throw "app.config.json: name is required" }
 if ([string]::IsNullOrWhiteSpace([string]$app.slug)) { throw "app.config.json: slug is required" }

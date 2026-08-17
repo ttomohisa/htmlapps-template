@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0 - Portable PowerShell build verification - 2026-08-17
+
+- Removed the builder's dependency on `Get-FileHash` and now calculate file SHA-256 hashes through the .NET cryptography API.
+- Replaced `::new()` constructor syntax in self-extract build/verification scripts with older-compatible construction syntax.
+- Changed standalone placeholder verification to reject only the real build placeholders instead of every `__UPPERCASE__` runtime identifier.
+- Added repository regression guards so future template changes cannot reintroduce `Get-FileHash`, `::new()`, or the generic placeholder false positive.
+
 ## 1.0 - Self-extract loader robustness - 2026-08-17
 
 - Made `scripts/build-self-extract.ps1` ASCII-only so Windows PowerShell 5.1 cannot corrupt Japanese loader text when the script is stored as BOM-less UTF-8.

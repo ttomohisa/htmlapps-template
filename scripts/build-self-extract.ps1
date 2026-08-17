@@ -96,7 +96,7 @@ function Get-EmbeddedFaviconTag([string]$Html) {
 
 $compressedBuffer = New-Object System.IO.MemoryStream
 try {
-  $gzip = [System.IO.Compression.GZipStream]::new(
+  $gzip = New-Object System.IO.Compression.GZipStream -ArgumentList @(
     $compressedBuffer,
     [System.IO.Compression.CompressionMode]::Compress,
     $true
@@ -242,7 +242,7 @@ $manifest = [ordered]@{
   output = [ordered]@{
     path = [System.IO.Path]::GetFileName($OutputPath)
     bytes = (Get-Item $OutputPath).Length
-    sha256 = (Get-FileHash -Algorithm SHA256 -Path $OutputPath).Hash.ToLowerInvariant()
+    sha256 = (Get-Sha256Hex $wrapperBytes)
     loaderEncoding = "ascii"
     faviconInherited = $true
   }

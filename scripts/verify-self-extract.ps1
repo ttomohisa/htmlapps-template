@@ -86,10 +86,10 @@ try {
   throw "The embedded payload is not valid Base64: $($_.Exception.Message)"
 }
 
-$input = [System.IO.MemoryStream]::new($compressedBytes)
-$output = [System.IO.MemoryStream]::new()
+$input = New-Object System.IO.MemoryStream -ArgumentList (, $compressedBytes)
+$output = New-Object System.IO.MemoryStream
 try {
-  $gzip = [System.IO.Compression.GZipStream]::new($input, [System.IO.Compression.CompressionMode]::Decompress)
+  $gzip = New-Object System.IO.Compression.GZipStream -ArgumentList $input, ([System.IO.Compression.CompressionMode]::Decompress)
   try {
     $gzip.CopyTo($output)
   } finally {

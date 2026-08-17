@@ -117,3 +117,9 @@ Do not claim a browser, device, build, or network test was performed unless it w
 - Whenever application behavior changes, update the content between `APP:HELP:BEGIN` and `APP:HELP:END` in the same change.
 - Include actual basic operations, privacy behavior, limitations, and data-loss risks. Do not leave starter-specific help in a finished app.
 - The dialog must close with its close button, `Esc`, and a click on the backdrop.
+
+## Build compatibility guardrails
+
+- Do not depend on `Get-FileHash`; use .NET SHA-256 APIs.
+- Avoid `::new()` in required PowerShell build and verification scripts.
+- Verify only declared build placeholders, not arbitrary `__UPPERCASE__` runtime identifiers.
