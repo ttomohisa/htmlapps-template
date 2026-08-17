@@ -36,9 +36,10 @@ The starter includes `components/confirm-dialog.html` and exposes the matching `
 7. Store assets as Base64 in an embedded JSON bundle.
 8. Replace the three source placeholders exactly once.
 9. Write and verify `dist/index.html`.
-10. Gzip that HTML, embed it into a small native `DecompressionStream` loader, and write `dist/index.self-extract.html`.
-11. Verify byte-for-byte restoration and write both manifests plus `dist/.nojekyll`.
-12. Reject unresolved placeholders and common external runtime resource references.
+10. Gzip that HTML, embed it into a small ASCII-only native `DecompressionStream` loader, inherit the readable HTML favicon, and write `dist/index.self-extract.html`.
+11. Verify that the loader stays ASCII-only and embedded-only, the favicon matches the readable HTML, and the gzip payload restores byte-for-byte.
+12. Write both manifests plus `dist/.nojekyll`.
+13. Reject unresolved placeholders and common external runtime resource references.
 
 ## Build placeholders
 

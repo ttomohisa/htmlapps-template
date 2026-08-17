@@ -14,4 +14,4 @@ For GitHub Pages, one initial request downloads the HTML. Clear the Network pane
 
 ## Self-extracting variant
 
-Open `dist/index.self-extract.html` directly, confirm that the loading screen disappears, and repeat the same offline checks. Verify that the browser console contains no decompression or CSP errors.
+Open `dist/index.self-extract.html` directly, confirm that the loading screen text is readable, the same favicon as `dist/index.html` is visible, and the loading screen disappears. Repeat the same offline checks and verify that the browser console contains no decompression or CSP errors. `scripts/verify-self-extract.ps1` also enforces an ASCII-only loader and byte-for-byte restoration of the readable HTML.

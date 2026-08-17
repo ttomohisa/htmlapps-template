@@ -4,7 +4,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$OutputPath,
   [string]$AppName = "Standalone app",
-  [string]$AppNameJa = "単一HTMLアプリ"
+  [string]$AppNameJa = "Standalone app"
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,6 +16,83 @@ if (-not [System.IO.Path]::IsPathRooted($OutputPath)) { $OutputPath = [System.IO
 
 $inputBytes = [System.IO.File]::ReadAllBytes($InputPath)
 if ($inputBytes.Length -eq 0) { throw "Input HTML is empty: $InputPath" }
+$inputHtml = [System.Text.Encoding]::UTF8.GetString($inputBytes)
+
+function Get-Sha256Hex([byte[]]$Bytes) {
+  $algorithm = [System.Security.Cryptography.SHA256]::Create()
+  try {
+    return (($algorithm.ComputeHash($Bytes) | ForEach-Object { $_.ToString("x2") }) -join "")
+  } finally {
+    $algorithm.Dispose()
+  }
+}
+
+function ConvertTo-AsciiHtmlFragment([string]$Value) {
+  $builder = New-Object System.Text.StringBuilder
+  for ($index = 0; $index -lt $Value.Length; $index += 1) {
+    $character = $Value[$index]
+    $codePoint = [int][char]$character
+    if ([char]::IsHighSurrogate($character) -and ($index + 1) -lt $Value.Length -and [char]::IsLowSurrogate($Value[$index + 1])) {
+      $codePoint = [char]::ConvertToUtf32($character, $Value[$index + 1])
+      $index += 1
+    }
+
+    if ($codePoint -le 0x7f) {
+      [void]$builder.Append([char]$codePoint)
+    } else {
+      [void]$builder.Append(("&#x{0:X};" -f $codePoint))
+    }
+  }
+  return $builder.ToString()
+}
+
+function ConvertTo-AsciiHtmlText([string]$Value) {
+  return ConvertTo-AsciiHtmlFragment ([System.Net.WebUtility]::HtmlEncode($Value))
+}
+
+function Get-EmbeddedFaviconTag([string]$Html) {
+  $linkMatches = [regex]::Matches(
+    $Html,
+    '<link\b[^>]*>',
+    [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+  )
+
+  foreach ($linkMatch in $linkMatches) {
+    $tag = $linkMatch.Value
+    $relMatch = [regex]::Match(
+      $tag,
+      '\brel\s*=\s*(["''])(?<rel>.*?)\1',
+      [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+    if (-not $relMatch.Success) { continue }
+
+    $relTokens = @($relMatch.Groups["rel"].Value -split '\s+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    $hasIconRel = $false
+    foreach ($token in $relTokens) {
+      if ($token.Equals("icon", [StringComparison]::OrdinalIgnoreCase)) {
+        $hasIconRel = $true
+        break
+      }
+    }
+    if (-not $hasIconRel) { continue }
+
+    $hrefMatch = [regex]::Match(
+      $tag,
+      '\bhref\s*=\s*(["''])(?<href>.*?)\1',
+      [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+    if (-not $hrefMatch.Success) { continue }
+
+    $href = [System.Net.WebUtility]::HtmlDecode($hrefMatch.Groups["href"].Value)
+    if (-not $href.StartsWith("data:", [StringComparison]::OrdinalIgnoreCase)) {
+      throw "The source favicon must be embedded as a data: URL for a standalone build."
+    }
+
+    return ConvertTo-AsciiHtmlFragment $tag
+  }
+
+  throw "The source HTML must contain an embedded <link rel=\"icon\" href=\"data:...\"> favicon."
+}
 
 $compressedBuffer = New-Object System.IO.MemoryStream
 try {
@@ -34,24 +111,12 @@ try {
   $compressedBuffer.Dispose()
 }
 
-function Get-Sha256Hex([byte[]]$Bytes) {
-  $algorithm = [System.Security.Cryptography.SHA256]::Create()
-  try {
-    return (($algorithm.ComputeHash($Bytes) | ForEach-Object { $_.ToString("x2") }) -join "")
-  } finally {
-    $algorithm.Dispose()
-  }
-}
-
-function ConvertTo-HtmlText([string]$Value) {
-  return [System.Net.WebUtility]::HtmlEncode($Value)
-}
-
 $sourceSha256 = Get-Sha256Hex $inputBytes
 $gzipSha256 = Get-Sha256Hex $compressedBytes
 $payloadBase64 = [Convert]::ToBase64String($compressedBytes)
-$encodedAppName = ConvertTo-HtmlText $AppName
-$encodedAppNameJa = ConvertTo-HtmlText $AppNameJa
+$encodedAppName = ConvertTo-AsciiHtmlText $AppName
+$encodedAppNameJa = ConvertTo-AsciiHtmlText $AppNameJa
+$faviconTag = Get-EmbeddedFaviconTag $inputHtml
 $sourceBytes = $inputBytes.Length
 $gzipBytes = $compressedBytes.Length
 
@@ -60,7 +125,7 @@ $wrapper = @"
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="robots" content="noindex,nofollow">
   <meta name="generator" content="single-html-app-template self-extract builder">
@@ -69,6 +134,7 @@ $wrapper = @"
   <meta name="self-extract-source-bytes" content="$sourceBytes">
   <meta name="self-extract-gzip-bytes" content="$gzipBytes">
   <title>$encodedAppNameJa / $encodedAppName</title>
+  $faviconTag
   <style>
     :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     body { margin: 0; min-height: 100vh; display: grid; place-items: center; color: #24342f; background: #f6f8f7; }
@@ -85,9 +151,10 @@ $wrapper = @"
 <body>
   <main>
     <div class="spinner" aria-hidden="true"></div>
-    <h1>アプリを展開しています / Unpacking the app</h1>
-    <p>この処理は端末内で行われ、外部通信は発生しません。</p>
-    <p>The app is being restored locally without a network request.</p>
+    <h1>&#x30A2;&#x30D7;&#x30EA;&#x3092;&#x5C55;&#x958B;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059; / Unpacking the app</h1>
+    <p>&#x3053;&#x306E;&#x51E6;&#x7406;&#x306F;&#x7AEF;&#x672B;&#x5185;&#x3067;&#x884C;&#x308F;&#x308C;&#x3001;&#x5916;&#x90E8;&#x901A;&#x4FE1;&#x306F;&#x767A;&#x751F;&#x3057;&#x307E;&#x305B;&#x3093;&#x3002;</p>
+    <p>The compressed single-file app is being restored locally.</p>
+    <p>&#x5916;&#x90E8;&#x901A;&#x4FE1;&#x306F;&#x3042;&#x308A;&#x307E;&#x305B;&#x3093;&#x3002; / No network request is made.</p>
     <pre id="error" role="alert"></pre>
   </main>
   <script id="self-extract-payload" type="application/octet-stream">$payloadBase64</script>
@@ -99,7 +166,7 @@ $wrapper = @"
       document.body.classList.add("failed");
       const detail = error instanceof Error ? error.name + ": " + error.message : String(error);
       document.getElementById("error").textContent =
-        "展開に失敗しました。対応ブラウザーで開いてください。\n" +
+        "\u5c55\u958b\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002\u5bfe\u5fdc\u30d6\u30e9\u30a6\u30b6\u30fc\u3067\u958b\u3044\u3066\u304f\u3060\u3055\u3044\u3002\n" +
         "Failed to unpack the application. Open this file in a browser that supports DecompressionStream.\n\n" + detail;
       console.error(error);
     };
@@ -146,9 +213,16 @@ $wrapper = @"
 </html>
 "@
 
+$wrapperBytes = [System.Text.Encoding]::UTF8.GetBytes($wrapper)
+foreach ($byte in $wrapperBytes) {
+  if ($byte -gt 0x7f) {
+    throw "The generated self-extracting wrapper must remain ASCII-only. Encode non-ASCII loader text before writing the file."
+  }
+}
+
 $outputDirectory = Split-Path -Parent $OutputPath
 New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
-[System.IO.File]::WriteAllText($OutputPath, $wrapper, (New-Object System.Text.UTF8Encoding($false)))
+[System.IO.File]::WriteAllBytes($OutputPath, $wrapperBytes)
 
 $manifestPath = Join-Path $outputDirectory "self-extract-manifest.json"
 $manifest = [ordered]@{
@@ -169,6 +243,8 @@ $manifest = [ordered]@{
     path = [System.IO.Path]::GetFileName($OutputPath)
     bytes = (Get-Item $OutputPath).Length
     sha256 = (Get-FileHash -Algorithm SHA256 -Path $OutputPath).Hash.ToLowerInvariant()
+    loaderEncoding = "ascii"
+    faviconInherited = $true
   }
   runtime = [ordered]@{
     decompressor = "DecompressionStream"

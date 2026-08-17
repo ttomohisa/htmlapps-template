@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0 - Self-extract loader robustness - 2026-08-17
+
+- Made `scripts/build-self-extract.ps1` ASCII-only so Windows PowerShell 5.1 cannot corrupt Japanese loader text when the script is stored as BOM-less UTF-8.
+- Encoded non-ASCII loader copy and application titles into ASCII-safe HTML character references / JavaScript Unicode escapes.
+- Inherited the embedded favicon from the normal standalone HTML into `dist/index.self-extract.html`.
+- Added regression checks for ASCII-only loader output, embedded favicon presence and exact favicon inheritance, and the existing byte-for-byte gzip payload restoration.
+- Added a repository guard that rejects non-ASCII text in the self-extract builder source.
+
 ## 1.0 - Reusable mobile confirmation component - 2026-08-15
 
 - Added `components/confirm-dialog.html`, a dependency-free Promise-based confirmation dialog.

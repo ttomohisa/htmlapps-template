@@ -97,6 +97,8 @@ A normal build creates two variants:
 
 The self-extracting variant stays offline and dependency-free, but it requires JavaScript and a browser with `DecompressionStream`. Keep the normal HTML as the GitHub Pages entry point; treat the self-extracting file as an optional download artifact for size-constrained distribution.
 
+The loader wrapper is intentionally ASCII-only so it is safe when built with Windows PowerShell 5.1 from a BOM-less UTF-8 repository. Japanese loader text is emitted with ASCII-safe character references / Unicode escapes, and the wrapper automatically inherits the embedded favicon from `dist/index.html`. The verifier rejects encoding regressions, a missing or different favicon, and any gzip payload that does not restore byte-for-byte to the readable HTML.
+
 To skip it:
 
 ```powershell

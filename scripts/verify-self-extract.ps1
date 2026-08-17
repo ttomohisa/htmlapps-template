@@ -7,12 +7,60 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+function Get-FaviconHref([string]$Html) {
+  $linkMatches = [regex]::Matches(
+    $Html,
+    '<link\b[^>]*>',
+    [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+  )
+
+  foreach ($linkMatch in $linkMatches) {
+    $tag = $linkMatch.Value
+    $relMatch = [regex]::Match(
+      $tag,
+      '\brel\s*=\s*(["''])(?<rel>.*?)\1',
+      [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+    if (-not $relMatch.Success) { continue }
+
+    $relTokens = @($relMatch.Groups["rel"].Value -split '\s+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    $hasIconRel = $false
+    foreach ($token in $relTokens) {
+      if ($token.Equals("icon", [StringComparison]::OrdinalIgnoreCase)) {
+        $hasIconRel = $true
+        break
+      }
+    }
+    if (-not $hasIconRel) { continue }
+
+    $hrefMatch = [regex]::Match(
+      $tag,
+      '\bhref\s*=\s*(["''])(?<href>.*?)\1',
+      [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+    if ($hrefMatch.Success) {
+      return [System.Net.WebUtility]::HtmlDecode($hrefMatch.Groups["href"].Value)
+    }
+  }
+
+  return ""
+}
+
 if (-not (Test-Path $Path)) { throw "Self-extracting HTML was not found: $Path" }
-$html = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+$wrapperBytes = [System.IO.File]::ReadAllBytes($Path)
+foreach ($byte in $wrapperBytes) {
+  if ($byte -gt 0x7f) {
+    throw "The self-extracting loader must be ASCII-only to avoid Windows PowerShell 5.1 source-encoding regressions."
+  }
+}
+$html = [System.Text.Encoding]::ASCII.GetString($wrapperBytes)
 
 $checks = @(
   @{ Message = "HTML document marker is missing"; Failed = -not $html.TrimStart().StartsWith("<!doctype html>", [StringComparison]::OrdinalIgnoreCase) },
+  @{ Message = "UTF-8 charset metadata is missing"; Failed = $html -notmatch '<meta\s+charset=["'']utf-8["'']' },
   @{ Message = "Viewport metadata is missing"; Failed = $html -notmatch '<meta\s+name=["'']viewport["'']' },
+  @{ Message = "The inherited favicon is missing"; Failed = [string]::IsNullOrWhiteSpace((Get-FaviconHref $html)) },
+  @{ Message = "The inherited favicon is not embedded"; Failed = -not (Get-FaviconHref $html).StartsWith("data:", [StringComparison]::OrdinalIgnoreCase) },
   @{ Message = "The self-extract payload is missing"; Failed = $html -notmatch '<script\s+id=["'']self-extract-payload["'']\s+type=["'']application/octet-stream["'']>' },
   @{ Message = "The gzip decompressor is missing"; Failed = $html -notmatch 'new\s+DecompressionStream\(["'']gzip["'']\)' },
   @{ Message = "connect-src 'none' is missing"; Failed = $html -notmatch "connect-src\s+'none'" },
@@ -68,6 +116,16 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedSourcePath)) {
     if ($expectedBytes[$index] -ne $restoredBytes[$index]) {
       throw "Restored payload differs from the source HTML at byte $index."
     }
+  }
+
+  $expectedHtml = [System.Text.Encoding]::UTF8.GetString($expectedBytes)
+  $sourceFavicon = Get-FaviconHref $expectedHtml
+  $wrapperFavicon = Get-FaviconHref $html
+  if ([string]::IsNullOrWhiteSpace($sourceFavicon)) {
+    throw "The source HTML does not contain a favicon."
+  }
+  if (-not $sourceFavicon.Equals($wrapperFavicon, [StringComparison]::Ordinal)) {
+    throw "The self-extracting loader favicon does not match the source HTML favicon."
   }
 }
 

@@ -97,6 +97,8 @@ dist/
 
 自己解凍版も外部ライブラリを使わず、1ファイルのままオフラインで動作します。JavaScriptが無効な環境や `DecompressionStream` 非対応ブラウザーでは開けません。GitHub Pagesのトップページには通常版を使い、自己解凍版はダウンロード配布や容量制限のある場所向けの副成果物として扱う設計です。
 
+自己解凍ローダーは、BOMなしUTF-8のPowerShellスクリプトをWindows PowerShell 5.1で実行しても日本語が壊れないよう、意図的にASCII-onlyで生成します。日本語表示はHTML文字参照 / JavaScript Unicodeエスケープで表現し、faviconは `dist/index.html` に内包されたものを自動継承します。検証では文字コード退行、faviconの欠落・不一致、gzip展開後のバイト不一致をエラーにします。
+
 自己解凍版を生成しない場合：
 
 ```powershell

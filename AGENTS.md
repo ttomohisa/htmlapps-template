@@ -13,6 +13,8 @@ This file is the first instruction for any coding LLM or agent working in this r
 ## Non-negotiable product constraints
 
 - Generate two one-file release variants: readable `dist/index.html` and gzip self-extracting `dist/index.self-extract.html`.
+- Keep `scripts/build-self-extract.ps1` and the generated self-extract loader ASCII-only; encode loader UI text instead of placing non-ASCII literals in that PowerShell source.
+- The self-extract loader must inherit the embedded favicon from `dist/index.html`; do not maintain a second favicon by hand.
 - The app must work when `dist/index.html` is opened directly with `file://` unless `APP_SPEC.md` explicitly says otherwise.
 - No runtime CDN, external font, analytics, telemetry, API request, or hidden network dependency.
 - User-selected files and entered data must stay in the browser unless `APP_SPEC.md` explicitly defines an export initiated by the user.

@@ -12,7 +12,8 @@ Describe the user-visible change.
 
 - [ ] `scripts/check-repository.ps1` passes.
 - [ ] `dist/index.html` opens directly.
-- [ ] `dist/index.self-extract.html` expands and opens directly.
+- [ ] `dist/index.self-extract.html` expands and opens directly without mojibake.
+- [ ] The self-extracting loader shows the same favicon as `dist/index.html`.
 - [ ] Main flow tested on desktop.
 - [ ] Narrow-screen/touch behavior tested.
 - [ ] Keyboard-only flow tested.

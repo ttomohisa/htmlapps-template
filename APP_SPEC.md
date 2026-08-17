@@ -81,6 +81,7 @@ Current stable desktop and mobile versions of Chromium, Firefox, and Safari. Dir
 
 - `build-standalone.ps1` produces the readable HTML and a gzip self-extracting variant.
 - `scripts/verify-standalone.ps1` passes.
+- The self-extract loader is ASCII-only, inherits the embedded favicon from the readable HTML, and restores the source HTML byte-for-byte.
 - The generated HTML contains no unresolved build placeholder.
 - The generated HTML contains no external script, stylesheet, frame, module import, or CSS asset URL.
 - Runtime CSP includes `connect-src 'none'`.
