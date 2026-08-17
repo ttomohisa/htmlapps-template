@@ -91,7 +91,7 @@ function Get-EmbeddedFaviconTag([string]$Html) {
     return ConvertTo-AsciiHtmlFragment $tag
   }
 
-  throw "The source HTML must contain an embedded <link rel=\"icon\" href=\"data:...\"> favicon."
+  throw 'The source HTML must contain an embedded <link rel="icon" href="data:..."> favicon.'
 }
 
 $compressedBuffer = New-Object System.IO.MemoryStream
