@@ -11,6 +11,10 @@ $required = @(
   "APP_SPEC.md",
   "app.config.json",
   "dependencies.json",
+  "components\confirm-dialog.html",
+  "components\mobile-bottom-bar.html",
+  "docs\COMPONENTS.md",
+  "docs\COMPONENTS.ja.md",
   "src\index.template.html",
   "build-standalone.ps1",
   "scripts\build-self-extract.ps1",
@@ -27,6 +31,22 @@ $required = @(
 foreach ($relative in $required) {
   $path = Join-Path $Root $relative
   if (-not (Test-Path $path)) { throw "Required repository file is missing: $relative" }
+}
+
+$mobileBottomBarPath = Join-Path $Root "components\mobile-bottom-bar.html"
+$mobileBottomBarText = Get-Content -Raw -Encoding UTF8 $mobileBottomBarPath
+$mobileBottomBarRequiredTokens = @(
+  'position: fixed',
+  'env(safe-area-inset-bottom)',
+  'data-mobile-target',
+  'data-mobile-action',
+  'disabled',
+  'window.AppMobileBottomBar'
+)
+foreach ($token in $mobileBottomBarRequiredTokens) {
+  if (-not $mobileBottomBarText.Contains($token)) {
+    throw "components\mobile-bottom-bar.html is missing required behavior marker: $token"
+  }
 }
 
 $selfExtractBuilderPath = Join-Path $Root "scripts\build-self-extract.ps1"

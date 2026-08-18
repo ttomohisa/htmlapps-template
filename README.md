@@ -24,6 +24,7 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 - GitHub Actions for pull request validation and GitHub Pages deployment
 - Starter implementation for bilingual UI, a light-only interface, responsive layout, and keyboard access
 - Reusable confirmation dialog: centered modal on desktop and safe-area-aware bottom sheet on smartphones
+- Reusable smartphone bottom navigation / action bar with safe-area handling and disabled workflow states
 - `AGENTS.md`, `APP_SPEC.md`, and a reusable LLM request included
 
 ## Read these first
@@ -36,6 +37,7 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 | `dependencies.json` | npm packages and files to embed |
 | `src/index.template.html` | Editable application source |
 | `components/confirm-dialog.html` | Reusable confirmation UI for delete, clear-all, and similar actions |
+| `components/mobile-bottom-bar.html` | Reusable fixed smartphone navigation / workflow action bar |
 | `build-standalone.ps1` | Standalone and self-extracting HTML builder |
 | `scripts/build-self-extract.ps1` | Gzip and wrap the normal HTML in a self-extracting loader |
 | `docs/LLM_WORKFLOW.md` | Recommended LLM workflow and request |
@@ -129,7 +131,8 @@ After enabling Pages, open Actions and choose **Re-run all jobs**. The generated
 ├─ app.config.json
 ├─ dependencies.json
 ├─ components/
-│  └─ confirm-dialog.html
+│  ├─ confirm-dialog.html
+│  └─ mobile-bottom-bar.html
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
@@ -147,9 +150,11 @@ After enabling Pages, open Actions and choose **Re-run all jobs**. The generated
 
 ## Reusable UI components
 
-`components/` contains dependency-free source snippets that can be copied into finished apps. The first standard component is `confirm-dialog.html`, intended for deletion, clear-all, overwrite, and similar confirmation flows. The starter's Clear action uses the same `AppConfirm.ask()` pattern.
+`components/` contains dependency-free source snippets that can be copied into finished apps. `confirm-dialog.html` is intended for deletion, clear-all, overwrite, and similar confirmation flows; the starter's Clear action uses the same `AppConfirm.ask()` pattern.
 
-It renders as a centered modal on desktop and a safe-area-aware bottom sheet on smartphones. See [Reusable UI components](docs/COMPONENTS.md) for usage.
+`mobile-bottom-bar.html` is the standard fixed smartphone navigation / workflow bar for apps that need persistent access to 3-5 sections or actions. It supports safe-area padding, icon + label items, actual disabled states (for example Save before a result exists), section scrolling, and app-defined action handlers. It is intentionally optional rather than forced into every starter app.
+
+See [Reusable UI components](docs/COMPONENTS.md) for usage and UX rules.
 
 ## Security and privacy
 

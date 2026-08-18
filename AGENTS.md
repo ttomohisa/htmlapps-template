@@ -55,11 +55,13 @@ If the application becomes too large for safe single-file source editing, split 
 
 - Inspect `components/` before implementing common UI from scratch.
 - `components/confirm-dialog.html` is the canonical confirmation UI for this template. It is centered on desktop and becomes a safe-area-aware bottom sheet on smartphones.
+- `components/mobile-bottom-bar.html` is the canonical fixed smartphone navigation / workflow bar when an app benefits from 3-5 persistent destinations or actions. It supports safe areas, icons + labels, disabled actions, section targets, and application actions.
 - Component files are source snippets, not runtime dependencies. Copy or adapt the needed CSS, HTML, and JavaScript into `src/index.template.html` so the final release remains one self-contained HTML file.
 - Prefer `AppConfirm.ask()` over `window.confirm()` for deletion, clear-all, overwrite, and other meaningful destructive actions.
 - Use `tone: 'danger'` for destructive confirmation buttons.
 - Pass localized title, message, and button labels from the application's translation object whenever practical.
 - Preserve `Esc`, backdrop cancellation, visible focus, focus restoration, smartphone safe-area handling, and keyboard access when adapting a component.
+- For mobile bottom bars, keep 3-5 concise icon + text items, reserve bottom body padding, use real `disabled` state for unavailable actions, and avoid a duplicate fixed primary CTA. Save / Share should stay disabled until a valid result exists.
 - Avoid `window.alert()`, `window.confirm()`, and `window.prompt()` in finished product UI unless `APP_SPEC.md` explicitly requires native browser dialogs or there is a documented technical reason.
 - See `docs/COMPONENTS.md` / `docs/COMPONENTS.ja.md` for usage and maintenance rules.
 

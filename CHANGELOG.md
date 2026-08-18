@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0 - Reusable mobile bottom navigation / action bar - 2026-08-19
+
+- Added `components/mobile-bottom-bar.html` as the canonical fixed smartphone navigation / workflow action pattern.
+- Added safe-area-aware 3-5 item layout, icon + label controls, native disabled states, section scrolling, active-section tracking, and application action hooks.
+- Documented when to use a bottom bar versus an in-flow primary button, including the pattern of enabling Save / Share only after a valid result exists.
+- Updated LLM guidance, product UX guidance, bilingual README files, and repository checks so future apps discover and reuse the component instead of rebuilding it ad hoc.
+
 ## 1.0 - Portable PowerShell build verification - 2026-08-17
 
 - Removed the builder's dependency on `Get-FileHash` and now calculate file SHA-256 hashes through the .NET cryptography API.

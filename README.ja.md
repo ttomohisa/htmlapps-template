@@ -24,6 +24,7 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 - GitHub ActionsでPull Requestのビルド検証とGitHub Pages公開
 - 日英UI、ライトモード固定、スマートフォン、キーボード操作の基本実装
 - PCではモーダル、スマホではボトムシートになる汎用確認ダイアログを標準装備
+- Safe Area・無効状態に対応したスマホ固定ボトムナビ / 操作バーを再利用部品として同梱
 - LLM向けの `AGENTS.md`、仕様書 `APP_SPEC.md`、推奨プロンプトを同梱
 
 ## 最初に確認するファイル
@@ -36,6 +37,7 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 | `dependencies.json` | 内包するnpmパッケージとファイル |
 | `src/index.template.html` | 編集するアプリ本体 |
 | `components/confirm-dialog.html` | 削除・全消去などに使う汎用確認ダイアログ |
+| `components/mobile-bottom-bar.html` | スマホ固定ボトムナビ / ワークフロー操作バー |
 | `build-standalone.ps1` | 完全内包HTMLと自己解凍版の生成 |
 | `scripts/build-self-extract.ps1` | 通常版HTMLをgzip圧縮して自己解凍HTMLへ変換 |
 | `docs/LLM_WORKFLOW.ja.md` | LLMへ依頼する手順 |
@@ -129,7 +131,8 @@ Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を�
 ├─ app.config.json
 ├─ dependencies.json
 ├─ components/
-│  └─ confirm-dialog.html
+│  ├─ confirm-dialog.html
+│  └─ mobile-bottom-bar.html
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
@@ -147,9 +150,11 @@ Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を�
 
 ## 汎用UIコンポーネント
 
-`components/` には、完成アプリへコピーして使える依存なしのUI部品を置きます。現在は、削除・全消去・上書き確認などに使う `confirm-dialog.html` を用意しています。スターター画面の「消去」でも同じ `AppConfirm.ask()` パターンを使っています。
+`components/` には、完成アプリへコピーして使える依存なしのUI部品を置きます。`confirm-dialog.html` は削除・全消去・上書き確認などに使う標準確認UIで、スターター画面の「消去」でも同じ `AppConfirm.ask()` パターンを使っています。
 
-PCでは中央モーダル、スマートフォンではSafe Area対応のボトムシートとして表示されます。詳しくは [再利用UIコンポーネント](docs/COMPONENTS.ja.md) を参照してください。
+`mobile-bottom-bar.html` は、スマホで3〜5個の主要セクションや操作へ常時アクセスしたいアプリ向けの固定ボトムナビ / 操作バーです。Safe Area、アイコン＋文字ラベル、実際の `disabled` 状態（例：結果ができる前の保存）、画面内スクロール、アプリ固有アクションに対応します。すべてのアプリへ強制する部品ではなく、必要な場合だけ取り込む設計です。
+
+詳しくは [再利用UIコンポーネント](docs/COMPONENTS.ja.md) を参照してください。
 
 ## セキュリティとプライバシー
 

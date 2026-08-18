@@ -66,6 +66,7 @@ A successful replacement app should state here:
 - Destructive actions are visually distinct and use the reusable confirmation component.
 - Confirmation is centered on desktop and presented as a safe-area-aware bottom sheet on smartphones.
 - Status messages use an `aria-live` region.
+- If the finished app needs persistent smartphone access to 3-5 sections or workflow actions, reuse `components/mobile-bottom-bar.html` rather than inventing another fixed bottom bar. Keep unavailable actions disabled until their prerequisites exist.
 
 ## 8. Performance expectations
 

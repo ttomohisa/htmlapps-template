@@ -4,7 +4,7 @@
 
 Give the coding LLM the repository and this instruction:
 
-> Read `AGENTS.md` first, then `APP_SPEC.md` and `docs/ARCHITECTURE.md`. Inspect `components/` before recreating common UI such as confirmation dialogs. Implement the complete application described by the spec. Preserve the single-HTML, local-first, no-runtime-network constraints. Update source, configuration, notices, README files, changelog, and tests as needed. Build and verify the repository before reporting completion. Do not edit either generated file in `dist/` by hand.
+> Read `AGENTS.md` first, then `APP_SPEC.md` and `docs/ARCHITECTURE.md`. Inspect `components/` before recreating common UI such as confirmation dialogs or smartphone bottom action bars. Implement the complete application described by the spec. Preserve the single-HTML, local-first, no-runtime-network constraints. Update source, configuration, notices, README files, changelog, and tests as needed. Build and verify the repository before reporting completion. Do not edit either generated file in `dist/` by hand.
 
 ## Recommended development loop
 
