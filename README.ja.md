@@ -6,76 +6,57 @@
 
 [English README](README.md)
 
-LLMと人が、**配布物が1つのHTMLだけで完結するブラウザーアプリ**を継続的に作るためのGitHubリポジトリテンプレートです。
+**配布物が1つのHTMLだけで完結する、プライバシーに配慮したブラウザーアプリ**を作るためのGitHubリポジトリテンプレートです。
 
-PDF Organizerで採用した「開発用HTMLから、固定バージョンの外部ライブラリ、Worker、WASM、フォント、補助素材までビルド時に内包し、GitHub Pagesへ公開する」考え方を、特定アプリに依存しない形へ整理しています。
+[PDF Organizer](https://github.com/ttomohisa/html-pdf-organizer) で採用している「読みやすい開発用ソースから、固定バージョンのライブラリ、Worker、WASM、フォント、補助素材などをビルド時に内包し、生成物を検証してGitHub Pagesへ公開する」構成を、さまざまな単一HTMLアプリで再利用できる形に整理しています。
 
-![Single HTML App Templateの画面](assets/screenshot.png)
+## 🚀 デモ
 
-## このテンプレートの特徴
+### [GitHub Pagesでスターターを開く](https://ttomohisa.github.io/htmlapps-template/)
 
-- 通常版 `dist/index.html` と、gzip自己解凍版 `dist/index.self-extract.html` を同時生成
+GitHub Pagesから最初のHTMLを取得した後は、アプリ内の処理をブラウザー内で完結させられる構成です。初期設定ではContent Security Policyにより実行時のネットワーク接続を遮断します。
+
+[![Single HTML App Templateの画面](assets/screenshot.png)](https://ttomohisa.github.io/htmlapps-template/)
+
+## 主な機能
+
+- ブラウザーアプリ全体を `dist/index.html` 1ファイルへビルド
+- gzip自己解凍版 `dist/index.self-extract.html` も任意で生成
 - Windowsでは `build-standalone.bat` をダブルクリックしてビルド可能
-- PythonやNode.jsは不要
-- npmパッケージのバージョンを固定し、必要ファイルだけをBase64 1回で内包。大容量assetは `gzip` / `auto` 圧縮可能
-- パッケージtarballと各内包ファイルのSHA-256を記録
-- 実行時のCDN、外部フォント、API、分析タグを使わない
-- `connect-src 'none'` のContent Security Policy
-- GitHub ActionsでPull Requestのビルド検証とGitHub Pages公開
-- 日英UI、ライトモード固定、スマートフォン、キーボード操作の基本実装
-- PCではモーダル、スマホではボトムシートになる汎用確認ダイアログを標準装備
-- Undo付きToast、外側クリック/Escで閉じるコンパクトメニュー、プリセット＋自由入力の数値設定、非同期状態ガードを再利用部品として同梱
-- Safe Area・無効状態に対応したスマホ固定ボトムナビ / 操作バーを再利用部品として同梱
-- LLM向けの `AGENTS.md`、仕様書 `APP_SPEC.md`、推奨プロンプトを同梱
-- ファイル出力アプリは出力ファイル名をユーザーが編集できることを共通UXルール化
-- `build-size-report.json` と警告のみのサイズ予算で、UXを削らず容量増加を把握
+- 標準のビルド手順ではPythonやNode.jsが不要
+- npmパッケージのバージョンを固定し、指定したファイルだけを内包
+- 大容量assetは必要に応じて `gzip` / `auto` 圧縮で内包
+- 取得したpackage tarballと内包ファイルのSHA-256を記録
+- `connect-src 'none'` により実行時のネットワーク接続を遮断
+- 実行時CDN、外部フォント、分析タグ、テレメトリを初期状態では使用しない
+- GitHub Actionsでビルド検証とGitHub Pages公開
+- 日英UI、レスポンシブ表示、キーボード操作、SVG favicon、ライトモード固定のスターター
+- 確認ダイアログ、Undo Toast、ポップオーバーメニュー、数値設定、非同期状態ガード、スマホ固定ボトムバーを再利用可能
+- 製品仕様を `APP_SPEC.md`、コーディングLLM向け実装ルールを `AGENTS.md` に分離
+- ファイル出力アプリでは、保存前に出力ファイル名を編集できることを共通UXルール化
+- `build-size-report.json` で、UXを自動的に削らず容量増加を把握
 
-## 最初に確認するファイル
+## クイックスタート
 
-| ファイル | 役割 |
-| --- | --- |
-| `AGENTS.md` | LLMが最初に読む実装契約 |
-| `APP_SPEC.md` | 作るアプリの目的、機能、受入条件 |
-| `app.config.json` | アプリ名、slug、バージョン、説明 |
-| `dependencies.json` | 内包するnpmパッケージとファイル |
-| `src/index.template.html` | 編集するアプリ本体 |
-| `components/confirm-dialog.html` | 取り返しのつかない操作に使う汎用確認ダイアログ |
-| `components/toast.html` | 状態通知・Undo付きToast |
-| `components/popover-menu.html` | 絞り込み/管理/その他向けコンパクトメニュー |
-| `components/setting-field.html` | プリセット＋自由入力の数値設定 |
-| `components/async-state.html` | 入力変更と古い非同期結果を管理する状態ガード |
-| `components/mobile-bottom-bar.html` | スマホ固定ボトムナビ / ワークフロー操作バー |
-| `build-standalone.ps1` | 完全内包HTMLと自己解凍版の生成 |
-| `scripts/build-self-extract.ps1` | 通常版HTMLをgzip圧縮して自己解凍HTMLへ変換 |
-| `docs/LLM_WORKFLOW.ja.md` | LLMへ依頼する手順 |
+### このテンプレートから新しいアプリを作る
 
-## 新しいアプリを作る
-
-1. GitHubでこのリポジトリをテンプレートとして有効化します。
+1. GitHubでこのリポジトリを開きます。
 2. **Use this template** から新しいリポジトリを作成します。
-3. `APP_SPEC.md` を新しいアプリの具体的な仕様へ書き換えます。
-4. `app.config.json` を変更します。
-5. `components/` を確認し、確認ダイアログなど再利用できる部品をアプリへ取り込みます。
-6. LLMへ `AGENTS.md` から読むよう指示します。
-7. 実装後、Windowsで `build-standalone.bat` を実行します。
-8. `dist/index.html` と `dist/index.self-extract.html` を直接開き、ネットワークを切った状態でも主要機能を確認します。
+3. `APP_SPEC.md` を作りたいアプリの仕様へ書き換えます。
+4. `app.config.json` のアプリ名、slug、バージョン、説明、リポジトリ情報を変更します。
+5. コーディングLLMには、実装前に `AGENTS.md` を読むよう指示します。
+6. `src/index.template.html` を編集し、必要に応じて `components/` の共通部品を利用します。
+7. Windowsで `build-standalone.bat` を実行します。
+8. `dist/` に生成されたHTMLを直接開き、必要に応じてネットワークを切った状態でも主要機能を確認します。
 
-そのまま使える依頼文は [LLMでアプリを作る手順](docs/LLM_WORKFLOW.ja.md) にあります。
+そのまま利用できる依頼文と推奨手順は [LLMでアプリを作る手順](docs/LLM_WORKFLOW.ja.md) にあります。
 
-## ローカルビルド
+### ローカルでビルドする
 
-Windows 10/11で `build-standalone.bat` をダブルクリックします。
+Windows 10/11で `build-standalone.bat` をダブルクリックするか、次を実行します。
 
-```text
+```bat
 build-standalone.bat
-```
-
-必須のビルドスクリプトは `Get-FileHash` と `::new()` に依存せず、制約のあるWindows PowerShell環境でも動きやすい構成にしています。SHA-256は.NETの暗号化APIで計算します。
-
-依存パッケージをキャッシュから削除して再取得する場合：
-
-```text
-build-standalone.bat -ForceDownload
 ```
 
 生成物：
@@ -92,45 +73,46 @@ dist/
 
 `dist/index.html` と `dist/index.self-extract.html` は生成物です。直接編集せず、`src/index.template.html` を変更して再ビルドしてください。
 
-## 外部ライブラリを内包する
+## 使い方
 
-`dependencies.json` に固定バージョンと必要ファイルを記載します。初期状態は依存ゼロなので、初回ビルドは通信なしで完了します。
+基本的な開発の流れは次のとおりです。
 
-設定例は `examples/dependencies.dayjs.json`、詳しい読み込み方法は [依存ライブラリの追加](docs/DEPENDENCIES.md) を参照してください。
+1. `APP_SPEC.md` にアプリの目的、挙動、受入条件を定義します。
+2. `app.config.json` でアプリ情報を変更します。
+3. 外部ライブラリが必要な場合だけ、`dependencies.json` に固定バージョンで追加します。
+4. `src/index.template.html` にアプリを実装します。
+5. 共通操作は `components/` のUIパターンを再利用し、アプリごとに挙動がばらつかないようにします。
+6. `build-standalone.bat` を実行します。
+7. `dist/index.html` を直接開き、主要フロー、スマホ表示、キーボード操作、保存ファイル名などを確認します。
+8. 自己解凍版を有効にしている場合は `dist/index.self-extract.html` も確認します。
+9. WASMや大容量ライブラリを追加した場合は、公開前に `dist/build-size-report.json` も確認します。
 
-ビルド処理はnpm公式レジストリからtarballを取得し、指定ファイルだけをHTMLへ内包します。実行時にCDNへアクセスすることはありません。 大きなassetは `compression: "auto"` または `"gzip"` を指定でき、圧縮assetは `StandaloneAssets` のasync APIで展開します。ビルド時には `dist/build-size-report.json` も生成します。
+### 主なファイル
 
-## 自己解凍HTML
+| ファイル | 役割 |
+| --- | --- |
+| `AGENTS.md` | コーディングLLMが最初に読む実装契約 |
+| `APP_SPEC.md` | アプリの挙動と受入条件 |
+| `app.config.json` | アプリ名、slug、バージョン、説明、ビルド設定 |
+| `dependencies.json` | 内包するnpmパッケージとファイル |
+| `src/index.template.html` | 編集するアプリ本体 |
+| `components/` | 依存なしの再利用UIパターン |
+| `build-standalone.bat` | Windows向けビルド入口 |
+| `build-standalone.ps1` | 単一HTMLビルダー |
+| `docs/LLM_WORKFLOW.ja.md` | コーディングLLMへ依頼する推奨手順 |
 
-通常のビルドでは次の2種類を同時に生成します。
+## GitHub Pagesで公開する
 
-- `dist/index.html`：可読性、デバッグ、SEO、GitHub Pagesの既定ページに向く通常版
-- `dist/index.self-extract.html`：元HTMLをgzip圧縮し、ブラウザーの `DecompressionStream` で展開する配布向け版
+このリポジトリには、生成したHTMLをビルドして `dist` をGitHub Pagesへ公開するworkflowが含まれています。
 
-自己解凍版も外部ライブラリを使わず、1ファイルのままオフラインで動作します。JavaScriptが無効な環境や `DecompressionStream` 非対応ブラウザーでは開けません。GitHub Pagesのトップページには通常版を使い、自己解凍版はダウンロード配布や容量制限のある場所向けの副成果物として扱う設計です。
+1. このテンプレートからリポジトリを作成してGitHubへpushします。
+2. **Settings → Pages → Build and deployment → Source** で **GitHub Actions** を選択します。
+3. `main` へpushするか、Actions画面からデプロイworkflowを手動実行します。
+4. 成功すると、そのリポジトリのGitHub Pages URLから生成済みアプリを開けます。
 
-自己解凍ローダーは、BOMなしUTF-8のPowerShellスクリプトをWindows PowerShell 5.1で実行しても日本語が壊れないよう、意図的にASCII-onlyで生成します。日本語表示はHTML文字参照 / JavaScript Unicodeエスケープで表現し、faviconは `dist/index.html` に内包されたものを自動継承します。検証では文字コード退行、faviconの欠落・不一致、gzip展開後のバイト不一致をエラーにします。
+`.github/workflows/deploy-pages.yml` はWindows runnerでビルドし、生成物を検証したうえで、Pagesが有効な場合に `dist` を公開します。Pagesが未設定の場合はデプロイだけをスキップし、生成したHTMLはActions artifactとして残します。
 
-自己解凍版を生成しない場合：
-
-```powershell
-.\build-standalone.ps1 -SkipSelfExtract
-```
-
-## GitHub Pages
-
-新しいリポジトリを作成したら、最初に **Settings → Pages → Build and deployment → Source** で **GitHub Actions** を選択してください。これはリポジトリごとに一度だけ必要な設定です。
-
-`.github/workflows/deploy-pages.yml` は `main` へのpushごとに次を行います。
-
-1. Windows runnerで完全内包HTMLを生成
-2. 外部ランタイム参照と、宣言済みの未置換ビルドプレースホルダーを検査
-3. Pagesが有効なら `dist` をGitHub Pagesへ公開
-4. Pagesが未設定なら公開だけをスキップし、設定手順をActionsの概要へ表示
-
-Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を実行してください。Pages未設定でも生成済みHTMLは通常のActions artifactとして保存されます。
-
-## リポジトリ構成
+## 開発・ビルド構成
 
 ```text
 .
@@ -160,25 +142,88 @@ Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を�
 └─ .github/workflows/
 ```
 
-## 汎用UIコンポーネント
+### 依存ライブラリを追加・更新する
 
-`components/` には、完成アプリへコピーして使える依存なしのUI部品を置きます。`confirm-dialog.html` は上書き・完全削除など取り返しのつかない/高リスク操作向けです。スターターの「消去」は安全に戻せるため、Toast + Undoの例にしています。
+`dependencies.json` に固定バージョンと必要ファイルを記載します。スターター初期状態には依存パッケージがないため、最初のビルドはパッケージ取得なしで完了できます。
 
-`toast.html` は安全に取り消せる操作の「実行 → 元に戻す」、`popover-menu.html` は「絞り込み / 管理 / その他」、`setting-field.html` は横幅やFPSのようなプリセット＋自由入力、`async-state.html` は入力変更後に古い処理結果を表示しないための共通パターンです。
+設定例は `examples/dependencies.dayjs.json`、詳しい方法は [依存ライブラリの追加](docs/DEPENDENCIES.md) を参照してください。
 
-`mobile-bottom-bar.html` は、スマホで3〜5個の主要セクションや操作へ常時アクセスしたいアプリ向けの固定ボトムナビ / 操作バーです。Safe Area、アイコン＋文字ラベル、実際の `disabled` 状態（例：結果ができる前の保存）、画面内スクロール、アプリ固有アクションに対応します。すべてのアプリへ強制する部品ではなく、必要な場合だけ取り込む設計です。
+パッケージキャッシュを破棄して固定バージョンを再取得する場合：
+
+```bat
+build-standalone.bat -ForceDownload
+```
+
+ビルド処理では次のことを行えます。
+
+- npm公式レジストリから固定バージョンのpackage tarballを取得
+- 宣言したファイルだけをHTMLへ内包
+- 選択した大容量assetを `gzip` / `auto` 圧縮で内包
+- package tarballと内包ファイルのSHA-256を記録
+- 未置換のビルドプレースホルダーや禁止された外部ランタイム参照を検出
+- `dist/dependency-manifest.json` を生成
+- `dist/build-size-report.json` を生成
+- 設定したサイズ予算を超えた場合は警告し、容量だけを理由に自動でUXを削る設計にはしない
+
+必須のPowerShellスクリプトは `Get-FileHash` と `::new()` に依存せず、制約のあるWindows PowerShell環境でも動きやすい構成です。
+
+### 自己解凍HTML
+
+通常のビルドでは次の2種類を生成できます。
+
+- `dist/index.html`：可読性、デバッグ、SEO、GitHub Pagesの既定ページに向く通常版
+- `dist/index.self-extract.html`：元HTMLをgzip圧縮し、ブラウザーの `DecompressionStream` で復元する配布向け版
+
+自己解凍版も1ファイルで完結し、外部ライブラリなしでオフライン利用できます。ただしJavaScriptと `DecompressionStream` 対応ブラウザーが必要です。GitHub Pagesでは通常版を使い、自己解凍版は容量を抑えたい配布向けの副成果物として扱う想定です。
+
+自己解凍版を生成しない場合：
+
+```powershell
+.\build-standalone.ps1 -SkipSelfExtract
+```
+
+## 再利用UIコンポーネント
+
+`components/` には、すべてのアプリを同じレイアウトに縛ることなく、共通操作を揃えるための依存なしUIパターンを用意しています。
+
+- `confirm-dialog.html`：上書きや完全削除など、取り返しのつかない・高リスク操作
+- `toast.html`：軽量な状態通知と、戻せる操作のUndo
+- `popover-menu.html`：外側クリックと `Esc` に対応した「絞り込み / 管理 / その他」メニュー
+- `setting-field.html`：プリセット＋自由入力の数値設定
+- `async-state.html`：入力元変更後に古い非同期結果を表示しないための状態ガード
+- `mobile-bottom-bar.html`：Safe Areaと実際の無効状態に対応したスマホ固定ナビ / 操作バー
 
 詳しくは [再利用UIコンポーネント](docs/COMPONENTS.ja.md) を参照してください。
 
-## セキュリティとプライバシー
+## プライバシーと実行時通信
 
-初期テンプレートは実行時通信をCSPで遮断します。GitHub Pages版は最初にHTMLを取得しますが、その後のアプリ処理はページ内で完結します。完全にネットワークを切って使う場合は、生成された `dist/index.html` または `dist/index.self-extract.html` をローカルで開いてください。
+スターターのContent Security Policyでは `connect-src 'none'` を指定し、実行時のネットワーク接続を遮断します。必要なアプリ資産を生成HTMLへ内包し、ユーザーの処理をブラウザー内で完結させることを基本方針としています。
 
-静的検査だけで完全性を証明することはできません。公開前にブラウザーの開発者ツールでも通信がないことを確認してください。
+GitHub Pages版では最初のHTML取得に通信が必要です。完全にネットワークを切って利用する場合は、生成された `dist/index.html` または `dist/index.self-extract.html` をローカルで開いてください。
+
+静的検査はプライバシーや安全性を完全に証明するものではありません。公開前にはブラウザーのネットワーク通信も確認し、追加した第三者コードの内容とライセンスも確認してください。
+
+## 制限事項
+
+- これは開発テンプレートであり、アプリ固有機能を提供するフレームワークではありません。個別仕様は `APP_SPEC.md` と `src/index.template.html` に実装します。
+- センサー、WebCodecs、WASM threads、File System API、`DecompressionStream` などはブラウザーによって対応状況が異なるため、各アプリ側で互換性対応が必要です。
+- WASM、モデル、フォント、メディア素材などを内包すると単一HTMLが大きくなる場合があります。使いやすさを安易に削らず、サイズレポートと圧縮機能を使って判断してください。
+- `connect-src 'none'` は完全ローカル処理のアプリ向けです。意図的にWeb APIを使うアプリではCSPを個別に見直す必要があります。
+- 静的検証だけでは、追加した第三者コードの安全性やプライバシーを保証できません。
+- 自己解凍版はJavaScriptと `DecompressionStream` が必要です。幅広い互換性が必要な場合は通常版HTMLを利用してください。
+
+## 依存ライブラリ
+
+スターターアプリは初期状態では第三者の実行時依存ライブラリを持ちません。
+
+各アプリで追加したライブラリは `dependencies.json` に固定バージョンで宣言し、ライセンス上必要なものはそのアプリの `THIRD_PARTY_NOTICES.md` にも反映してください。
+
+## Contributing
+
+ビルドシステムの改善、バグ報告、再利用できるUIパターンの提案はGitHub Issuesで歓迎します。開発手順は [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 
 ## ライセンス
 
 Copyright © 2026 ttomohisa
 
-このテンプレートは [MIT License](LICENSE) で公開されています。テンプレートから作ったアプリでは、作者名と第三者ライセンス表記を適切に更新してください。
-
+[MIT License](LICENSE) で公開しています。このテンプレートから作成したアプリでは、作者名と第三者ライセンス表記を適切に更新してください。
