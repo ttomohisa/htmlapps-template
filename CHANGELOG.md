@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0 - Browser-Kitty UX and asset pipeline hardening - 2026-08-20
+
+- Removed the second Base64 layer around the complete embedded asset bundle; asset payloads are now Base64-encoded exactly once.
+- Added per-asset `none` / `gzip` / `auto` compression, async decompression APIs, and per-asset original/stored byte metadata.
+- Added `build-size-report.json` plus configurable warning-only readable/self-extract size budgets.
+- Added reusable Toast + Undo, compact popover menu, preset + custom numeric setting, and async source-generation/state components.
+- Updated starter export UX with a user-editable output filename, fixed extension handling, invalid-character sanitization, and fallback naming.
+- Added template rules for source-change invalidation, stale async result rejection, explicit heavy-processing phases, mobile preview/control proximity, portrait media geometry/orientation, and compact advanced settings.
+- Added finished-app README guidance and repository checks for the new components and asset-bundle contract.
+
+
 ## 1.0 - Reusable mobile bottom navigation / action bar - 2026-08-19
 
 - Added `components/mobile-bottom-bar.html` as the canonical fixed smartphone navigation / workflow action pattern.

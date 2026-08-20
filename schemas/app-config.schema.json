@@ -99,6 +99,24 @@
               "minLength": 1
             }
           }
+        },
+        "sizeBudget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "readableWarningMb",
+            "selfExtractWarningMb"
+          ],
+          "properties": {
+            "readableWarningMb": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "selfExtractWarningMb": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
         }
       }
     }

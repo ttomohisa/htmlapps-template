@@ -17,6 +17,10 @@
     "selfExtract": {
       "enabled": true,
       "output": "dist/index.self-extract.html"
+    },
+    "sizeBudget": {
+      "readableWarningMb": 25,
+      "selfExtractWarningMb": 12
     }
   }
 }

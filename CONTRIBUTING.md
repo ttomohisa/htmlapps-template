@@ -7,6 +7,9 @@
 - Prefer understandable browser-native code.
 - Treat smartphone interaction, keyboard operation, and accessibility as core requirements.
 - Keep dependencies exact, minimal, auditable, and license-compatible.
+- Prefer reversible action + Undo over pre-action confirmation when recovery is reliable.
+- If the app exports files, expose a user-editable output filename with a sensible default and predictable extension.
+- For file/media processing, invalidate stale async results when the primary source changes.
 
 ## Workflow
 
@@ -14,8 +17,9 @@
 2. Modify `src/index.template.html`, configuration, or build scripts.
 3. Do not edit generated `dist/index.html`.
 4. Run `scripts/check-repository.ps1`.
-5. Test direct local opening and the main user flow.
-6. Update README files, changelog, notices, and security documentation when relevant.
+5. Review `dist/build-size-report.json` for unexpected size growth.
+6. Test direct local opening and the main user flow, including a user-edited export filename when applicable.
+7. Update README files, changelog, notices, and security documentation when relevant.
 
 ## Pull requests
 

@@ -4,7 +4,7 @@
 
 Give the coding LLM the repository and this instruction:
 
-> Read `AGENTS.md` first, then `APP_SPEC.md` and `docs/ARCHITECTURE.md`. Inspect `components/` before recreating common UI such as confirmation dialogs or smartphone bottom action bars. Implement the complete application described by the spec. Preserve the single-HTML, local-first, no-runtime-network constraints. Update source, configuration, notices, README files, changelog, and tests as needed. Build and verify the repository before reporting completion. Do not edit either generated file in `dist/` by hand.
+> Read `AGENTS.md` first, then `APP_SPEC.md` and `docs/ARCHITECTURE.md`. Inspect `components/` before recreating common UI such as confirmation dialogs, Undo toasts, popover menus, preset/custom fields, async-state guards, or smartphone bottom action bars. Implement the complete application described by the spec. Preserve the single-HTML, local-first, no-runtime-network constraints. Update source, configuration, notices, README files, changelog, and tests as needed. Build and verify the repository before reporting completion. Do not edit either generated file in `dist/` by hand.
 
 ## Recommended development loop
 
@@ -14,7 +14,7 @@ Give the coding LLM the repository and this instruction:
 4. Ask the LLM to inspect the existing source before replacing the sample.
 5. Let the LLM add exact dependencies only when justified.
 6. Require the LLM to build after each meaningful implementation phase.
-7. Review `dist/dependency-manifest.json` for unexpected packages or assets.
+7. Review `dist/dependency-manifest.json` and `dist/build-size-report.json` for unexpected packages, assets, or size growth.
 8. Open both generated HTML variants directly and test the core flow.
 9. Publish only after the no-network check passes.
 
@@ -23,10 +23,10 @@ Give the coding LLM the repository and this instruction:
 Provide concrete details instead of style adjectives:
 
 - Input examples and maximum sizes.
-- Exact output format and filename rules.
+- Exact output format, default filename, user-editable filename behavior, and extension rules.
 - Destructive actions and undo behavior.
-- Smartphone gestures and scroll behavior.
-- Empty, loading, success, and error states.
+- Smartphone gestures and scroll behavior, including keeping preview controls next to the preview.
+- Explicit async phases such as empty / ready / loading-runtime / processing / result / error, plus stale-result invalidation after source changes.
 - Data persistence and reset rules.
 - Accessibility requirements.
 - Browser and device targets.

@@ -6,7 +6,7 @@ They are not automatically loaded by the builder. Copy or adapt the component in
 
 ## Confirmation dialog
 
-`components/confirm-dialog.html` is the preferred replacement for `window.confirm()`. The starter's Clear action uses the same `AppConfirm.ask()` pattern.
+`components/confirm-dialog.html` is the preferred replacement for `window.confirm()` when an action is irreversible or high-risk. The starter keeps the API available, while its reversible Clear action demonstrates Toast + Undo instead.
 
 - Centered modal on desktop
 - Bottom-sheet presentation on smartphones
@@ -34,7 +34,59 @@ if (!ok) return;
 deleteHistoryItem();
 ```
 
-Finished apps should normally pass localized labels from their own translation object. Preserve `Esc`, backdrop cancellation, focus restoration, keyboard access, and smartphone safe-area handling when adapting the component.
+Finished apps should normally pass localized labels from their own translation object. Preserve `Esc`, backdrop cancellation, focus restoration, keyboard access, and smartphone safe-area handling when adapting the component. For a reliably reversible delete/clear, prefer the Toast + Undo pattern below.
+
+## Toast / Undo
+
+`components/toast.html` is the standard transient status component. It supports a short message, optional tone, and one optional action. Use that action for Undo when an operation is safely reversible.
+
+```js
+AppToast.show({
+  message: 'Deleted',
+  actionLabel: 'Undo',
+  duration: 5000,
+  onAction: () => restoreDeletedItem()
+});
+```
+
+Do not stack many toasts. Replace the current toast with the newest relevant status. Keep irreversible/high-risk operations on `AppConfirm` instead of pretending every destructive action is undoable.
+
+## Compact popover menu
+
+`components/popover-menu.html` is the standard compact menu for controls such as Filter, Manage, More, and Output settings. The helper keeps only one menu open and closes it on outside click, `Esc`, or viewport resize. It restores focus after `Esc` and shifts the panel when needed to stay inside the viewport.
+
+Use `data-popover-trigger` with `aria-controls`, plus a matching `data-popover-panel`. Keep menu actions concise; do not hide the single most important primary action inside a popover.
+
+## Preset + custom numeric setting
+
+`components/setting-field.html` implements the common preset/custom pattern used by width, FPS, quality, duration, and similar settings. Custom mode exposes min/max helper text only when needed. The helper deliberately allows intermediate typing and normalizes on change/blur instead of fighting every keystroke.
+
+Listen for the bubbling `settingchange` event or pass an `onChange` callback to `AppSettingField.init()`. Keep units outside the editable value.
+
+## Async source state guard
+
+`components/async-state.html` provides `AppAsyncState.create()`. It models explicit phases and a monotonically increasing source generation. Capture the generation before async work; check `isCurrent(token)` before committing a result. Calling `invalidateSource()` makes all older work stale immediately.
+
+```js
+const jobState = AppAsyncState.create({ onChange: renderState });
+
+function onNewFile(file) {
+  jobState.invalidateSource();
+  clearOldPreviewAndResult();
+  jobState.setPhase(file ? 'ready' : 'empty');
+}
+
+async function run() {
+  const token = jobState.captureGeneration();
+  jobState.setPhase('processing', { progress: 0 });
+  const result = await processCurrentFile();
+  if (!jobState.isCurrent(token)) return;
+  showResult(result);
+  jobState.setPhase('result', { progress: 1 });
+}
+```
+
+Use the same principle even if you do not copy this helper. A late result from an old file must never overwrite the UI for a newer file.
 
 ## Mobile bottom navigation / action bar
 

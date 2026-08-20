@@ -12,6 +12,10 @@ $required = @(
   "app.config.json",
   "dependencies.json",
   "components\confirm-dialog.html",
+  "components\toast.html",
+  "components\popover-menu.html",
+  "components\setting-field.html",
+  "components\async-state.html",
   "components\mobile-bottom-bar.html",
   "docs\COMPONENTS.md",
   "docs\COMPONENTS.ja.md",
@@ -48,6 +52,35 @@ foreach ($token in $mobileBottomBarRequiredTokens) {
     throw "components\mobile-bottom-bar.html is missing required behavior marker: $token"
   }
 }
+
+
+$componentContracts = @(
+  @{ Path = "components\toast.html"; Tokens = @("window.AppToast", "actionLabel", "onAction", "env(safe-area-inset-bottom)") },
+  @{ Path = "components\popover-menu.html"; Tokens = @("window.AppPopoverMenu", "data-popover-trigger", "aria-expanded", "Escape") },
+  @{ Path = "components\setting-field.html"; Tokens = @("window.AppSettingField", "data-setting-custom", "data-setting-range", "settingchange") },
+  @{ Path = "components\async-state.html"; Tokens = @("window.AppAsyncState", "invalidateSource", "captureGeneration", "isCurrent") }
+)
+foreach ($contract in $componentContracts) {
+  $componentText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root $contract.Path)
+  foreach ($token in @($contract.Tokens)) {
+    if (-not $componentText.Contains([string]$token)) {
+      throw "$($contract.Path) is missing required behavior marker: $token"
+    }
+  }
+}
+
+$sourceText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "src\index.template.html")
+if (-not $sourceText.Contains("__EMBEDDED_ASSET_BUNDLE_JSON__")) { throw "src\index.template.html must embed the asset bundle JSON directly." }
+if ($sourceText.Contains("__EMBEDDED_ASSET_BUNDLE_BASE64__")) { throw "Legacy double-Base64 asset bundle placeholder must not return." }
+foreach ($token in @("bytesAsync", "blobUrlAsync", "outputFilename", "window.AppToast")) {
+  if (-not $sourceText.Contains($token)) { throw "src\index.template.html is missing required template behavior marker: $token" }
+}
+
+$builderText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "build-standalone.ps1")
+foreach ($token in @("compressionSetting", "Compress-GzipBytes", "build-size-report.json", "sizeBudget", "__EMBEDDED_ASSET_BUNDLE_JSON__")) {
+  if (-not $builderText.Contains($token)) { throw "build-standalone.ps1 is missing required asset pipeline marker: $token" }
+}
+if ($builderText.Contains("__EMBEDDED_ASSET_BUNDLE_BASE64__")) { throw "build-standalone.ps1 must not wrap the full asset bundle in Base64." }
 
 $selfExtractBuilderPath = Join-Path $Root "scripts\build-self-extract.ps1"
 $selfExtractBuilderBytes = [System.IO.File]::ReadAllBytes($selfExtractBuilderPath)

@@ -14,6 +14,7 @@ build-standalone.ps1         Dependency fetch, hash, embed, and build
 scripts/verify-standalone.ps1 Static release checks
 dist/index.html              Generated readable release artifact
 dist/index.self-extract.html Generated gzip self-extracting artifact
+dist/build-size-report.json    Generated size and embedded-asset storage report
 ```
 
 `dist/index.html` and `dist/index.self-extract.html` are generated and must not be edited manually.
@@ -23,7 +24,7 @@ dist/index.self-extract.html Generated gzip self-extracting artifact
 
 `components/` contains dependency-free source snippets for common UI patterns. These files are not loaded at runtime and are not a separate bundle layer. An app copies or adapts the needed CSS, HTML, and JavaScript into `src/index.template.html`, preserving the one-file runtime model.
 
-The starter includes `components/confirm-dialog.html` and exposes the matching `window.AppConfirm` API in the default source. It is intended to replace native `window.confirm()` for delete, clear-all, overwrite, and similar user-visible destructive flows. See `docs/COMPONENTS.md`.
+The starter includes the canonical confirmation and toast APIs in the default source, while `components/` also carries the mobile bottom bar, compact popover, preset/custom setting field, and async source-state guard. Reversible operations should normally use Toast + Undo; irreversible/high-risk operations use `AppConfirm`. See `docs/COMPONENTS.md`.
 
 ## Build pipeline
 
@@ -32,14 +33,15 @@ The starter includes `components/confirm-dialog.html` and exposes the matching `
 3. Cache and extract each tarball.
 4. Validate the package's own version.
 5. Read only the explicitly listed asset files.
-6. Calculate SHA-256 hashes for the package tarball and every embedded asset.
-7. Store assets as Base64 in an embedded JSON bundle.
-8. Replace the three source placeholders exactly once.
-9. Write and verify `dist/index.html`.
-10. Gzip that HTML, embed it into a small ASCII-only native `DecompressionStream` loader, inherit the readable HTML favicon, and write `dist/index.self-extract.html`.
-11. Verify that the loader stays ASCII-only and embedded-only, the favicon matches the readable HTML, and the gzip payload restores byte-for-byte.
-12. Write both manifests plus `dist/.nojekyll`.
-13. Reject the declared unresolved build placeholders and common external runtime resource references.
+6. Calculate SHA-256 hashes for the package tarball and every original embedded asset.
+7. Optionally gzip each declared asset (`gzip` / `auto`), then Base64-encode the stored bytes exactly once.
+8. Embed the asset bundle JSON directly, avoiding a second Base64 wrapper around the whole bundle.
+9. Replace the three source placeholders exactly once.
+10. Write and verify `dist/index.html`.
+11. Gzip that HTML, embed it into a small ASCII-only native `DecompressionStream` loader, inherit the readable HTML favicon, and write `dist/index.self-extract.html`.
+12. Verify that the loader stays ASCII-only and embedded-only, the favicon matches the readable HTML, and the gzip payload restores byte-for-byte.
+13. Write manifests, `build-size-report.json`, and `dist/.nojekyll`; emit warning-only size-budget messages when configured thresholds are exceeded.
+14. Reject the declared unresolved build placeholders and common external runtime resource references.
 
 ## Build placeholders
 
@@ -47,7 +49,7 @@ The source template contains exactly one of each:
 
 - `__APP_CONFIG_JSON__`
 - `__BUILD_MANIFEST_JSON__`
-- `__EMBEDDED_ASSET_BUNDLE_BASE64__`
+- `__EMBEDDED_ASSET_BUNDLE_JSON__`
 
 Do not rename or duplicate them without changing the builder and verifier. Other runtime identifiers that happen to use a `__NAME__` convention are allowed and must not be rejected as build placeholders.
 
@@ -58,14 +60,17 @@ The generated page exposes `window.StandaloneAssets`:
 ```js
 StandaloneAssets.list();
 StandaloneAssets.has('library-id', 'asset-key');
-StandaloneAssets.bytes('library-id', 'asset-key');
-StandaloneAssets.text('library-id', 'asset-key');
-StandaloneAssets.blobUrl('library-id', 'asset-key');
+StandaloneAssets.bytes('library-id', 'asset-key'); // uncompressed only
+await StandaloneAssets.bytesAsync('library-id', 'asset-key'); // compressed or uncompressed
+StandaloneAssets.text('library-id', 'asset-key'); // uncompressed only
+await StandaloneAssets.textAsync('library-id', 'asset-key');
+StandaloneAssets.blobUrl('library-id', 'asset-key'); // uncompressed only
+await StandaloneAssets.blobUrlAsync('library-id', 'asset-key');
 await StandaloneAssets.loadClassicScript('library-id', 'main', 'ExpectedGlobal');
 const module = await StandaloneAssets.importModule('library-id', 'main');
 ```
 
-Blob URLs are revoked after script/module loading and on page exit.
+Blob URLs are revoked after script/module loading and on page exit. Gzip assets are expanded with native `DecompressionStream` and cached in memory after first use.
 
 ### Important limitation
 

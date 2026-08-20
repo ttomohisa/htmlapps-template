@@ -17,15 +17,18 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 - 通常版 `dist/index.html` と、gzip自己解凍版 `dist/index.self-extract.html` を同時生成
 - Windowsでは `build-standalone.bat` をダブルクリックしてビルド可能
 - PythonやNode.jsは不要
-- npmパッケージのバージョンを固定し、必要ファイルだけをBase64で内包
+- npmパッケージのバージョンを固定し、必要ファイルだけをBase64 1回で内包。大容量assetは `gzip` / `auto` 圧縮可能
 - パッケージtarballと各内包ファイルのSHA-256を記録
 - 実行時のCDN、外部フォント、API、分析タグを使わない
 - `connect-src 'none'` のContent Security Policy
 - GitHub ActionsでPull Requestのビルド検証とGitHub Pages公開
 - 日英UI、ライトモード固定、スマートフォン、キーボード操作の基本実装
 - PCではモーダル、スマホではボトムシートになる汎用確認ダイアログを標準装備
+- Undo付きToast、外側クリック/Escで閉じるコンパクトメニュー、プリセット＋自由入力の数値設定、非同期状態ガードを再利用部品として同梱
 - Safe Area・無効状態に対応したスマホ固定ボトムナビ / 操作バーを再利用部品として同梱
 - LLM向けの `AGENTS.md`、仕様書 `APP_SPEC.md`、推奨プロンプトを同梱
+- ファイル出力アプリは出力ファイル名をユーザーが編集できることを共通UXルール化
+- `build-size-report.json` と警告のみのサイズ予算で、UXを削らず容量増加を把握
 
 ## 最初に確認するファイル
 
@@ -36,7 +39,11 @@ PDF Organizerで採用した「開発用HTMLから、固定バージョンの外
 | `app.config.json` | アプリ名、slug、バージョン、説明 |
 | `dependencies.json` | 内包するnpmパッケージとファイル |
 | `src/index.template.html` | 編集するアプリ本体 |
-| `components/confirm-dialog.html` | 削除・全消去などに使う汎用確認ダイアログ |
+| `components/confirm-dialog.html` | 取り返しのつかない操作に使う汎用確認ダイアログ |
+| `components/toast.html` | 状態通知・Undo付きToast |
+| `components/popover-menu.html` | 絞り込み/管理/その他向けコンパクトメニュー |
+| `components/setting-field.html` | プリセット＋自由入力の数値設定 |
+| `components/async-state.html` | 入力変更と古い非同期結果を管理する状態ガード |
 | `components/mobile-bottom-bar.html` | スマホ固定ボトムナビ / ワークフロー操作バー |
 | `build-standalone.ps1` | 完全内包HTMLと自己解凍版の生成 |
 | `scripts/build-self-extract.ps1` | 通常版HTMLをgzip圧縮して自己解凍HTMLへ変換 |
@@ -78,6 +85,7 @@ dist/
 ├─ index.html
 ├─ index.self-extract.html
 ├─ dependency-manifest.json
+├─ build-size-report.json
 ├─ self-extract-manifest.json
 └─ .nojekyll
 ```
@@ -90,7 +98,7 @@ dist/
 
 設定例は `examples/dependencies.dayjs.json`、詳しい読み込み方法は [依存ライブラリの追加](docs/DEPENDENCIES.md) を参照してください。
 
-ビルド処理はnpm公式レジストリからtarballを取得し、指定ファイルだけをHTMLへ内包します。実行時にCDNへアクセスすることはありません。
+ビルド処理はnpm公式レジストリからtarballを取得し、指定ファイルだけをHTMLへ内包します。実行時にCDNへアクセスすることはありません。 大きなassetは `compression: "auto"` または `"gzip"` を指定でき、圧縮assetは `StandaloneAssets` のasync APIで展開します。ビルド時には `dist/build-size-report.json` も生成します。
 
 ## 自己解凍HTML
 
@@ -131,8 +139,12 @@ Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を�
 ├─ app.config.json
 ├─ dependencies.json
 ├─ components/
+│  ├─ async-state.html
 │  ├─ confirm-dialog.html
-│  └─ mobile-bottom-bar.html
+│  ├─ mobile-bottom-bar.html
+│  ├─ popover-menu.html
+│  ├─ setting-field.html
+│  └─ toast.html
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
@@ -150,7 +162,9 @@ Pagesを有効化した直後は、Actions画面から **Re-run all jobs** を�
 
 ## 汎用UIコンポーネント
 
-`components/` には、完成アプリへコピーして使える依存なしのUI部品を置きます。`confirm-dialog.html` は削除・全消去・上書き確認などに使う標準確認UIで、スターター画面の「消去」でも同じ `AppConfirm.ask()` パターンを使っています。
+`components/` には、完成アプリへコピーして使える依存なしのUI部品を置きます。`confirm-dialog.html` は上書き・完全削除など取り返しのつかない/高リスク操作向けです。スターターの「消去」は安全に戻せるため、Toast + Undoの例にしています。
+
+`toast.html` は安全に取り消せる操作の「実行 → 元に戻す」、`popover-menu.html` は「絞り込み / 管理 / その他」、`setting-field.html` は横幅やFPSのようなプリセット＋自由入力、`async-state.html` は入力変更後に古い処理結果を表示しないための共通パターンです。
 
 `mobile-bottom-bar.html` は、スマホで3〜5個の主要セクションや操作へ常時アクセスしたいアプリ向けの固定ボトムナビ / 操作バーです。Safe Area、アイコン＋文字ラベル、実際の `disabled` 状態（例：結果ができる前の保存）、画面内スクロール、アプリ固有アクションに対応します。すべてのアプリへ強制する部品ではなく、必要な場合だけ取り込む設計です。
 
@@ -168,4 +182,3 @@ Copyright © 2026 ttomohisa
 
 このテンプレートは [MIT License](LICENSE) で公開されています。テンプレートから作ったアプリでは、作者名と第三者ライセンス表記を適切に更新してください。
 
-- 右上の「使い方と注意事項」ダイアログを標準装備

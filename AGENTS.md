@@ -34,6 +34,9 @@ This file is the first instruction for any coding LLM or agent working in this r
 - Record the license and homepage in `dependencies.json` and update `THIRD_PARTY_NOTICES.md`.
 - Imported module files must be self-contained. The generic loader does not rewrite relative imports.
 - Workers, WASM, fonts, dictionaries, and support files must also be listed as embedded assets.
+- Large or repetitive assets may set `compression` to `gzip` or `auto` in `dependencies.json`. Use the async `StandaloneAssets.*Async()` APIs for compressed assets.
+- Do not wrap the complete embedded asset JSON bundle in Base64. Asset bytes are Base64-encoded exactly once; the bundle JSON is embedded directly to avoid systematic size inflation.
+- Treat generated size information as part of the build review. `build-size-report.json` reports readable/self-extract sizes and per-asset storage; `app.config.json` may define warning-only size budgets.
 
 ## Source organization
 
@@ -54,16 +57,69 @@ If the application becomes too large for safe single-file source editing, split 
 ## Reusable UI components
 
 - Inspect `components/` before implementing common UI from scratch.
-- `components/confirm-dialog.html` is the canonical confirmation UI for this template. It is centered on desktop and becomes a safe-area-aware bottom sheet on smartphones.
+- `components/confirm-dialog.html` is the canonical confirmation UI for irreversible or high-risk actions. It is centered on desktop and becomes a safe-area-aware bottom sheet on smartphones.
+- `components/toast.html` is the canonical transient status / Undo UI. Prefer immediate action + Undo for safely reversible operations instead of showing a confirmation dialog first.
+- `components/popover-menu.html` is the canonical compact “Filter / Manage / More / Output settings” menu. It closes on outside click, `Esc`, resize, and when another menu opens.
+- `components/setting-field.html` is the canonical preset + custom numeric field. Custom mode exposes min/max quietly, does not clamp while the user is typing, and normalizes on change/blur.
+- `components/async-state.html` is the canonical source-generation and async-phase guard for file/media processing. Use it or an equivalent explicit generation token to reject stale results.
 - `components/mobile-bottom-bar.html` is the canonical fixed smartphone navigation / workflow bar when an app benefits from 3-5 persistent destinations or actions. It supports safe areas, icons + labels, disabled actions, section targets, and application actions.
 - Component files are source snippets, not runtime dependencies. Copy or adapt the needed CSS, HTML, and JavaScript into `src/index.template.html` so the final release remains one self-contained HTML file.
-- Prefer `AppConfirm.ask()` over `window.confirm()` for deletion, clear-all, overwrite, and other meaningful destructive actions.
+- Prefer `AppConfirm.ask()` over `window.confirm()` for irreversible deletion, overwrite, and other meaningful destructive actions. If the action is reliably reversible, prefer `AppToast.show()` with Undo instead of a pre-action confirmation.
 - Use `tone: 'danger'` for destructive confirmation buttons.
 - Pass localized title, message, and button labels from the application's translation object whenever practical.
 - Preserve `Esc`, backdrop cancellation, visible focus, focus restoration, smartphone safe-area handling, and keyboard access when adapting a component.
 - For mobile bottom bars, keep 3-5 concise icon + text items, reserve bottom body padding, use real `disabled` state for unavailable actions, and avoid a duplicate fixed primary CTA. Save / Share should stay disabled until a valid result exists.
 - Avoid `window.alert()`, `window.confirm()`, and `window.prompt()` in finished product UI unless `APP_SPEC.md` explicitly requires native browser dialogs or there is a documented technical reason.
 - See `docs/COMPONENTS.md` / `docs/COMPONENTS.ja.md` for usage and maintenance rules.
+
+
+## Interaction and state rules
+
+### Source replacement and stale async work
+
+For apps that accept a file, image, video, audio track, PDF, database, or other primary source, changing that source is a state boundary:
+
+- Invalidate all in-flight work from the previous source with a monotonically increasing generation/token or `AppAsyncState`.
+- Revoke obsolete Blob URLs and release object references where practical.
+- Clear old previews, detections, masks, timelines, derived metadata, errors, and export-ready state before showing the new source.
+- Disable Save / Share / Download until a valid result exists for the current source.
+- Before committing an async result to the UI, verify that its generation still matches the current source. Never let a late result from source A overwrite source B.
+- Make phases explicit for heavy apps: `empty`, `ready`, `loading-runtime` when needed, `processing`, `result`, and `error`. Define transitions in `APP_SPEC.md`.
+
+### Mobile control proximity
+
+- Do not create a smartphone layout by simply stacking the desktop layout in source order. Re-evaluate the workflow at narrow widths.
+- Controls that directly manipulate a preview (seek bar, transport, crop/range handles, frame navigation, overlay toggles) must remain immediately before or after that preview on smartphones. Do not separate them with unrelated settings cards.
+- Keep primary actions reachable without forcing repeated long scrolls. Use the mobile bottom bar only when persistent access materially helps.
+
+### Numeric settings and advanced controls
+
+- Prefer a small set of useful presets plus one custom input over many equal-weight buttons.
+- Show units outside the editable numeric text.
+- In custom mode, show the accepted min/max range as quiet helper text instead of a large permanent warning.
+- Do not forcibly clamp on every keystroke. Let the user type an intermediate value; validate/normalize on blur, change, or execution and show field-local errors.
+- Keep rarely changed or expert settings collapsed by default when the primary flow is clearer without them.
+
+### File export naming
+
+- If the app outputs a file, the user must be able to enter or edit the output filename before export. Do not hard-code the only filename.
+- Provide a sensible default derived from the input name, app slug, or output purpose. Preserve the user's edited name while it remains relevant.
+- Keep the extension visible and predictable; append/fix the required extension at export when the format is fixed.
+- Remove path separators, control characters, and other characters that are invalid or unsafe as filenames. Fall back to a valid default when the entered name becomes empty.
+- Test a user-edited filename as part of the main export flow.
+
+### Media geometry and orientation
+
+When drawing detections, points, masks, crops, annotations, or comparison overlays over images/video, never assume encoded dimensions equal displayed dimensions. Explicitly distinguish:
+
+- encoded/file dimensions,
+- intrinsic browser dimensions such as `videoWidth`/`videoHeight` or `naturalWidth`/`naturalHeight`,
+- processing/canvas dimensions,
+- CSS display dimensions and `object-fit`,
+- rotation/orientation metadata, and
+- `devicePixelRatio` where canvas pixels map to CSS pixels.
+
+Define the coordinate transform once and reuse it. Test portrait smartphone media as well as landscape media.
 
 ## Required checks before completion
 
@@ -99,6 +155,24 @@ Update these when relevant:
 - `THIRD_PARTY_NOTICES.md`: dependency additions, removals, or upgrades.
 - `SECURITY.md`: changed trust boundaries or file handling.
 - `docs/COMPONENTS.md` and `docs/COMPONENTS.ja.md`: reusable UI component behavior and API.
+
+
+## Finished-app README shape
+
+When this template becomes a real Browser-Kitty tool, rewrite the README for end users instead of leaving template-development prose. Unless the product has a strong reason to differ, use this compact order:
+
+1. App name + one-sentence purpose.
+2. Screenshot or short visual overview when useful.
+3. Features.
+4. How to use.
+5. Privacy / local processing.
+6. Supported browsers / devices.
+7. Limitations.
+8. Single-HTML / offline behavior.
+9. Development / build.
+10. License and third-party notices.
+
+Remove starter-specific explanations that are no longer relevant to the finished tool. Keep README behavior, in-app help, and `APP_SPEC.md` synchronized.
 
 ## Completion report format
 

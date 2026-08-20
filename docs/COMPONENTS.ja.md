@@ -6,14 +6,14 @@
 
 ## 確認ダイアログ
 
-`components/confirm-dialog.html` は、`window.confirm()` の代わりに使う自前の確認UIです。スターター本体の「消去」でも同じ考え方の `AppConfirm.ask()` を使用しています。
+`components/confirm-dialog.html` は、取り返しのつかない・高リスクな操作で `window.confirm()` の代わりに使う自前の確認UIです。スターター本体ではAPIを同梱しつつ、安全に戻せる「消去」はToast + Undoの例にしています。
 
 - PCでは中央のモーダル
 - スマートフォンでは下から出るボトムシート風
 - `env(safe-area-inset-bottom)` 対応
 - `Esc`、閉じるボタン、背景タップでキャンセル
 - 実行後に元のフォーカスへ戻す
-- 削除などの破壊的操作は `tone: 'danger'`
+- 完全削除など取り返しのつかない破壊的操作は `tone: 'danger'`
 - 外部依存・外部通信なし
 - `Promise<boolean>` を返す
 
@@ -48,11 +48,63 @@ deleteHistoryItem();
 
 ## 実装ルール
 
-- 削除・全消去・上書きなどユーザー影響の大きい操作では、`window.confirm()` よりこの部品か同等の自前UIを優先します。
+- 上書きや完全削除など、取り返しのつかない・高リスクな操作では `window.confirm()` よりこの部品か同等の自前UIを優先します。安全に元へ戻せる削除・消去は、下記のToast + Undoを優先します。
 - 確認本文へHTML文字列を差し込まず、テキストとして渡します。
 - スマートフォンでは48px程度のタップ領域とSafe Areaを維持します。
 - アプリ固有の見た目に変更しても、`Esc`、背景タップ、フォーカス復帰、キーボード操作を維持します。
 - `components/` の部品を変更した場合は、スターター本体に組み込まれた同等実装とドキュメントも同期します。
+
+## トースト / Undo
+
+`components/toast.html` は短い状態通知と Undo の標準部品です。安全に元へ戻せる操作では、実行前に確認ダイアログを出すより「実行 → トーストの元に戻す」を優先します。
+
+```js
+AppToast.show({
+  message: '削除しました',
+  actionLabel: '元に戻す',
+  duration: 5000,
+  onAction: () => restoreDeletedItem()
+});
+```
+
+トーストを何段も積まず、最新の意味ある通知へ置き換えます。上書きなど取り返しがつかない操作は `AppConfirm` を使います。
+
+## コンパクトメニュー
+
+`components/popover-menu.html` は「絞り込み」「管理」「その他」「出力設定」のような小さなメニュー向けです。外側クリック、`Esc`、画面サイズ変更、別メニューを開いたときに自動で閉じます。`Esc` ではトリガーへフォーカスを戻し、狭い画面ではパネルが画面外へ出ないよう位置を補正します。
+
+`data-popover-trigger` + `aria-controls` と、対応する `data-popover-panel` を使います。最重要の主操作までメニューへ隠さないでください。
+
+## プリセット + 自由入力の数値設定
+
+`components/setting-field.html` は横幅、FPS、品質、時間などで使う標準パターンです。通常は少数のプリセットを見せ、自由入力を選んだときだけ min/max を控えめに表示します。入力途中では強制 clamp せず、change / blur で正規化します。
+
+`settingchange` イベントを購読するか、`AppSettingField.init()` に `onChange` を渡します。単位は入力値の外側へ表示します。
+
+## 非同期処理 / 入力変更ガード
+
+`components/async-state.html` の `AppAsyncState.create()` は、処理フェーズと入力世代番号をまとめて扱います。非同期処理を開始する前に世代番号を取得し、結果をUIへ反映する直前に `isCurrent(token)` を確認してください。新しいファイルへ変更したら `invalidateSource()` を呼ぶことで、それ以前の処理結果をすべて古いものとして扱えます。
+
+```js
+const jobState = AppAsyncState.create({ onChange: renderState });
+
+function onNewFile(file) {
+  jobState.invalidateSource();
+  clearOldPreviewAndResult();
+  jobState.setPhase(file ? 'ready' : 'empty');
+}
+
+async function run() {
+  const token = jobState.captureGeneration();
+  jobState.setPhase('processing', { progress: 0 });
+  const result = await processCurrentFile();
+  if (!jobState.isCurrent(token)) return;
+  showResult(result);
+  jobState.setPhase('result', { progress: 1 });
+}
+```
+
+この部品を使わない場合も、古い入力の遅延結果が新しい入力の画面を上書きしない設計は必須です。
 
 ## スマホ固定ボトムナビ / 操作バー
 

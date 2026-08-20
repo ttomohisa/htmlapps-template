@@ -137,6 +137,33 @@ function Get-AssetBytes([string]$Path, [bool]$StripSourceMapComment) {
   return [System.IO.File]::ReadAllBytes($Path)
 }
 
+
+function Compress-GzipBytes([byte[]]$Bytes) {
+  $output = New-Object System.IO.MemoryStream
+  $gzip = New-Object System.IO.Compression.GZipStream -ArgumentList @(
+    $output,
+    [System.IO.Compression.CompressionMode]::Compress,
+    $true
+  )
+  try {
+    $gzip.Write($Bytes, 0, $Bytes.Length)
+  } finally {
+    $gzip.Dispose()
+  }
+  try {
+    return ,$output.ToArray()
+  } finally {
+    $output.Dispose()
+  }
+}
+
+function Get-OptionalNumber([object]$Object, [string]$Name, [double]$Fallback = 0) {
+  if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
+    return [double]$Object.$Name
+  }
+  return $Fallback
+}
+
 function ConvertTo-SafeJson([object]$Value, [int]$Depth = 30) {
   return ($Value | ConvertTo-Json -Compress -Depth $Depth).Replace("<", "\u003c").Replace(">", "\u003e").Replace("&", "\u0026")
 }
@@ -165,7 +192,7 @@ if (-not $OutputPathWasSpecified) {
 if (-not $dependencyConfig.dependencies) { $dependencies = @() } else { $dependencies = @($dependencyConfig.dependencies) }
 
 $ids = @{}
-$assetBundle = [ordered]@{ schemaVersion = 1; dependencies = [ordered]@{} }
+$assetBundle = [ordered]@{ schemaVersion = 2; dependencies = [ordered]@{} }
 $manifestDependencies = @()
 
 foreach ($dependency in $dependencies) {
@@ -198,15 +225,36 @@ foreach ($dependency in $dependencies) {
     }
     $sha = ($hashBytes | ForEach-Object { $_.ToString("x2") }) -join ""
 
+    $compressionSetting = "none"
+    if ($asset.PSObject.Properties.Name -contains "compression") { $compressionSetting = ([string]$asset.compression).ToLowerInvariant() }
+    if ($compressionSetting -notin @("none", "gzip", "auto")) {
+      throw "Unsupported compression '$compressionSetting' for $id/$key. Use none, gzip, or auto."
+    }
+
+    $storedBytes = $bytes
+    $resolvedCompression = "none"
+    if ($compressionSetting -in @("gzip", "auto")) {
+      $gzipBytes = Compress-GzipBytes $bytes
+      if ($compressionSetting -eq "gzip" -or $gzipBytes.Length -lt $bytes.Length) {
+        $storedBytes = $gzipBytes
+        $resolvedCompression = "gzip"
+      }
+    }
+
     $dependencyAssets[$key] = [ordered]@{
       mime = $mime
-      base64 = [Convert]::ToBase64String($bytes)
+      compression = $resolvedCompression
+      originalBytes = $bytes.Length
+      storedBytes = $storedBytes.Length
+      base64 = [Convert]::ToBase64String($storedBytes)
     }
     $manifestAssets += [ordered]@{
       key = $key
       path = [string]$asset.path
       mime = $mime
+      compression = $resolvedCompression
       bytes = $bytes.Length
+      storedBytes = $storedBytes.Length
       sha256 = $sha
     }
   }
@@ -232,7 +280,7 @@ foreach ($dependency in $dependencies) {
 }
 
 $manifest = [ordered]@{
-  schemaVersion = 1
+  schemaVersion = 2
   builder = "single-html-app-template/1.0"
   generatedAtUtc = [DateTime]::UtcNow.ToString("o")
   app = [ordered]@{
@@ -249,7 +297,7 @@ $assetBundleJson = ConvertTo-SafeJson $assetBundle 50
 $replacements = [ordered]@{
   "__APP_CONFIG_JSON__" = ConvertTo-SafeJson $appConfig 20
   "__BUILD_MANIFEST_JSON__" = ConvertTo-SafeJson $manifest 40
-  "__EMBEDDED_ASSET_BUNDLE_BASE64__" = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($assetBundleJson))
+  "__EMBEDDED_ASSET_BUNDLE_JSON__" = $assetBundleJson
 }
 
 foreach ($entry in $replacements.GetEnumerator()) {
@@ -305,8 +353,59 @@ if (-not $SkipSelfExtract -and ($appConfig.build.PSObject.Properties.Name -conta
   }
 }
 
+$readableBytes = (Get-Item $OutputPath).Length
+$selfExtractBytes = 0
+if ($selfExtractEnabled -and (Test-Path $selfExtractOutputPath)) { $selfExtractBytes = (Get-Item $selfExtractOutputPath).Length }
+$assetRawBytes = 0
+$assetStoredBytes = 0
+$sizeAssets = @()
+foreach ($dependencyEntry in $manifestDependencies) {
+  foreach ($assetEntry in @($dependencyEntry.assets)) {
+    $assetRawBytes += [long]$assetEntry.bytes
+    $assetStoredBytes += [long]$assetEntry.storedBytes
+    $sizeAssets += [ordered]@{
+      dependency = [string]$dependencyEntry.id
+      key = [string]$assetEntry.key
+      compression = [string]$assetEntry.compression
+      originalBytes = [long]$assetEntry.bytes
+      storedBytes = [long]$assetEntry.storedBytes
+    }
+  }
+}
+$sizeReport = [ordered]@{
+  schemaVersion = 1
+  generatedAtUtc = [DateTime]::UtcNow.ToString("o")
+  readableHtmlBytes = [long]$readableBytes
+  selfExtractHtmlBytes = [long]$selfExtractBytes
+  embeddedAssetOriginalBytes = [long]$assetRawBytes
+  embeddedAssetStoredBytes = [long]$assetStoredBytes
+  embeddedAssetSavedBytes = [long]($assetRawBytes - $assetStoredBytes)
+  assets = $sizeAssets
+}
+$sizeReportPath = Join-Path (Split-Path -Parent $OutputPath) "build-size-report.json"
+[System.IO.File]::WriteAllText($sizeReportPath, ($sizeReport | ConvertTo-Json -Depth 20), (New-Object System.Text.UTF8Encoding($false)))
+
+Write-Host ""
+Write-Host "[Size] Readable HTML: $([Math]::Round($readableBytes / 1MB, 2)) MB"
+if ($selfExtractBytes -gt 0) { Write-Host "[Size] Self-extract HTML: $([Math]::Round($selfExtractBytes / 1MB, 2)) MB" }
+Write-Host "[Size] Embedded assets: $([Math]::Round($assetRawBytes / 1MB, 2)) MB raw -> $([Math]::Round($assetStoredBytes / 1MB, 2)) MB stored"
+Write-Host "[Size] Report: $sizeReportPath"
+
+if ($appConfig.build.PSObject.Properties.Name -contains "sizeBudget" -and $appConfig.build.sizeBudget) {
+  $readableBudget = Get-OptionalNumber $appConfig.build.sizeBudget "readableWarningMb" 0
+  $selfExtractBudget = Get-OptionalNumber $appConfig.build.sizeBudget "selfExtractWarningMb" 0
+  $readableMb = $readableBytes / 1MB
+  $selfExtractMb = $selfExtractBytes / 1MB
+  if ($readableBudget -gt 0 -and $readableMb -gt $readableBudget) {
+    Write-Warning ("Readable HTML size {0:N2} MB exceeds warning budget {1:N2} MB." -f $readableMb, $readableBudget)
+  }
+  if ($selfExtractBytes -gt 0 -and $selfExtractBudget -gt 0 -and $selfExtractMb -gt $selfExtractBudget) {
+    Write-Warning ("Self-extract HTML size {0:N2} MB exceeds warning budget {1:N2} MB." -f $selfExtractMb, $selfExtractBudget)
+  }
+}
+
 $outputHash = Get-Sha256FileHex $OutputPath
-$outputSizeMb = [Math]::Round((Get-Item $OutputPath).Length / 1MB, 2)
+$outputSizeMb = [Math]::Round($readableBytes / 1MB, 2)
 Write-Host ""
 Write-Host "[OK] Standalone HTML: $OutputPath" -ForegroundColor Green
 Write-Host "[OK] Size: $outputSizeMb MB"

@@ -17,15 +17,18 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 - Generate both `dist/index.html` and the gzip self-extracting `dist/index.self-extract.html`
 - Double-click `build-standalone.bat` on Windows
 - No Python or Node.js required
-- Exact npm versions with only explicitly selected files embedded as Base64
+- Exact npm versions with each explicitly selected asset Base64-encoded exactly once; large assets can use `gzip` / `auto` compression
 - SHA-256 records for package tarballs and every embedded file
 - No runtime CDN, remote font, API, analytics, or telemetry
 - Content Security Policy with `connect-src 'none'`
 - GitHub Actions for pull request validation and GitHub Pages deployment
 - Starter implementation for bilingual UI, a light-only interface, responsive layout, and keyboard access
 - Reusable confirmation dialog: centered modal on desktop and safe-area-aware bottom sheet on smartphones
+- Reusable Undo toast, outside-click/Esc popover menu, preset + custom numeric field, and async source-state guard
 - Reusable smartphone bottom navigation / action bar with safe-area handling and disabled workflow states
 - `AGENTS.md`, `APP_SPEC.md`, and a reusable LLM request included
+- File-producing apps are required to let users edit the output filename before export
+- `build-size-report.json` and warning-only size budgets expose size regressions without forcing UX cuts
 
 ## Read these first
 
@@ -36,7 +39,11 @@ It generalizes the approach used by PDF Organizer: develop from readable source,
 | `app.config.json` | Application name, slug, version, and description |
 | `dependencies.json` | npm packages and files to embed |
 | `src/index.template.html` | Editable application source |
-| `components/confirm-dialog.html` | Reusable confirmation UI for delete, clear-all, and similar actions |
+| `components/confirm-dialog.html` | Reusable confirmation UI for irreversible/high-risk actions |
+| `components/toast.html` | Reusable transient status / Undo toast |
+| `components/popover-menu.html` | Compact Filter / Manage / More menu |
+| `components/setting-field.html` | Preset + custom numeric setting |
+| `components/async-state.html` | Source generation + stale async result guard |
 | `components/mobile-bottom-bar.html` | Reusable fixed smartphone navigation / workflow action bar |
 | `build-standalone.ps1` | Standalone and self-extracting HTML builder |
 | `scripts/build-self-extract.ps1` | Gzip and wrap the normal HTML in a self-extracting loader |
@@ -78,6 +85,7 @@ dist/
 ├─ index.html
 ├─ index.self-extract.html
 ├─ dependency-manifest.json
+├─ build-size-report.json
 ├─ self-extract-manifest.json
 └─ .nojekyll
 ```
@@ -90,7 +98,7 @@ Add exact package versions and required files to `dependencies.json`. The starte
 
 See `examples/dependencies.dayjs.json` and [Adding Embedded Dependencies](docs/DEPENDENCIES.md).
 
-The builder downloads the package tarball from the official npm registry and embeds only the listed files. The generated application does not contact a CDN at runtime.
+The builder downloads the package tarball from the official npm registry and embeds only the listed files. The generated application does not contact a CDN at runtime. Set `compression` to `auto` or `gzip` for large assets when useful; compressed assets are restored with the async `StandaloneAssets` APIs. The build also writes `dist/build-size-report.json` so size changes are visible.
 
 ## Self-extracting HTML
 
@@ -131,8 +139,12 @@ After enabling Pages, open Actions and choose **Re-run all jobs**. The generated
 ├─ app.config.json
 ├─ dependencies.json
 ├─ components/
+│  ├─ async-state.html
 │  ├─ confirm-dialog.html
-│  └─ mobile-bottom-bar.html
+│  ├─ mobile-bottom-bar.html
+│  ├─ popover-menu.html
+│  ├─ setting-field.html
+│  └─ toast.html
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
@@ -150,7 +162,9 @@ After enabling Pages, open Actions and choose **Re-run all jobs**. The generated
 
 ## Reusable UI components
 
-`components/` contains dependency-free source snippets that can be copied into finished apps. `confirm-dialog.html` is intended for deletion, clear-all, overwrite, and similar confirmation flows; the starter's Clear action uses the same `AppConfirm.ask()` pattern.
+`components/` contains dependency-free source snippets that can be copied into finished apps. `confirm-dialog.html` is for irreversible/high-risk actions such as overwrite or permanent deletion. The starter's reversible Clear action instead demonstrates Toast + Undo.
+
+`toast.html` handles reversible action feedback/Undo, `popover-menu.html` provides compact Filter / Manage / More menus, `setting-field.html` covers preset + custom numeric inputs, and `async-state.html` prevents stale results from an older source from reaching the current UI.
 
 `mobile-bottom-bar.html` is the standard fixed smartphone navigation / workflow bar for apps that need persistent access to 3-5 sections or actions. It supports safe-area padding, icon + label items, actual disabled states (for example Save before a result exists), section scrolling, and app-defined action handlers. It is intentionally optional rather than forced into every starter app.
 
@@ -168,4 +182,3 @@ Copyright © 2026 ttomohisa
 
 Released under the [MIT License](LICENSE). Update authorship and third-party notices appropriately in applications created from this template.
 
-- A standard upper-right “How to use & notes” dialog
