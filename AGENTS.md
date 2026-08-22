@@ -157,6 +157,22 @@ Update these when relevant:
 - `docs/COMPONENTS.md` and `docs/COMPONENTS.ja.md`: reusable UI component behavior and API.
 
 
+## README screenshot policy
+
+Finished Browser Kitty tools should include a representative application screenshot
+unless a screenshot would not meaningfully explain the tool.
+
+- Store the primary screenshot at `assets/screenshot.png`.
+- Target approximately 1360 x 900 pixels for the desktop screenshot.
+- Capture the actual rendered application. Do not recreate the UI with image generation or mockups.
+- Do not capture only the initial empty state. Prepare realistic sample data and show the primary workflow or result so the application's purpose is understandable at a glance.
+- Do not include browser chrome, local file paths, personal information, debug UI, or unrelated desktop content.
+- Prefer one strong representative screenshot over multiple weak screenshots.
+- Add the screenshot to both `README.ja.md` and `README.md`, normally near the demo / introductory section.
+- Temporary files or sample data created only for screenshot capture must not remain in the repository unless they are intentionally useful as examples.
+- Screenshot work must not change application behavior or production UI merely to make the screenshot look better.
+
+
 ## Finished-app README shape
 
 When this template becomes a real Browser-Kitty tool, rewrite the README for end users instead of leaving template-development prose. Unless the product has a strong reason to differ, use this compact order:
