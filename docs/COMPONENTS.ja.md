@@ -106,37 +106,86 @@ async function run() {
 
 この部品を使わない場合も、古い入力の遅延結果が新しい入力の画面を上書きしない設計は必須です。
 
-## スマホ固定ボトムナビ / 操作バー
+## スマホ固定ボトムナビ / ページタブ / 操作バー
 
-`components/mobile-bottom-bar.html` は、スマートフォンで複数の画面内セクションや主要操作へいつでもアクセスしたいアプリ向けの標準コンポーネントです。PCでは非表示、`600px` 以下では Safe Area 対応の固定バーとして表示する前提です。
+`components/mobile-bottom-bar.html` は、スマートフォンで **3〜5個の意味のあるグループや主要操作**へいつでもアクセスしたいアプリ向けの標準コンポーネントです。PCでは非表示、`600px` 以下では Safe Area 対応の固定バーとして表示します。
 
-たとえば次のような用途に向いています。
+長いツールでは、今後は **「タブを押すとページが切り替わる」方式を第一候補**にします。スマホでは選択中のグループだけを表示し、PCでは従来どおりすべてのセクションを通常の文書フローで表示します。デスクトップUIを単純に縦積みしただけの長いスマホ画面を避けられます。
 
-- 動画編集系の `動画 / 範囲 / 切り出す / 保存`。
+たとえば次のような構成に向いています。
+
+- Device Check系の `概要 / カメラ・音声 / 入力 / 画面・端末`。
+- メディア編集系の `素材 / 編集 / プレビュー / 出力`。
 - ドキュメント系の `スキャン / ページ / PDF`。
-- 3〜5個の主要セクションを行き来するスマホUI。
-- 「保存」「共有」のように、結果ができるまで無効にしておきたい操作。
+- 一部はページ、一部は「実行」「保存」のような操作にする混在型。
 
-テンプレートにあるから必ず付けるものではありません。主操作が1つだけで常時ナビゲーションも不要なら、通常のインフローボタンの方が分かりやすいことがあります。
+テンプレートにあるから必ず付けるものではありません。短い1本道の操作で主ボタンも1つだけなら、通常配置のボタンの方が分かりやすいです。
 
-### マークアップ
+### 推奨：スマホで本当にページ切替する
 
-各ボタンには安定した `data-mobile-key` を付けます。`data-mobile-target` を付けると画面内セクションへの移動、`data-mobile-action` を付けるとアプリ固有操作として扱えます。表示は短いラベルとアイコンを併用してください。
+`<body>` に次の2クラスを付けます。
 
 ```html
-<nav class="app-mobile-bottom-bar" id="mobileBottomBar" style="--app-mobile-bottom-items: 4" aria-label="Mobile actions">
-  <button class="app-mobile-bottom-item is-active" data-mobile-key="source" data-mobile-target="sourceSection" aria-current="page">…</button>
-  <button class="app-mobile-bottom-item" data-mobile-key="range" data-mobile-target="rangeSection">…</button>
-  <button class="app-mobile-bottom-item primary" data-mobile-key="run" data-mobile-action="run">…</button>
-  <button class="app-mobile-bottom-item" data-mobile-key="save" data-mobile-action="save" disabled>…</button>
+<body class="has-mobile-bottom-bar has-mobile-page-tabs">
+```
+
+各グループを `app-mobile-page` で囲み、最初に表示するページだけ `is-mobile-active` を付けます。
+
+```html
+<section id="overviewPage" class="app-mobile-page is-mobile-active">…</section>
+<section id="mediaPage" class="app-mobile-page">…</section>
+<section id="inputPage" class="app-mobile-page">…</section>
+<section id="devicePage" class="app-mobile-page">…</section>
+```
+
+下部タブは `data-mobile-page-target` で接続します。
+
+```html
+<nav class="app-mobile-bottom-bar" id="mobileBottomBar" style="--app-mobile-bottom-items: 4" aria-label="スマートフォン用ナビゲーション">
+  <button class="app-mobile-bottom-item is-active" data-mobile-key="overview" data-mobile-page-target="overviewPage" aria-current="page">…</button>
+  <button class="app-mobile-bottom-item" data-mobile-key="media" data-mobile-page-target="mediaPage">…</button>
+  <button class="app-mobile-bottom-item" data-mobile-key="input" data-mobile-page-target="inputPage">…</button>
+  <button class="app-mobile-bottom-item" data-mobile-key="device" data-mobile-page-target="devicePage">…</button>
 </nav>
 ```
 
-`<body>` には `has-mobile-bottom-bar` を付け、固定バーの裏へ本文が隠れないよう下余白を確保します。3個・5個に変更する場合は `--app-mobile-bottom-items` も合わせて変更します。
+`600px` より広い画面では `.app-mobile-page` は常に `display: block` のため、PC表示は変わりません。スマホだけ `has-mobile-page-tabs` により、`.is-mobile-active` のページだけ表示されます。
 
-### 任意のヘルパーAPI
+初期化は通常どおりです。
 
-コンポーネント内のスクリプトも取り込む場合は、アプリ固有の操作だけを渡して初期化できます。
+```js
+const mobileBar = AppMobileBottomBar.mount(
+  document.getElementById('mobileBottomBar')
+);
+```
+
+処理の途中から別タブへ案内したい場合は、クリックを偽装せずAPIで切り替えます。
+
+```js
+mobileBar.showPage('media');
+console.log(mobileBar.currentPage()); // "media"
+```
+
+たとえば「クイック診断を開始 → カメラ・音声タブへ移動」のような誘導に使えます。
+
+### 従来方式：セクションへスクロール
+
+スマホでも全セクションを常に表示したまま、下部バーからその位置へジャンプしたいアプリでは `data-mobile-target` を使えます。
+
+```html
+<button class="app-mobile-bottom-item" data-mobile-key="source" data-mobile-target="sourceSection">…</button>
+```
+
+ヘルパーは対象セクションへスクロールし、利用可能なら `IntersectionObserver` で現在位置も追従します。意味もなくページ切替とセクションスクロールを混ぜず、そのアプリのスマホフローに合う方を選びます。
+
+### 操作ボタン
+
+`data-mobile-action` を使えば「実行」「保存」などのアプリ固有操作も置けます。
+
+```html
+<button class="app-mobile-bottom-item primary" data-mobile-key="run" data-mobile-action="run">…</button>
+<button class="app-mobile-bottom-item" data-mobile-key="save" data-mobile-action="save" disabled>…</button>
+```
 
 ```js
 const mobileBar = AppMobileBottomBar.mount(
@@ -154,16 +203,28 @@ mobileBar.setEnabled('save', false);
 mobileBar.setEnabled('save', true);
 ```
 
-画面内セクションへのスクロール、アクティブ表示、利用可能なら `IntersectionObserver` による現在セクション追従はヘルパー側で行います。「いつ保存を有効化するか」などの業務状態はアプリ側で決めます。
+### ヘルパーAPI
+
+- `showPage(keyOrId, options?)`：ページタブを切り替え、必要ならその位置まで移動。
+- `currentPage()`：現在のページキーを取得。
+- `setActive(key)`：アクティブ表示を変更。
+- `setEnabled(key, enabled)`：標準の `disabled` 状態を変更。
+- `button(key)`：対象ボタンを取得。
+- `destroy()`：イベントやObserverを解除。
+
+初期化オプションには `initialPage`、`pageTopTarget`、`pageTopOffset`、`onPageChange`、`actions`、`observeSections` などを使えます。
 
 ### UXルール
 
-- 項目数は **3〜5個** を基本にします。操作系ツールは4個が扱いやすいです。
-- アイコンだけにせず、短い文字ラベルも付けます。
-- まだ実行できない操作は見た目だけ薄くせず、実際に `disabled` にします。
+- 項目数は **3〜5個** を基本にし、4個を有力な初期案にします。
+- アイコンだけにせず、短い文字ラベルも必ず付けます。
+- スマホで3〜5グループに自然に分かれる長いツールは、**縦長1ページよりページ切替を優先**します。
+- PCでは通常の文書フローですべて見せます。スマホタブの都合でPCまで無理にページ分割しません。
+- 各スマホページの内部は通常のページスクロールを使い、入れ子のスクロール領域を作らないでください。
+- タブ切替で入力値や処理結果をリセットしません。タブ変更はナビゲーションです。
+- まだ実行できない操作は見た目だけ薄くせず、本当に `disabled` にします。
 - 「保存」「共有」は正常な結果ができた後に有効化します。
-- 固定CTAを重複させません。ボトムバーに主操作がある場合、別の全幅固定ボタンは通常不要です。
-- 一方で、長い編集エリアの自然な末尾に通常配置の主操作ボタンを置くのは有効です。
+- 固定CTAを重複させません。ボトムバーに固定の主操作があるなら、別の全幅固定ボタンは通常不要です。
 - `env(safe-area-inset-bottom)` と本文側の下余白を維持し、バーで内容を隠さないようにします。
-- 固定バーはスマホ向けです。PCでは通常のインフロー操作を維持します。
-- フォーカス表示、ナビ項目の `aria-current`、標準の `disabled` セマンティクスを維持します。
+- フォーカス表示、`aria-current`、標準button、`disabled` セマンティクスを維持します。
+- 320 / 360 / 390〜393 / 430px幅で確認し、ページ全体の横スクロールが出ないことを確認します。

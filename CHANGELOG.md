@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0 - Smartphone bottom-tab page switching - 2026-08-24
+
+- Extended `components/mobile-bottom-bar.html` with a canonical mobile page-tab mode using `data-mobile-page-target`.
+- Added `.app-mobile-page` / `.is-mobile-active` behavior: smartphones show only the selected page while desktop keeps every section in normal document flow.
+- Added `showPage()` / `currentPage()` APIs so app workflows can switch tabs programmatically.
+- Kept the existing section-scroll (`data-mobile-target`) and workflow-action (`data-mobile-action`) modes for backward compatibility.
+- Updated LLM/product guidance to prefer bottom-tab page switching for long smartphone tools that naturally divide into 3-5 groups.
+
 ## 1.0 - Browser-Kitty UX and asset pipeline hardening - 2026-08-20
 
 - Removed the second Base64 layer around the complete embedded asset bundle; asset payloads are now Base64-encoded exactly once.

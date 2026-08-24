@@ -31,7 +31,7 @@ GitHub Pagesから最初のHTMLを取得した後は、アプリ内の処理を�
 - 実行時CDN、外部フォント、分析タグ、テレメトリを初期状態では使用しない
 - GitHub Actionsでビルド検証とGitHub Pages公開
 - 日英UI、レスポンシブ表示、キーボード操作、SVG favicon、ライトモード固定のスターター
-- 確認ダイアログ、Undo Toast、ポップオーバーメニュー、数値設定、非同期状態ガード、スマホ固定ボトムバーを再利用可能
+- 確認ダイアログ、Undo Toast、ポップオーバーメニュー、数値設定、非同期状態ガード、ページ切替対応のスマホ固定ボトムバーを再利用可能
 - 製品仕様を `APP_SPEC.md`、コーディングLLM向け実装ルールを `AGENTS.md` に分離
 - ファイル出力アプリでは、保存前に出力ファイル名を編集できることを共通UXルール化
 - `build-size-report.json` で、UXを自動的に削らず容量増加を把握
@@ -191,7 +191,7 @@ build-standalone.bat -ForceDownload
 - `popover-menu.html`：外側クリックと `Esc` に対応した「絞り込み / 管理 / その他」メニュー
 - `setting-field.html`：プリセット＋自由入力の数値設定
 - `async-state.html`：入力元変更後に古い非同期結果を表示しないための状態ガード
-- `mobile-bottom-bar.html`：Safe Areaと実際の無効状態に対応したスマホ固定ナビ / 操作バー
+- `mobile-bottom-bar.html`：Safe Area、ページ切替、セクション移動、主要操作、実際の無効状態に対応したスマホ固定ボトムナビ
 
 詳しくは [再利用UIコンポーネント](docs/COMPONENTS.ja.md) を参照してください。
 

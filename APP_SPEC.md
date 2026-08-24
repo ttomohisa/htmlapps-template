@@ -66,7 +66,7 @@ A successful replacement app should state here:
 - Reversible changes provide a visible Undo action in the reusable toast.
 - Irreversible or high-risk destructive actions use the reusable confirmation component, centered on desktop and presented as a safe-area-aware bottom sheet on smartphones.
 - Status messages use an `aria-live` region.
-- If the finished app needs persistent smartphone access to 3-5 sections or workflow actions, reuse `components/mobile-bottom-bar.html` rather than inventing another fixed bottom bar. Keep unavailable actions disabled until their prerequisites exist.
+- If the finished app needs persistent smartphone access to 3-5 sections or workflow actions, reuse `components/mobile-bottom-bar.html` rather than inventing another fixed bottom bar. For long multi-section tools, prefer its mobile page-tab mode (`data-mobile-page-target`) so tapping a bottom tab shows only that group on smartphones while desktop still shows all sections. Keep unavailable actions disabled until their prerequisites exist.
 
 ## 8. Performance expectations
 
@@ -106,6 +106,7 @@ Replace these with explicit decisions before implementation:
 - Error and recovery behavior, including stale async-result invalidation when inputs can change during processing.
 - Explicit async phases (`empty`, `ready`, `loading-runtime` if needed, `processing`, `result`, `error`) for heavy processing apps.
 - Mobile relationship between previews and their directly related controls.
+- Smartphone navigation model: bottom-tab page switching, section-scrolling bottom bar, workflow-action bar, or no fixed bottom bar.
 - Media coordinate/orientation strategy when drawing overlays.
 - Required third-party libraries.
 - Whether bilingual UI is required.

@@ -62,13 +62,13 @@ If the application becomes too large for safe single-file source editing, split 
 - `components/popover-menu.html` is the canonical compact “Filter / Manage / More / Output settings” menu. It closes on outside click, `Esc`, resize, and when another menu opens.
 - `components/setting-field.html` is the canonical preset + custom numeric field. Custom mode exposes min/max quietly, does not clamp while the user is typing, and normalizes on change/blur.
 - `components/async-state.html` is the canonical source-generation and async-phase guard for file/media processing. Use it or an equivalent explicit generation token to reject stale results.
-- `components/mobile-bottom-bar.html` is the canonical fixed smartphone navigation / workflow bar when an app benefits from 3-5 persistent destinations or actions. It supports safe areas, icons + labels, disabled actions, section targets, and application actions.
+- `components/mobile-bottom-bar.html` is the canonical fixed smartphone navigation / workflow bar when an app benefits from 3-5 persistent destinations or actions. It supports safe areas, icons + labels, true mobile page tabs, backward-compatible section targets, disabled actions, and application actions.
 - Component files are source snippets, not runtime dependencies. Copy or adapt the needed CSS, HTML, and JavaScript into `src/index.template.html` so the final release remains one self-contained HTML file.
 - Prefer `AppConfirm.ask()` over `window.confirm()` for irreversible deletion, overwrite, and other meaningful destructive actions. If the action is reliably reversible, prefer `AppToast.show()` with Undo instead of a pre-action confirmation.
 - Use `tone: 'danger'` for destructive confirmation buttons.
 - Pass localized title, message, and button labels from the application's translation object whenever practical.
 - Preserve `Esc`, backdrop cancellation, visible focus, focus restoration, smartphone safe-area handling, and keyboard access when adapting a component.
-- For mobile bottom bars, keep 3-5 concise icon + text items, reserve bottom body padding, use real `disabled` state for unavailable actions, and avoid a duplicate fixed primary CTA. Save / Share should stay disabled until a valid result exists.
+- For mobile bottom bars, keep 3-5 concise icon + text items, reserve bottom body padding, use real `disabled` state for unavailable actions, and avoid a duplicate fixed primary CTA. For long multi-section smartphone tools, prefer `data-mobile-page-target` page switching so only the selected group is shown on mobile while desktop keeps all sections visible. Save / Share should stay disabled until a valid result exists.
 - Avoid `window.alert()`, `window.confirm()`, and `window.prompt()` in finished product UI unless `APP_SPEC.md` explicitly requires native browser dialogs or there is a documented technical reason.
 - See `docs/COMPONENTS.md` / `docs/COMPONENTS.ja.md` for usage and maintenance rules.
 
@@ -90,7 +90,7 @@ For apps that accept a file, image, video, audio track, PDF, database, or other 
 
 - Do not create a smartphone layout by simply stacking the desktop layout in source order. Re-evaluate the workflow at narrow widths.
 - Controls that directly manipulate a preview (seek bar, transport, crop/range handles, frame navigation, overlay toggles) must remain immediately before or after that preview on smartphones. Do not separate them with unrelated settings cards.
-- Keep primary actions reachable without forcing repeated long scrolls. Use the mobile bottom bar only when persistent access materially helps.
+- Keep primary actions reachable without forcing repeated long scrolls. When a smartphone app naturally divides into 3-5 groups, prefer bottom-tab page switching over a long stacked page; preserve the normal all-sections desktop layout. Use the mobile bottom bar only when persistent access materially helps.
 
 ### Numeric settings and advanced controls
 

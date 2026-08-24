@@ -42,6 +42,10 @@ $mobileBottomBarText = Get-Content -Raw -Encoding UTF8 $mobileBottomBarPath
 $mobileBottomBarRequiredTokens = @(
   'position: fixed',
   'env(safe-area-inset-bottom)',
+  'data-mobile-page-target',
+  'app-mobile-page',
+  'showPage',
+  'currentPage',
   'data-mobile-target',
   'data-mobile-action',
   'disabled',

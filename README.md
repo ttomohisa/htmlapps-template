@@ -31,7 +31,7 @@ GitHub Pages delivers the initial HTML. The starter is designed so application p
 - Avoid runtime CDN, remote fonts, analytics, and telemetry by default
 - Validate builds and deploy GitHub Pages with GitHub Actions
 - Start with Japanese / English UI, responsive layout, keyboard access, embedded SVG favicon, and a light-only interface
-- Reuse confirmation dialogs, Undo toasts, popover menus, numeric setting fields, async-state guards, and smartphone bottom bars
+- Reuse confirmation dialogs, Undo toasts, popover menus, numeric setting fields, async-state guards, and smartphone bottom bars with page switching
 - Keep product requirements in `APP_SPEC.md` and implementation rules for coding LLMs in `AGENTS.md`
 - Require file-producing apps to let users edit the output filename before export
 - Generate `build-size-report.json` so size regressions are visible without automatically sacrificing UX
@@ -191,7 +191,7 @@ To skip the self-extracting file:
 - `popover-menu.html`: compact Filter / Manage / More menus with outside-click and `Esc` handling
 - `setting-field.html`: preset + custom numeric input patterns
 - `async-state.html`: guards against stale asynchronous results after the source changes
-- `mobile-bottom-bar.html`: safe-area-aware smartphone navigation or workflow actions with real disabled states
+- `mobile-bottom-bar.html`: safe-area-aware smartphone bottom tabs with true page switching, section navigation, workflow actions, and real disabled states
 
 See [Reusable UI components](docs/COMPONENTS.md) for usage and UX rules.
 

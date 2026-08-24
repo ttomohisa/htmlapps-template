@@ -88,37 +88,86 @@ async function run() {
 
 Use the same principle even if you do not copy this helper. A late result from an old file must never overwrite the UI for a newer file.
 
-## Mobile bottom navigation / action bar
+## Mobile bottom navigation / page tabs / action bar
 
-`components/mobile-bottom-bar.html` is the canonical fixed smartphone bottom bar for apps that benefit from persistent access to several sections or workflow actions. It is hidden on desktop by default and becomes a safe-area-aware fixed bar at `600px` and below.
+`components/mobile-bottom-bar.html` is the canonical fixed smartphone bottom bar for apps that benefit from persistent access to **3-5 meaningful groups or workflow actions**. It is hidden above `600px` by default and is safe-area aware.
+
+For long tools, the preferred mode is now **true mobile page switching**: tapping a bottom tab shows only that group on smartphones, while desktop keeps every section visible in normal document flow. This avoids turning the mobile layout into one very long stacked desktop page.
 
 Use it for patterns such as:
 
-- `Source / Range / Run / Save` in a media editor.
+- `Overview / Camera & Audio / Input / Screen & Device` in a device utility.
+- `Source / Edit / Preview / Export` in a media workflow.
 - `Scan / Pages / PDF` in a document workflow.
-- Section navigation where three to five destinations remain useful throughout the mobile flow.
-- A workflow action that starts disabled and becomes available only after a result exists, such as Save or Share.
+- A hybrid bar where some items are pages and another item is a workflow action.
 
-Do not add a bottom bar only because it exists in the template. If an app has a single primary action and no persistent navigation need, an in-flow button is usually clearer.
+Do not add a bottom bar only because it exists in the template. If the app has one short flow and one obvious primary action, an in-flow button is usually clearer.
 
-### Markup model
+### Recommended: true mobile page switching
 
-Each button has a stable `data-mobile-key`. A button can either navigate to a section with `data-mobile-target`, or run an application action with `data-mobile-action`. Keep the visible label short and pair it with an icon.
+Add both classes to `<body>`:
 
 ```html
-<nav class="app-mobile-bottom-bar" id="mobileBottomBar" style="--app-mobile-bottom-items: 4" aria-label="Mobile actions">
-  <button class="app-mobile-bottom-item is-active" data-mobile-key="source" data-mobile-target="sourceSection" aria-current="page">…</button>
-  <button class="app-mobile-bottom-item" data-mobile-key="range" data-mobile-target="rangeSection">…</button>
-  <button class="app-mobile-bottom-item primary" data-mobile-key="run" data-mobile-action="run">…</button>
-  <button class="app-mobile-bottom-item" data-mobile-key="save" data-mobile-action="save" disabled>…</button>
+<body class="has-mobile-bottom-bar has-mobile-page-tabs">
+```
+
+Wrap each mobile group with `app-mobile-page`. Mark the initial page with `is-mobile-active`:
+
+```html
+<section id="overviewPage" class="app-mobile-page is-mobile-active">…</section>
+<section id="mediaPage" class="app-mobile-page">…</section>
+<section id="inputPage" class="app-mobile-page">…</section>
+<section id="devicePage" class="app-mobile-page">…</section>
+```
+
+Connect each bottom item with `data-mobile-page-target`:
+
+```html
+<nav class="app-mobile-bottom-bar" id="mobileBottomBar" style="--app-mobile-bottom-items: 4" aria-label="Mobile navigation">
+  <button class="app-mobile-bottom-item is-active" data-mobile-key="overview" data-mobile-page-target="overviewPage" aria-current="page">…</button>
+  <button class="app-mobile-bottom-item" data-mobile-key="media" data-mobile-page-target="mediaPage">…</button>
+  <button class="app-mobile-bottom-item" data-mobile-key="input" data-mobile-page-target="inputPage">…</button>
+  <button class="app-mobile-bottom-item" data-mobile-key="device" data-mobile-page-target="devicePage">…</button>
 </nav>
 ```
 
-Add `has-mobile-bottom-bar` to `<body>` so page content receives bottom padding and is not hidden behind the fixed bar. Change `--app-mobile-bottom-items` when using three or five items.
+At widths above `600px`, `.app-mobile-page` remains `display: block`, so desktop is unchanged. At smartphone widths, `has-mobile-page-tabs` hides all pages except `.is-mobile-active`.
 
-### Optional helper API
+Mount the helper as usual:
 
-After copying the component script, mount the bar and provide handlers for application-specific actions:
+```js
+const mobileBar = AppMobileBottomBar.mount(
+  document.getElementById('mobileBottomBar')
+);
+```
+
+Application flows can move the user to another tab without faking a click:
+
+```js
+mobileBar.showPage('media');
+console.log(mobileBar.currentPage()); // "media"
+```
+
+This is useful when a guided workflow completes one step and should reveal the next relevant group.
+
+### Backward-compatible section scrolling
+
+For apps where all mobile sections should remain visible and the bottom bar only jumps around the document, use `data-mobile-target` instead:
+
+```html
+<button class="app-mobile-bottom-item" data-mobile-key="source" data-mobile-target="sourceSection">…</button>
+```
+
+The helper scrolls to the section and can track the visible section with `IntersectionObserver`. Do **not** combine section scrolling and page-tab switching just to add complexity; choose the model that matches the mobile workflow.
+
+### Workflow actions
+
+A button can run application code with `data-mobile-action`:
+
+```html
+<button class="app-mobile-bottom-item primary" data-mobile-key="run" data-mobile-action="run">…</button>
+<button class="app-mobile-bottom-item" data-mobile-key="save" data-mobile-action="save" disabled>…</button>
+```
 
 ```js
 const mobileBar = AppMobileBottomBar.mount(
@@ -136,16 +185,28 @@ mobileBar.setEnabled('save', false);
 mobileBar.setEnabled('save', true);
 ```
 
-The helper handles section scrolling, active destination state, and `IntersectionObserver`-based section tracking when available. Application code remains responsible for deciding when actions are enabled.
+### Helper API
+
+- `showPage(keyOrId, options?)` — activate a page-tab destination and optionally scroll it into view.
+- `currentPage()` — return the current page key.
+- `setActive(key)` — update active bottom-item styling.
+- `setEnabled(key, enabled)` — set the native disabled state.
+- `button(key)` — get one bottom button.
+- `destroy()` — remove listeners and observers.
+
+Useful mount options include `initialPage`, `pageTopTarget`, `pageTopOffset`, `onPageChange`, `actions`, and `observeSections`.
 
 ### UX rules
 
-- Prefer **3 to 5 items**. Four is a good default for action-heavy tools.
-- Use an icon **and** a short text label; do not rely on icons alone.
+- Prefer **3-5 items**; four is a strong default.
+- Use a clear icon **and** a short text label. Do not rely on icons alone.
+- For a long smartphone tool that naturally has 3-5 groups, prefer **page switching** over one long stacked page.
+- Keep the desktop layout in normal document flow; page tabs are a smartphone navigation treatment, not a reason to fragment desktop UX.
+- Keep each mobile page internally scrollable through the normal document, not a nested scroll container.
+- Preserve the user's current work when switching tabs. A tab change is navigation, not reset.
 - Keep unavailable actions actually `disabled`, not merely dimmed.
 - Enable Save / Share only after a valid result exists.
-- Avoid duplicate fixed CTAs. If the bottom bar contains the primary mobile action, a second full-width fixed button should normally be removed.
-- An in-flow primary button may still be useful at the natural end of a long editing section.
-- Keep `env(safe-area-inset-bottom)` padding and enough body bottom padding so content cannot hide behind the bar.
-- The bar is for smartphone ergonomics; desktop layout should keep normal in-flow controls.
-- Preserve visible focus, `aria-current` for active navigation items, and native `disabled` semantics.
+- Avoid duplicate fixed CTAs. If the bar contains the primary fixed mobile action, do not add another fixed full-width button.
+- Keep `env(safe-area-inset-bottom)` and enough body bottom padding so content cannot hide behind the bar.
+- Preserve visible focus, `aria-current`, semantic buttons, and native `disabled` behavior.
+- Test at 320, 360, 390/393, and 430px widths and confirm there is no page-level horizontal scrolling.

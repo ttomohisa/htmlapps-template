@@ -7,6 +7,6 @@ These files are source snippets for apps created from this template. They are **
 - [`popover-menu.html`](popover-menu.html) — Compact menu that closes on outside click, `Esc`, resize, or another menu opening.
 - [`setting-field.html`](setting-field.html) — Preset + custom numeric input with unobtrusive range guidance and delayed normalization.
 - [`async-state.html`](async-state.html) — Explicit async phase + source-generation guard that prevents stale results from a previous input.
-- [`mobile-bottom-bar.html`](mobile-bottom-bar.html) — Fixed smartphone bottom navigation / workflow action bar with icons, safe-area handling, disabled states, section scrolling, and an optional action API.
+- [`mobile-bottom-bar.html`](mobile-bottom-bar.html) — Fixed smartphone bottom navigation / workflow bar with icons, safe-area handling, true mobile page switching, backward-compatible section scrolling, disabled states, and an optional action API.
 
 Documentation: [English](../docs/COMPONENTS.md) / [日本語](../docs/COMPONENTS.ja.md)
