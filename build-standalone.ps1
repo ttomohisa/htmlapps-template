@@ -410,7 +410,7 @@ Write-Host ""
 Write-Host "[OK] Standalone HTML: $OutputPath" -ForegroundColor Green
 Write-Host "[OK] Size: $outputSizeMb MB"
 Write-Host "[OK] SHA-256: $outputHash"
-Write-Host "[OK] Runtime network access is blocked by CSP."
+Write-Host "[OK] Fetch/XHR/WebSocket-style runtime network access is blocked by CSP."
 if ($selfExtractEnabled) {
   Write-Host "[OK] Self-extracting HTML: $selfExtractOutputPath" -ForegroundColor Green
 }

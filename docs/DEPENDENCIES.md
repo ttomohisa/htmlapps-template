@@ -27,7 +27,7 @@ Add a package to `dependencies.json`:
 }
 ```
 
-A complete example is available at `examples/dependencies.dayjs.json`.
+A complete minimal example is available at `examples/dependencies.dayjs.json`. The WebRTC QR pairing component has a two-library example at `examples/dependencies.webrtc-qr.json`.
 
 
 ## Asset compression and bundle size

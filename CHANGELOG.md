@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 - Reusable fully serverless WebRTC QR pairing - 2026-08-29
+
+- Added `components/webrtc-qr-pairing.html`, a reusable host/joining-device pairing UI and controller based on the connection flow hardened in Wireless Sensor v1.0.0.
+- Added manual QR/copy signaling with `iceServers: []`, complete ICE gathering before QR generation, candidate diagnostics, stale-attempt cleanup, and delayed joining-side Answer creation.
+- Added low-resolution camera handling, native `BarcodeDetector` with embedded `jsQR` fallback, chunked QR transfer, and pre-connect Answer regeneration.
+- Added `examples/dependencies.webrtc-qr.json` with pinned `qrcode-generator` and `jsqr` assets for the standalone build pipeline.
+- Added bilingual WebRTC pairing documentation, custom DataChannel hooks, protocol-prefix customization, privacy wording, limitations, and real-device release tests.
+- Updated template guidance so future apps reuse the canonical WebRTC pairing component instead of rebuilding manual signaling from scratch.
+
 ## 1.0 - Smartphone bottom-tab page switching - 2026-08-24
 
 - Extended `components/mobile-bottom-bar.html` with a canonical mobile page-tab mode using `data-mobile-page-target`.

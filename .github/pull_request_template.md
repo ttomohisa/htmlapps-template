@@ -20,7 +20,7 @@ Describe the user-visible change.
 - [ ] Japanese and English checked where applicable.
 - [ ] The light-only interface was checked at desktop and mobile widths.
 - [ ] Browser console checked.
-- [ ] Runtime network panel checked after initial load.
+- [ ] Runtime network panel checked after initial load; any intentional WebRTC peer traffic matches `APP_SPEC.md`.
 
 ## Notes
 

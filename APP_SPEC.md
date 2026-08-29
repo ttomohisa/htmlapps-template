@@ -109,6 +109,7 @@ Replace these with explicit decisions before implementation:
 - Smartphone navigation model: bottom-tab page switching, section-scrolling bottom bar, workflow-action bar, or no fixed bottom bar.
 - Media coordinate/orientation strategy when drawing overlays.
 - Required third-party libraries.
+- Whether the app intentionally needs peer-to-peer WebRTC. If so, decide whether the fully serverless same-LAN QR pairing component is appropriate, what DataChannels are required, and how paired-device data is described to users.
 - Whether bilingual UI is required.
 
 ## In-app help

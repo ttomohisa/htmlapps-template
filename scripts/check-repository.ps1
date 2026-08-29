@@ -17,8 +17,12 @@ $required = @(
   "components\setting-field.html",
   "components\async-state.html",
   "components\mobile-bottom-bar.html",
+  "components\webrtc-qr-pairing.html",
   "docs\COMPONENTS.md",
   "docs\COMPONENTS.ja.md",
+  "docs\WEBRTC_QR_PAIRING.md",
+  "docs\WEBRTC_QR_PAIRING.ja.md",
+  "examples\dependencies.webrtc-qr.json",
   "src\index.template.html",
   "build-standalone.ps1",
   "scripts\build-self-extract.ps1",
@@ -62,7 +66,8 @@ $componentContracts = @(
   @{ Path = "components\toast.html"; Tokens = @("window.AppToast", "actionLabel", "onAction", "env(safe-area-inset-bottom)") },
   @{ Path = "components\popover-menu.html"; Tokens = @("window.AppPopoverMenu", "data-popover-trigger", "aria-expanded", "Escape") },
   @{ Path = "components\setting-field.html"; Tokens = @("window.AppSettingField", "data-setting-custom", "data-setting-range", "settingchange") },
-  @{ Path = "components\async-state.html"; Tokens = @("window.AppAsyncState", "invalidateSource", "captureGeneration", "isCurrent") }
+  @{ Path = "components\async-state.html"; Tokens = @("window.AppAsyncState", "invalidateSource", "captureGeneration", "isCurrent") },
+  @{ Path = "components\webrtc-qr-pairing.html"; Tokens = @("window.AppWebRtcQrPairing", "iceServers:[]", "waitForIceComplete", "BarcodeDetector", "answerAutoRetryLimit", "StandaloneAssets", "createJoinAnswer", "payloadPrefix", "qrPrefix") }
 )
 foreach ($contract in $componentContracts) {
   $componentText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root $contract.Path)
@@ -70,6 +75,14 @@ foreach ($contract in $componentContracts) {
     if (-not $componentText.Contains([string]$token)) {
       throw "$($contract.Path) is missing required behavior marker: $token"
     }
+  }
+}
+
+$webrtcDependencyExample = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "examples\dependencies.webrtc-qr.json") | ConvertFrom-Json
+$webrtcDependencyIds = @($webrtcDependencyExample.dependencies | ForEach-Object { [string]$_.id })
+foreach ($requiredDependencyId in @("qrcode-generator", "jsqr")) {
+  if ($webrtcDependencyIds -notcontains $requiredDependencyId) {
+    throw "examples\dependencies.webrtc-qr.json is missing required dependency: $requiredDependencyId"
   }
 }
 

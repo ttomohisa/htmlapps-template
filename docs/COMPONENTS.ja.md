@@ -2,7 +2,29 @@
 
 `components/` には、このテンプレートから新しい単一HTMLアプリを作るときに再利用できるUI部品を置きます。
 
-これらはビルダーが自動で読み込むライブラリではありません。必要な部品を `src/index.template.html` にコピーまたは組み込み、アプリの翻訳・状態・操作へ合わせて調整してください。最終成果物はこれまでどおり1つのHTMLです。
+これらはビルダーが自動で読み込むライブラリではありません。必要な部品を `src/index.template.html` にコピーまたは組み込み、アプリの翻訳・状態・操作へ合わせて調整してください。最終成果物はこれまでどおり1つのHTMLです。多くは依存なしですが、WebRTC QRペアリングは既存のAsset Pipelineで固定バージョンのQRライブラリを内包する依存ありコンポーネントです。
+
+## 完全サーバーレスWebRTC QRペアリング
+
+`components/webrtc-qr-pairing.html` は、Browser Kitty系アプリで2台のブラウザーを、シグナリングサーバー / STUN / TURN / WebSocket / 外部APIなしで直接つなぐ場合の標準パターンです。低レベル関数だけではなく、接続UIと状態管理をまとめて持ちます。
+
+含まれるもの：
+
+- ホスト / 参加端末の役割選択。
+- Offer / Answerの分割QR受け渡しとコピー＆ペーストfallback。
+- `BarcodeDetector` + 内包 `jsQR` fallback。
+- 低解像度カメラを考慮したQRページとカメラ選択。
+- `RTCPeerConnection({ iceServers: [] })`。
+- ICE gathering完了後だけ接続情報を出し、タイムアウト時に途中SDPを使わない。
+- IPアドレスを露出せずIPv4 / IPv6 / mDNS候補を診断。
+- 古い非同期試行を無視するguardと再試行クリーンアップ。
+- 参加端末のAnswer生成を遅延し、ホストの返答QRカメラを先に準備するフロー。
+- 接続前ICE失敗時の新しいAnswer QR自動再生成。
+- 標準reliable DataChannelと、アプリ固有channel構成の拡張hook。
+
+`examples/dependencies.webrtc-qr.json` の固定QR依存を使います。第三者minified bundleをアプリ本体へ直接貼り付けないでください。
+
+詳しい実装契約・制限・プロトコル互換・実機テスト項目は [WebRTC QRペアリングコンポーネント](WEBRTC_QR_PAIRING.ja.md) を参照してください。
 
 ## 確認ダイアログ
 

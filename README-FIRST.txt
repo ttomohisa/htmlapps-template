@@ -4,7 +4,7 @@ Single HTML App Template
 1. Read README.ja.md.
 2. Rewrite APP_SPEC.md for the new application.
 3. Update app.config.json.
-4. Inspect components/ and reuse generic UI snippets where they fit: Undo toast for reversible actions, confirmation dialog for irreversible/high-risk actions, compact popover menus, preset/custom numeric settings, async source guards, and the mobile bottom bar when persistent smartphone navigation/actions help; for long 3-5 group smartphone tools, prefer its page-tab mode over one long stacked page.
+4. Inspect components/ and reuse generic patterns where they fit: Undo toast for reversible actions, confirmation dialog for irreversible/high-risk actions, compact popover menus, preset/custom numeric settings, async source guards, the mobile bottom bar for persistent smartphone navigation/actions, and webrtc-qr-pairing.html for fully serverless same-LAN browser pairing. For the WebRTC component, also copy the pinned assets from examples/dependencies.webrtc-qr.json. For long 3-5 group smartphone tools, prefer mobile page tabs over one long stacked page.
 5. Give the repository to the coding LLM and tell it to read AGENTS.md first.
 6. If the app exports files, make the output filename user-editable before export.
 7. Run build-standalone.bat on Windows.

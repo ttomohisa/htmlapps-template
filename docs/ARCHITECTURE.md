@@ -22,9 +22,9 @@ dist/build-size-report.json    Generated size and embedded-asset storage report
 
 ## Reusable component layer
 
-`components/` contains dependency-free source snippets for common UI patterns. These files are not loaded at runtime and are not a separate bundle layer. An app copies or adapts the needed CSS, HTML, and JavaScript into `src/index.template.html`, preserving the one-file runtime model.
+`components/` contains reusable source snippets for common UI and connection patterns. These files are not loaded at runtime and are not a separate bundle layer. An app copies or adapts the needed CSS, HTML, and JavaScript into `src/index.template.html`, preserving the one-file runtime model. Most components are dependency-free; dependency-aware components use the same pinned embedded-asset pipeline as the rest of the app.
 
-The starter includes the canonical confirmation and toast APIs in the default source, while `components/` also carries the mobile bottom bar/page-tabs pattern, compact popover, preset/custom setting field, and async source-state guard. Reversible operations should normally use Toast + Undo; irreversible/high-risk operations use `AppConfirm`. See `docs/COMPONENTS.md`.
+The starter includes the canonical confirmation and toast APIs in the default source, while `components/` also carries the mobile bottom bar/page-tabs pattern, compact popover, preset/custom setting field, async source-state guard, and a fully serverless WebRTC QR-pairing component. Reversible operations should normally use Toast + Undo; irreversible/high-risk operations use `AppConfirm`. The WebRTC component is dependency-aware and uses the normal pinned embedded-asset pipeline rather than a runtime CDN. See `docs/COMPONENTS.md` and `docs/WEBRTC_QR_PAIRING.md`.
 
 ## Build pipeline
 
@@ -78,7 +78,7 @@ Blob URLs are revoked after script/module loading and on page exit. Gzip assets 
 
 ## Runtime security boundary
 
-The default Content Security Policy blocks all network connections with `connect-src 'none'`. It also blocks frames, objects, forms, and external base URLs. Inline CSS and JavaScript are allowed because the release is intentionally one HTML document. Embedded scripts and workers may be loaded through `blob:` URLs.
+The default Content Security Policy blocks ordinary fetch/XHR/WebSocket-style runtime connections with `connect-src 'none'`. It also blocks frames, objects, forms, and external base URLs. Inline CSS and JavaScript are allowed because the release is intentionally one HTML document. Embedded scripts and workers may be loaded through `blob:` URLs. An application that intentionally uses peer-to-peer WebRTC DataChannels may still keep this CSP and the fully serverless `iceServers: []` design; its privacy copy must distinguish “no server/cloud transfer” from “no data leaves this device.”
 
 Static scanning is a guardrail, not a proof. Browser developer tools should still be used to verify that the generated app makes no unexpected request.
 

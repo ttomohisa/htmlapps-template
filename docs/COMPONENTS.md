@@ -2,7 +2,29 @@
 
 `components/` contains UI snippets that can be reused when creating a new single-HTML app from this template.
 
-They are not automatically loaded by the builder. Copy or adapt the component into `src/index.template.html` so the release remains one self-contained HTML file.
+They are not automatically loaded by the builder. Copy or adapt the component into `src/index.template.html` so the release remains one self-contained HTML file. Most components are dependency-free; the WebRTC QR pairing component is dependency-aware and uses pinned assets through the existing standalone asset pipeline.
+
+## Fully serverless WebRTC QR pairing
+
+`components/webrtc-qr-pairing.html` is the canonical pattern when a Browser Kitty-style app needs to connect two browsers directly without a signaling server, STUN, TURN, WebSocket, or runtime API. It includes the UI and connection state machine rather than only a low-level helper.
+
+It provides:
+
+- Host / joining-device role selection.
+- Chunked QR Offer/Answer transfer plus copy/paste fallback.
+- Native `BarcodeDetector` with embedded `jsQR` fallback.
+- Low-resolution camera-friendly QR pages and camera selection.
+- `RTCPeerConnection({ iceServers: [] })`.
+- Complete ICE gathering before QR data is exposed; incomplete SDP is never used after timeout.
+- Candidate diagnostics grouped by IPv4 / IPv6 / mDNS without exposing IP addresses.
+- Stale-attempt guards and full retry cleanup.
+- Delayed joining-side Answer creation: prepare the host reply scanner first, then start Answer/ICE work.
+- Automatic fresh-Answer generation after pre-connect ICE failures.
+- Default reliable DataChannel plus hooks for application-specific channel layouts.
+
+It requires the pinned QR assets from `examples/dependencies.webrtc-qr.json`. Do not paste the third-party minified bundles into the application source.
+
+See [WebRTC QR Pairing Component](WEBRTC_QR_PAIRING.md) for the complete integration contract, limitations, protocol-prefix options, and release tests.
 
 ## Confirmation dialog
 

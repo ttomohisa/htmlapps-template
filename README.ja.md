@@ -96,7 +96,7 @@ dist/
 | `app.config.json` | アプリ名、slug、バージョン、説明、ビルド設定 |
 | `dependencies.json` | 内包するnpmパッケージとファイル |
 | `src/index.template.html` | 編集するアプリ本体 |
-| `components/` | 依存なしの再利用UIパターン |
+| `components/` | 再利用UI / 接続パターン（多くは依存なし） |
 | `build-standalone.bat` | Windows向けビルド入口 |
 | `build-standalone.ps1` | 単一HTMLビルダー |
 | `docs/LLM_WORKFLOW.ja.md` | コーディングLLMへ依頼する推奨手順 |
@@ -126,7 +126,8 @@ dist/
 │  ├─ mobile-bottom-bar.html
 │  ├─ popover-menu.html
 │  ├─ setting-field.html
-│  └─ toast.html
+│  ├─ toast.html
+│  └─ webrtc-qr-pairing.html
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
@@ -146,7 +147,7 @@ dist/
 
 `dependencies.json` に固定バージョンと必要ファイルを記載します。スターター初期状態には依存パッケージがないため、最初のビルドはパッケージ取得なしで完了できます。
 
-設定例は `examples/dependencies.dayjs.json`、詳しい方法は [依存ライブラリの追加](docs/DEPENDENCIES.md) を参照してください。
+設定例は `examples/dependencies.dayjs.json`、WebRTC QR接続用は `examples/dependencies.webrtc-qr.json`、詳しい方法は [依存ライブラリの追加](docs/DEPENDENCIES.md) を参照してください。
 
 パッケージキャッシュを破棄して固定バージョンを再取得する場合：
 
@@ -184,7 +185,7 @@ build-standalone.bat -ForceDownload
 
 ## 再利用UIコンポーネント
 
-`components/` には、すべてのアプリを同じレイアウトに縛ることなく、共通操作を揃えるための依存なしUIパターンを用意しています。
+`components/` には、すべてのアプリを同じレイアウトに縛ることなく、共通操作を揃えるための再利用パターンを用意しています。多くは依存なしですが、WebRTC接続部品は必要なQRライブラリをAsset Pipelineで固定バージョン内包します。
 
 - `confirm-dialog.html`：上書きや完全削除など、取り返しのつかない・高リスク操作
 - `toast.html`：軽量な状態通知と、戻せる操作のUndo
@@ -192,12 +193,13 @@ build-standalone.bat -ForceDownload
 - `setting-field.html`：プリセット＋自由入力の数値設定
 - `async-state.html`：入力元変更後に古い非同期結果を表示しないための状態ガード
 - `mobile-bottom-bar.html`：Safe Area、ページ切替、セクション移動、主要操作、実際の無効状態に対応したスマホ固定ボトムナビ
+- `webrtc-qr-pairing.html`：QR/カメラ手動シグナリング、ICE診断、完全収集待ち、再試行クリーンアップまで含む完全サーバーレスWebRTC接続UI。`examples/dependencies.webrtc-qr.json` を使用
 
-詳しくは [再利用UIコンポーネント](docs/COMPONENTS.ja.md) を参照してください。
+詳しくは [再利用UIコンポーネント](docs/COMPONENTS.ja.md) を参照してください。接続部品の詳細は [WebRTC QRペアリング](docs/WEBRTC_QR_PAIRING.ja.md) にまとめています。
 
 ## プライバシーと実行時通信
 
-スターターのContent Security Policyでは `connect-src 'none'` を指定し、実行時のネットワーク接続を遮断します。必要なアプリ資産を生成HTMLへ内包し、ユーザーの処理をブラウザー内で完結させることを基本方針としています。
+スターターのContent Security Policyでは `connect-src 'none'` を指定し、通常の実行時ネットワーク接続を遮断します。必要なアプリ資産を生成HTMLへ内包し、ユーザーの処理をブラウザー内で完結させることを基本方針としています。任意のWebRTC DataChannelアプリは、CDN/APIを追加せず完全サーバーレスQR接続部品を利用できますが、接続相手ブラウザーへデータを直接送る点はプライバシー説明で明記してください。
 
 GitHub Pages版では最初のHTML取得に通信が必要です。完全にネットワークを切って利用する場合は、生成された `dist/index.html` または `dist/index.self-extract.html` をローカルで開いてください。
 

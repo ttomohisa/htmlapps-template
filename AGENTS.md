@@ -63,7 +63,8 @@ If the application becomes too large for safe single-file source editing, split 
 - `components/setting-field.html` is the canonical preset + custom numeric field. Custom mode exposes min/max quietly, does not clamp while the user is typing, and normalizes on change/blur.
 - `components/async-state.html` is the canonical source-generation and async-phase guard for file/media processing. Use it or an equivalent explicit generation token to reject stale results.
 - `components/mobile-bottom-bar.html` is the canonical fixed smartphone navigation / workflow bar when an app benefits from 3-5 persistent destinations or actions. It supports safe areas, icons + labels, true mobile page tabs, backward-compatible section targets, disabled actions, and application actions.
-- Component files are source snippets, not runtime dependencies. Copy or adapt the needed CSS, HTML, and JavaScript into `src/index.template.html` so the final release remains one self-contained HTML file.
+- `components/webrtc-qr-pairing.html` is the canonical fully serverless WebRTC pairing pattern. Reuse its role chooser, chunked QR handoff, camera scanner, full ICE-gathering guard, diagnostics, delayed Answer creation, stale-attempt cleanup, and pre-connect retry behavior instead of rebuilding manual signaling ad hoc. It requires the pinned embedded assets in `examples/dependencies.webrtc-qr.json`.
+- Component files are source snippets, not runtime bundles. Copy or adapt the needed CSS, HTML, and JavaScript into `src/index.template.html` so the final release remains one self-contained HTML file. Most components are dependency-free; dependency-aware components must use `dependencies.json` / `StandaloneAssets`, never runtime CDNs.
 - Prefer `AppConfirm.ask()` over `window.confirm()` for irreversible deletion, overwrite, and other meaningful destructive actions. If the action is reliably reversible, prefer `AppToast.show()` with Undo instead of a pre-action confirmation.
 - Use `tone: 'danger'` for destructive confirmation buttons.
 - Pass localized title, message, and button labels from the application's translation object whenever practical.
@@ -142,7 +143,7 @@ Then verify at minimum:
 - Narrow smartphone width and desktop width.
 - Keyboard-only operation.
 - No console error.
-- No runtime network request after the initial HTML load on GitHub Pages.
+- No runtime CDN/API/telemetry request after the initial HTML load on GitHub Pages. If `APP_SPEC.md` intentionally requires peer-to-peer WebRTC, use the canonical fully serverless QR pairing component, keep `iceServers: []`, and document that application data is sent directly to the paired browser.
 - Direct local opening of both generated HTML variants.
 
 ## Documentation required with code changes

@@ -96,7 +96,7 @@ A typical development cycle is:
 | `app.config.json` | App name, slug, version, descriptions, build settings |
 | `dependencies.json` | Exact npm packages and files to embed |
 | `src/index.template.html` | Editable application source |
-| `components/` | Reusable dependency-free UI patterns |
+| `components/` | Reusable UI / connection patterns; most are dependency-free |
 | `build-standalone.bat` | Windows build entry point |
 | `build-standalone.ps1` | Standalone HTML builder |
 | `docs/LLM_WORKFLOW.md` | Recommended workflow for coding LLMs |
@@ -126,7 +126,8 @@ The repository includes a workflow that builds the generated HTML and deploys `d
 │  ├─ mobile-bottom-bar.html
 │  ├─ popover-menu.html
 │  ├─ setting-field.html
-│  └─ toast.html
+│  ├─ toast.html
+│  └─ webrtc-qr-pairing.html
 ├─ src/
 │  └─ index.template.html
 ├─ scripts/
@@ -146,7 +147,7 @@ The repository includes a workflow that builds the generated HTML and deploys `d
 
 Add exact package versions and required files to `dependencies.json`. The starter has no dependencies, so its initial build can complete without downloading packages.
 
-See `examples/dependencies.dayjs.json` and [Adding Embedded Dependencies](docs/DEPENDENCIES.md) for details.
+See `examples/dependencies.dayjs.json`, `examples/dependencies.webrtc-qr.json`, and [Adding Embedded Dependencies](docs/DEPENDENCIES.md) for details.
 
 To discard the package cache and download pinned packages again:
 
@@ -184,7 +185,7 @@ To skip the self-extracting file:
 
 ## Reusable UI components
 
-`components/` contains dependency-free patterns intended to keep finished apps consistent without forcing every app into the same layout.
+`components/` contains reusable patterns intended to keep finished apps consistent without forcing every app into the same layout. Most are dependency-free; the WebRTC pairing component declares its required embedded assets separately.
 
 - `confirm-dialog.html`: irreversible or high-risk actions such as overwrite or permanent deletion
 - `toast.html`: lightweight feedback and Undo for reversible actions
@@ -192,12 +193,13 @@ To skip the self-extracting file:
 - `setting-field.html`: preset + custom numeric input patterns
 - `async-state.html`: guards against stale asynchronous results after the source changes
 - `mobile-bottom-bar.html`: safe-area-aware smartphone bottom tabs with true page switching, section navigation, workflow actions, and real disabled states
+- `webrtc-qr-pairing.html`: fully serverless WebRTC host/join UI with QR/camera signaling, ICE diagnostics, complete-gathering guards, cleanup, and retry handling; use `examples/dependencies.webrtc-qr.json`
 
-See [Reusable UI components](docs/COMPONENTS.md) for usage and UX rules.
+See [Reusable UI components](docs/COMPONENTS.md) for usage and UX rules. For the connection component, see [WebRTC QR Pairing](docs/WEBRTC_QR_PAIRING.md).
 
 ## Privacy and runtime network protection
 
-The starter Content Security Policy blocks runtime connections with `connect-src 'none'`. The intended architecture is to embed required application assets into the generated HTML so user processing can stay inside the browser.
+The starter Content Security Policy blocks ordinary runtime network connections with `connect-src 'none'`. The intended architecture is to embed required application assets into the generated HTML so user processing can stay inside the browser. Optional WebRTC DataChannel apps can still use the fully serverless QR-pairing component without adding a CDN/API endpoint; document clearly that paired-device data is sent directly to the other browser.
 
 A GitHub Pages deployment still needs the initial HTML request. For a fully disconnected session, open the generated `dist/index.html` or `dist/index.self-extract.html` locally.
 

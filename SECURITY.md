@@ -20,13 +20,15 @@ Include:
 
 The default template is a static browser application with no backend. Its primary protections are:
 
-- No runtime network connection (`connect-src 'none'`).
+- No ordinary runtime CDN/API connection (`connect-src 'none'`). Optional peer-to-peer WebRTC must be explicit in the product specification and must not introduce hidden signaling/STUN/TURN services.
 - Explicitly pinned and embedded third-party files.
 - SHA-256 records in the generated dependency manifest.
 - No analytics, telemetry, remote fonts, or silent update checks.
 - User-initiated downloads rather than automatic uploads.
 
 A generated HTML file is executable code. Distribute it through a trusted channel and verify hashes for high-trust workflows.
+
+If an app uses `components/webrtc-qr-pairing.html`, treat the paired browser as an explicit data recipient. “No server upload” does not mean “data never leaves this device.” Keep the manual signaling and `iceServers: []` boundary visible in the UI/help text, and do not silently add STUN/TURN later.
 
 ## Input files
 
