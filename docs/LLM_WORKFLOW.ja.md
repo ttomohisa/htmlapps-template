@@ -12,11 +12,12 @@
 2. `components/` を確認し、使える汎用UI部品があれば再利用します。
 3. `app.config.json` の名前、slug、バージョン、説明を変更します。
 4. LLMにはサンプルをすぐ削除させず、まず現在の構成を確認させます。
-5. 外部ライブラリが本当に必要な場合だけ、固定バージョンで `dependencies.json` へ追加させます。
-6. 実装のまとまりごとにビルドさせます。
-7. `dist/dependency-manifest.json` と `dist/build-size-report.json` を確認し、想定外の依存・asset・容量増加がないか確認します。
-8. 生成された2種類のHTMLを直接開き、主要操作を確認します。
-9. 実行時通信がないことを確認してから公開します。
+5. 外部ライブラリが本当に必要な場合だけ、固定バージョンで `dependencies.json` へ追加させ、`dependencies.lock.json` も同期させます。
+6. 依存更新では `scripts/update-dependency.ps1` を使わせます。週次Issueは通知であり、自動更新の許可ではありません。
+7. 実装のまとまりごとにビルドさせます。
+8. `dist/dependency-manifest.json` と `dist/build-size-report.json` を確認し、想定外の依存・asset・容量増加がないか確認します。
+9. 生成された2種類のHTMLを直接開き、主要操作を確認します。
+10. 実行時通信がないことを確認してから公開します。
 
 ## LLMへ渡すと精度が上がる情報
 

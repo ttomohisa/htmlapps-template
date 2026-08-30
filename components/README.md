@@ -8,7 +8,7 @@ These files are source snippets for apps created from this template. They are **
 - [`setting-field.html`](setting-field.html) — Preset + custom numeric input with unobtrusive range guidance and delayed normalization.
 - [`async-state.html`](async-state.html) — Explicit async phase + source-generation guard that prevents stale results from a previous input.
 - [`mobile-bottom-bar.html`](mobile-bottom-bar.html) — Fixed smartphone bottom navigation / workflow bar with icons, safe-area handling, true mobile page switching, backward-compatible section scrolling, disabled states, and an optional action API.
-- [`webrtc-qr-pairing.html`](webrtc-qr-pairing.html) — Fully serverless WebRTC host/join pairing UI with chunked QR signaling, camera scanner, complete ICE gathering, diagnostics, stale-attempt cleanup, delayed Answer creation, and retry handling. Requires the pinned assets from `examples/dependencies.webrtc-qr.json`.
+- [`webrtc-qr-pairing.html`](webrtc-qr-pairing.html) — Fully serverless WebRTC host/join pairing UI with chunked QR signaling, camera scanner, complete ICE gathering, diagnostics, stale-attempt cleanup, delayed Answer creation, and retry handling. Requires the pinned assets from `examples/dependencies.webrtc-qr.json`; after copying them, sync `dependencies.lock.json`.
 
 Documentation: [English](../docs/COMPONENTS.md) / [日本語](../docs/COMPONENTS.ja.md)
 

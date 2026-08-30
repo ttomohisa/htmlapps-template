@@ -13,6 +13,7 @@ $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $TemplatePath = Join-Path $Root "src\index.template.html"
 $AppConfigPath = Join-Path $Root "app.config.json"
 $DependenciesPath = Join-Path $Root "dependencies.json"
+$DependencyLockPath = Join-Path $Root "dependencies.lock.json"
 $VerifyPath = Join-Path $Root "scripts\verify-standalone.ps1"
 $SelfExtractBuilderPath = Join-Path $Root "scripts\build-self-extract.ps1"
 $CacheRoot = Join-Path $Root ".cache"
@@ -184,12 +185,26 @@ if (-not (Get-Command tar.exe -ErrorAction SilentlyContinue)) {
 
 $appConfig = Get-Json $AppConfigPath
 $dependencyConfig = Get-Json $DependenciesPath
+$dependencyLock = Get-Json $DependencyLockPath
 if (-not $OutputPathWasSpecified) {
   $configuredOutput = [string]$appConfig.build.output
   if ([string]::IsNullOrWhiteSpace($configuredOutput)) { $configuredOutput = "dist/index.html" }
   $OutputPath = if ([System.IO.Path]::IsPathRooted($configuredOutput)) { $configuredOutput } else { Join-Path $Root $configuredOutput }
 }
 if (-not $dependencyConfig.dependencies) { $dependencies = @() } else { $dependencies = @($dependencyConfig.dependencies) }
+if (-not ($dependencyLock.PSObject.Properties.Name -contains "schemaVersion") -or [int]$dependencyLock.schemaVersion -ne 1) {
+  throw "dependencies.lock.json must use schemaVersion 1."
+}
+if (-not $dependencyLock.dependencies) { $lockedDependencies = @() } else { $lockedDependencies = @($dependencyLock.dependencies) }
+$lockById = @{}
+foreach ($lockedDependency in $lockedDependencies) {
+  $lockedId = Get-SafeId ([string]$lockedDependency.id)
+  if ($lockById.ContainsKey($lockedId)) { throw "Duplicate dependency lock id: $lockedId" }
+  $lockById[$lockedId] = $lockedDependency
+}
+if ($lockedDependencies.Count -ne $dependencies.Count) {
+  throw "dependencies.lock.json does not match dependencies.json. Run .\scripts\sync-dependency-lock.ps1 after changing dependencies."
+}
 
 $ids = @{}
 $assetBundle = [ordered]@{ schemaVersion = 2; dependencies = [ordered]@{} }
@@ -200,7 +215,21 @@ foreach ($dependency in $dependencies) {
   if ($ids.ContainsKey($id)) { throw "Duplicate dependency id: $id" }
   $ids[$id] = $true
 
+  if (-not $lockById.ContainsKey($id)) {
+    throw "dependencies.lock.json has no entry for '$id'. Run .\scripts\sync-dependency-lock.ps1 -Id $id."
+  }
+  $lockedDependency = $lockById[$id]
+  if ([string]$lockedDependency.package -ne [string]$dependency.package -or [string]$lockedDependency.version -ne [string]$dependency.version) {
+    throw "Dependency lock mismatch for '$id'. Run .\scripts\sync-dependency-lock.ps1 -Id $id."
+  }
+  if ([string]$lockedDependency.tarballSha256 -notmatch '^[a-f0-9]{64}$') {
+    throw "Dependency lock for '$id' has an invalid tarballSha256."
+  }
+
   $package = Get-NpmPackage ([string]$dependency.package) ([string]$dependency.version)
+  if ($package.ArchiveSha256 -ne [string]$lockedDependency.tarballSha256) {
+    throw "Locked tarball SHA-256 mismatch for '$id'. Expected $([string]$lockedDependency.tarballSha256), got $($package.ArchiveSha256). Refusing to build."
+  }
   $dependencyAssets = [ordered]@{}
   $manifestAssets = @()
   $assetKeys = @{}
@@ -275,13 +304,14 @@ foreach ($dependency in $dependencies) {
     license = $license
     homepage = $homepage
     tarballSha256 = $package.ArchiveSha256
+    locked = $true
     assets = $manifestAssets
   }
 }
 
 $manifest = [ordered]@{
   schemaVersion = 2
-  builder = "single-html-app-template/1.0"
+  builder = "single-html-app-template/1.2"
   generatedAtUtc = [DateTime]::UtcNow.ToString("o")
   app = [ordered]@{
     name = [string]$appConfig.name

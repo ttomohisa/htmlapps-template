@@ -61,7 +61,7 @@ The component does not paste third-party minified code into the snippet. Add the
 | `qrcode-generator` | 1.4.4 | Offer / Answer QR generation |
 | `jsqr` | 1.4.0 | QR decoding fallback when `BarcodeDetector` is unavailable |
 
-Copy the two dependency entries from `examples/dependencies.webrtc-qr.json` into the target application's `dependencies.json`.
+Copy the two dependency entries from `examples/dependencies.webrtc-qr.json` into the target application's `dependencies.json`. Then run `scripts/sync-dependency-lock.ps1` so the copied package versions receive matching tarball lock entries.
 
 If the application already has dependencies, append the entries instead of replacing the existing array. Update that application's `THIRD_PARTY_NOTICES.md` as required.
 

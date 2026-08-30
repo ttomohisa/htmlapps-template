@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0 - Dependency lifecycle and Issue-based update monitoring - 2026-08-29
+
+- Added committed `dependencies.lock.json` tarball SHA-256 locking and build-time mismatch rejection.
+- Added `patch` / `minor` / `major` / `manual` dependency update policies without allowing scheduled jobs to change source automatically.
+- Added local PowerShell commands to check updates, synchronize lock entries, and apply a reviewed update with asset validation, standalone build verification, and config/lock rollback on failure.
+- Added a weekly GitHub Actions workflow that creates or refreshes one dependency maintenance Issue, closes it when no tracked updates remain, and never creates an automatic dependency pull request.
+- Added bilingual dependency lifecycle documentation and updated security, architecture, contributor, README, and LLM guidance.
+
 ## 1.1.0 - Reusable fully serverless WebRTC QR pairing - 2026-08-29
 
 - Added `components/webrtc-qr-pairing.html`, a reusable host/joining-device pairing UI and controller based on the connection flow hardened in Wireless Sensor v1.0.0.

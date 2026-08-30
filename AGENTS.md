@@ -30,7 +30,10 @@ This file is the first instruction for any coding LLM or agent working in this r
 - Prefer browser-native APIs when they are reliable and reasonably small to implement.
 - Add third-party packages only when they materially reduce risk or complexity.
 - Add npm assets through `dependencies.json`; never paste minified third-party bundles into the source template.
-- Pin exact versions. Do not use `latest`, ranges, tags, or unversioned URLs.
+- Pin exact versions. Do not use `latest`, ranges, tags, or unversioned URLs in `dependencies.json`.
+- Keep `dependencies.lock.json` synchronized and committed. Builds must reject package tarballs whose SHA-256 differs from the lock. Never hand-edit a lock hash to make a failing build pass.
+- Configure dependency update checks with `updates.policy` (`patch`, `minor`, `major`, or `manual`) when appropriate. The scheduled workflow may maintain an Issue, but it must not change versions, commit dependency updates, or open a dependency PR automatically.
+- Use `scripts/update-dependency.ps1` for intentional upgrades so the target package, asset paths, lock, and standalone build are validated together. Review upstream release notes and notices before committing.
 - Record the license and homepage in `dependencies.json` and update `THIRD_PARTY_NOTICES.md`.
 - Imported module files must be self-contained. The generic loader does not rewrite relative imports.
 - Workers, WASM, fonts, dictionaries, and support files must also be listed as embedded assets.

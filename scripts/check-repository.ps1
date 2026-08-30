@@ -11,6 +11,8 @@ $required = @(
   "APP_SPEC.md",
   "app.config.json",
   "dependencies.json",
+  "dependencies.lock.json",
+  ".github\workflows\dependency-updates.yml",
   "components\confirm-dialog.html",
   "components\toast.html",
   "components\popover-menu.html",
@@ -19,6 +21,8 @@ $required = @(
   "components\mobile-bottom-bar.html",
   "components\webrtc-qr-pairing.html",
   "docs\COMPONENTS.md",
+  "docs\DEPENDENCIES.md",
+  "docs\DEPENDENCIES.ja.md",
   "docs\COMPONENTS.ja.md",
   "docs\WEBRTC_QR_PAIRING.md",
   "docs\WEBRTC_QR_PAIRING.ja.md",
@@ -26,6 +30,10 @@ $required = @(
   "src\index.template.html",
   "build-standalone.ps1",
   "scripts\build-self-extract.ps1",
+  "scripts\dependency-tools.ps1",
+  "scripts\check-dependency-updates.ps1",
+  "scripts\sync-dependency-lock.ps1",
+  "scripts\update-dependency.ps1",
   "scripts\verify-standalone.ps1",
   "scripts\verify-self-extract.ps1",
   "README.md",
@@ -33,7 +41,8 @@ $required = @(
   "LICENSE",
   "THIRD_PARTY_NOTICES.md",
   "schemas\app-config.schema.json",
-  "schemas\dependencies.schema.json"
+  "schemas\dependencies.schema.json",
+  "schemas\dependencies-lock.schema.json"
 )
 
 foreach ($relative in $required) {
@@ -78,6 +87,20 @@ foreach ($contract in $componentContracts) {
   }
 }
 
+$dependencyConfig = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "dependencies.json") | ConvertFrom-Json
+$dependencyLock = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "dependencies.lock.json") | ConvertFrom-Json
+if ([int]$dependencyLock.schemaVersion -ne 1) { throw "dependencies.lock.json must use schemaVersion 1." }
+$configIds = @($dependencyConfig.dependencies | ForEach-Object { [string]$_.id })
+$lockIds = @($dependencyLock.dependencies | ForEach-Object { [string]$_.id })
+if ($configIds.Count -ne $lockIds.Count) { throw "dependencies.lock.json must contain exactly one entry for every dependency." }
+foreach ($dependency in @($dependencyConfig.dependencies)) {
+  $matches = @($dependencyLock.dependencies | Where-Object { [string]$_.id -eq [string]$dependency.id })
+  if ($matches.Count -ne 1) { throw "dependencies.lock.json must contain exactly one lock entry for '$([string]$dependency.id)'." }
+  if ([string]$matches[0].package -ne [string]$dependency.package -or [string]$matches[0].version -ne [string]$dependency.version) {
+    throw "dependencies.lock.json does not match dependencies.json for '$([string]$dependency.id)'."
+  }
+}
+
 $webrtcDependencyExample = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "examples\dependencies.webrtc-qr.json") | ConvertFrom-Json
 $webrtcDependencyIds = @($webrtcDependencyExample.dependencies | ForEach-Object { [string]$_.id })
 foreach ($requiredDependencyId in @("qrcode-generator", "jsqr")) {
@@ -94,7 +117,7 @@ foreach ($token in @("bytesAsync", "blobUrlAsync", "outputFilename", "window.App
 }
 
 $builderText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "build-standalone.ps1")
-foreach ($token in @("compressionSetting", "Compress-GzipBytes", "build-size-report.json", "sizeBudget", "__EMBEDDED_ASSET_BUNDLE_JSON__")) {
+foreach ($token in @("compressionSetting", "Compress-GzipBytes", "build-size-report.json", "sizeBudget", "DependencyLockPath", "tarballSha256", "__EMBEDDED_ASSET_BUNDLE_JSON__")) {
   if (-not $builderText.Contains($token)) { throw "build-standalone.ps1 is missing required asset pipeline marker: $token" }
 }
 if ($builderText.Contains("__EMBEDDED_ASSET_BUNDLE_BASE64__")) { throw "build-standalone.ps1 must not wrap the full asset bundle in Base64." }
@@ -120,7 +143,11 @@ $buildCompatibilityFiles = @(
   "build-standalone.ps1",
   "scripts\build-self-extract.ps1",
   "scripts\verify-standalone.ps1",
-  "scripts\verify-self-extract.ps1"
+  "scripts\verify-self-extract.ps1",
+  "scripts\dependency-tools.ps1",
+  "scripts\check-dependency-updates.ps1",
+  "scripts\sync-dependency-lock.ps1",
+  "scripts\update-dependency.ps1"
 )
 foreach ($relative in $buildCompatibilityFiles) {
   $compatibilityPath = Join-Path $Root $relative

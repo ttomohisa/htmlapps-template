@@ -61,7 +61,7 @@ new RTCPeerConnection({ iceServers: [] });
 | `qrcode-generator` | 1.4.4 | Offer / Answer QR生成 |
 | `jsqr` | 1.4.0 | `BarcodeDetector` が使えない環境のQR読取fallback |
 
-`examples/dependencies.webrtc-qr.json` の2エントリを、対象アプリの `dependencies.json` へコピーしてください。
+`examples/dependencies.webrtc-qr.json` の2エントリを、対象アプリの `dependencies.json` へコピーしてください。その後 `scripts/sync-dependency-lock.ps1` を実行し、コピーした固定バージョンに対応するtarball lockを生成します。
 
 既に別の依存がある場合は `dependencies` 配列を置き換えず、2項目を追加します。
 

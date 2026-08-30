@@ -22,6 +22,7 @@ The default template is a static browser application with no backend. Its primar
 
 - No ordinary runtime CDN/API connection (`connect-src 'none'`). Optional peer-to-peer WebRTC must be explicit in the product specification and must not introduce hidden signaling/STUN/TURN services.
 - Explicitly pinned and embedded third-party files.
+- Committed `dependencies.lock.json` tarball SHA-256 values verified before embedding.
 - SHA-256 records in the generated dependency manifest.
 - No analytics, telemetry, remote fonts, or silent update checks.
 - User-initiated downloads rather than automatic uploads.
@@ -46,8 +47,10 @@ Applications created from this template may parse untrusted local files. Impleme
 Before adding or upgrading a package:
 
 - Confirm the package identity and exact version.
+- Review the scheduled dependency Issue; never treat an available update as an automatic approval to upgrade.
 - Review its license and required notices.
 - Inspect the browser bundle and package scripts.
 - Confirm every runtime support asset is embedded.
+- Refresh the selected lock entry with the dependency scripts; never hand-edit a lock hash to bypass a mismatch.
 - Rebuild with a clean cache.
 - Test with the network disabled.

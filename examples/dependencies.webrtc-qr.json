@@ -15,7 +15,11 @@
           "stripSourceMapComment": true,
           "compression": "none"
         }
-      ]
+      ],
+      "updates": {
+        "enabled": true,
+        "policy": "manual"
+      }
     },
     {
       "id": "jsqr",
@@ -31,7 +35,11 @@
           "stripSourceMapComment": true,
           "compression": "gzip"
         }
-      ]
+      ],
+      "updates": {
+        "enabled": true,
+        "policy": "manual"
+      }
     }
   ]
 }

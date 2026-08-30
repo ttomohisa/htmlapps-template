@@ -25,6 +25,8 @@ GitHub Pagesから最初のHTMLを取得した後は、アプリ内の処理を�
 - Windowsでは `build-standalone.bat` をダブルクリックしてビルド可能
 - 標準のビルド手順ではPythonやNode.jsが不要
 - npmパッケージのバージョンを固定し、指定したファイルだけを内包
+- `dependencies.lock.json` でpackage tarballのSHA-256も固定
+- 週1回新版を確認し、自動更新やPR作成はせずGitHub Issueで通知
 - 大容量assetは必要に応じて `gzip` / `auto` 圧縮で内包
 - 取得したpackage tarballと内包ファイルのSHA-256を記録
 - `connect-src 'none'` により実行時のネットワーク接続を遮断
@@ -79,7 +81,7 @@ dist/
 
 1. `APP_SPEC.md` にアプリの目的、挙動、受入条件を定義します。
 2. `app.config.json` でアプリ情報を変更します。
-3. 外部ライブラリが必要な場合だけ、`dependencies.json` に固定バージョンで追加します。
+3. 外部ライブラリが必要な場合だけ、`dependencies.json` に固定バージョンで追加し、`dependencies.lock.json` を同期します。
 4. `src/index.template.html` にアプリを実装します。
 5. 共通操作は `components/` のUIパターンを再利用し、アプリごとに挙動がばらつかないようにします。
 6. `build-standalone.bat` を実行します。
@@ -94,7 +96,8 @@ dist/
 | `AGENTS.md` | コーディングLLMが最初に読む実装契約 |
 | `APP_SPEC.md` | アプリの挙動と受入条件 |
 | `app.config.json` | アプリ名、slug、バージョン、説明、ビルド設定 |
-| `dependencies.json` | 内包するnpmパッケージとファイル |
+| `dependencies.json` | 内包するnpmパッケージ、ファイル、更新チェック方針 |
+| `dependencies.lock.json` | 次回以降のビルドでも検証するtarball SHA-256 lock |
 | `src/index.template.html` | 編集するアプリ本体 |
 | `components/` | 再利用UI / 接続パターン（多くは依存なし） |
 | `build-standalone.bat` | Windows向けビルド入口 |
@@ -120,6 +123,7 @@ dist/
 ├─ APP_SPEC.md
 ├─ app.config.json
 ├─ dependencies.json
+├─ dependencies.lock.json
 ├─ components/
 │  ├─ async-state.html
 │  ├─ confirm-dialog.html
@@ -132,7 +136,11 @@ dist/
 │  └─ index.template.html
 ├─ scripts/
 │  ├─ build-self-extract.ps1
+│  ├─ check-dependency-updates.ps1
 │  ├─ check-repository.ps1
+│  ├─ dependency-tools.ps1
+│  ├─ sync-dependency-lock.ps1
+│  ├─ update-dependency.ps1
 │  ├─ verify-self-extract.ps1
 │  └─ verify-standalone.ps1
 ├─ docs/
@@ -145,9 +153,29 @@ dist/
 
 ### 依存ライブラリを追加・更新する
 
-`dependencies.json` に固定バージョンと必要ファイルを記載します。スターター初期状態には依存パッケージがないため、最初のビルドはパッケージ取得なしで完了できます。
+`dependencies.json` に固定バージョンと必要ファイルを記載したら、対応するlockを生成します。
 
-設定例は `examples/dependencies.dayjs.json`、WebRTC QR接続用は `examples/dependencies.webrtc-qr.json`、詳しい方法は [依存ライブラリの追加](docs/DEPENDENCIES.md) を参照してください。
+```powershell
+.\scripts\sync-dependency-lock.ps1 -Id dayjs
+```
+
+`dependencies.lock.json` にはpackage tarballの期待SHA-256を保存します。通常ビルドは、取得済み/新規取得したtarballがlockと一致しなければ停止します。スターター初期状態には依存がないためlockは空です。
+
+依存ごとに `patch` / `minor` / `major` / `manual` の更新チェック方針も設定できます。週1回の `.github/workflows/dependency-updates.yml` はnpmを確認し、対象更新があれば管理Issueを作成・更新します。**バージョン変更やPR作成は自動では行いません。**
+
+ローカルで確認：
+
+```powershell
+.\scripts\check-dependency-updates.ps1
+```
+
+内容を確認して推奨版へ更新：
+
+```powershell
+.\scripts\update-dependency.ps1 -Id dayjs
+```
+
+設定例は `examples/dependencies.dayjs.json`、WebRTC QR接続用は `examples/dependencies.webrtc-qr.json`、詳しい運用は [内包依存ライブラリの更新・固定](docs/DEPENDENCIES.ja.md) を参照してください。
 
 パッケージキャッシュを破棄して固定バージョンを再取得する場合：
 
@@ -158,6 +186,7 @@ build-standalone.bat -ForceDownload
 ビルド処理では次のことを行えます。
 
 - npm公式レジストリから固定バージョンのpackage tarballを取得
+- `dependencies.lock.json` のSHA-256と照合
 - 宣言したファイルだけをHTMLへ内包
 - 選択した大容量assetを `gzip` / `auto` 圧縮で内包
 - package tarballと内包ファイルのSHA-256を記録
@@ -218,7 +247,7 @@ GitHub Pages版では最初のHTML取得に通信が必要です。完全にネ�
 
 スターターアプリは初期状態では第三者の実行時依存ライブラリを持ちません。
 
-各アプリで追加したライブラリは `dependencies.json` に固定バージョンで宣言し、ライセンス上必要なものはそのアプリの `THIRD_PARTY_NOTICES.md` にも反映してください。
+各アプリで追加したライブラリは `dependencies.json` に固定バージョンで宣言し、`dependencies.lock.json` でtarballを固定します。ライセンス上必要なものはそのアプリの `THIRD_PARTY_NOTICES.md` にも反映してください。週次チェックはIssue通知だけで、更新自体は人が判断します。
 
 ## Contributing
 

@@ -7,10 +7,13 @@ The repository separates editable source from the release artifact:
 ```text
 app.config.json              Product metadata
 APP_SPEC.md                  Product behavior and acceptance contract
-dependencies.json            Exact npm packages and files to embed
+dependencies.json            Exact npm packages, assets, and update policy
+dependencies.lock.json       Committed tarball SHA-256 lock
 components/                   Reusable source snippets copied/adapted into apps
 src/index.template.html      Editable application source
-build-standalone.ps1         Dependency fetch, hash, embed, and build
+build-standalone.ps1         Dependency lock verification, embed, and build
+scripts/check-dependency-updates.ps1  Update discovery/reporting
+scripts/update-dependency.ps1          Reviewed upgrade helper
 scripts/verify-standalone.ps1 Static release checks
 dist/index.html              Generated readable release artifact
 dist/index.self-extract.html Generated gzip self-extracting artifact
@@ -28,20 +31,34 @@ The starter includes the canonical confirmation and toast APIs in the default so
 
 ## Build pipeline
 
-1. Read `app.config.json` and `dependencies.json`.
-2. Resolve each exact npm version through the npm registry.
-3. Cache and extract each tarball.
-4. Validate the package's own version.
-5. Read only the explicitly listed asset files.
-6. Calculate SHA-256 hashes for the package tarball and every original embedded asset.
-7. Optionally gzip each declared asset (`gzip` / `auto`), then Base64-encode the stored bytes exactly once.
-8. Embed the asset bundle JSON directly, avoiding a second Base64 wrapper around the whole bundle.
-9. Replace the three source placeholders exactly once.
-10. Write and verify `dist/index.html`.
-11. Gzip that HTML, embed it into a small ASCII-only native `DecompressionStream` loader, inherit the readable HTML favicon, and write `dist/index.self-extract.html`.
-12. Verify that the loader stays ASCII-only and embedded-only, the favicon matches the readable HTML, and the gzip payload restores byte-for-byte.
-13. Write manifests, `build-size-report.json`, and `dist/.nojekyll`; emit warning-only size-budget messages when configured thresholds are exceeded.
-14. Reject the declared unresolved build placeholders and common external runtime resource references.
+1. Read `app.config.json`, `dependencies.json`, and `dependencies.lock.json`.
+2. Require one matching lock entry for every configured dependency.
+3. Resolve each exact npm version through the npm registry when it is not already cached.
+4. Verify the tarball SHA-256 against the committed lock before embedding anything.
+5. Cache and extract each tarball.
+6. Validate the package's own version.
+7. Read only the explicitly listed asset files.
+8. Calculate SHA-256 hashes for every original embedded asset.
+9. Optionally gzip each declared asset (`gzip` / `auto`), then Base64-encode the stored bytes exactly once.
+10. Embed the asset bundle JSON directly, avoiding a second Base64 wrapper around the whole bundle.
+11. Replace the three source placeholders exactly once.
+12. Write and verify `dist/index.html`.
+13. Gzip that HTML, embed it into a small ASCII-only native `DecompressionStream` loader, inherit the readable HTML favicon, and write `dist/index.self-extract.html`.
+14. Verify that the loader stays ASCII-only and embedded-only, the favicon matches the readable HTML, and the gzip payload restores byte-for-byte.
+15. Write manifests, `build-size-report.json`, and `dist/.nojekyll`; emit warning-only size-budget messages when configured thresholds are exceeded.
+16. Reject the declared unresolved build placeholders and common external runtime resource references.
+
+## Dependency maintenance lifecycle
+
+The runtime build stays deterministic while release discovery remains separate from source changes:
+
+1. `scripts/check-dependency-updates.ps1` reads update policies and queries npm for newer versions.
+2. `.github/workflows/dependency-updates.yml` runs weekly and creates/refreshes one open maintenance Issue when updates exist.
+3. No dependency source file is changed by the scheduled workflow.
+4. A human reviews release notes and chooses whether to run `scripts/update-dependency.ps1`.
+5. The update helper refreshes the selected lock entry, verifies declared asset paths, runs the standalone build, and rolls config/lock files back if the process fails.
+
+The update checker is a repository-maintenance network operation. It does not run inside the distributed browser app and does not weaken the app's runtime `connect-src 'none'` boundary.
 
 ## Build placeholders
 

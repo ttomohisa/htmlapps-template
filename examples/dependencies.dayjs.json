@@ -15,7 +15,11 @@
           "stripSourceMapComment": true,
           "compression": "auto"
         }
-      ]
+      ],
+      "updates": {
+        "enabled": true,
+        "policy": "minor"
+      }
     }
   ]
 }

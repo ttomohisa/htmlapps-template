@@ -25,6 +25,8 @@ GitHub Pages delivers the initial HTML. The starter is designed so application p
 - Build on Windows by double-clicking `build-standalone.bat`
 - No Python or Node.js required for the standard build flow
 - Pin exact npm package versions and embed only explicitly selected files
+- Lock npm package tarballs by SHA-256 with committed `dependencies.lock.json`
+- Check dependency releases weekly and maintain a GitHub Issue without automatic version changes or pull requests
 - Embed large assets with `gzip` / `auto` compression when useful
 - Record SHA-256 hashes for downloaded package tarballs and embedded files
 - Block runtime network connections with `connect-src 'none'`
@@ -79,7 +81,7 @@ A typical development cycle is:
 
 1. Define product behavior and acceptance criteria in `APP_SPEC.md`.
 2. Update app metadata in `app.config.json`.
-3. Add exact third-party dependencies to `dependencies.json` only when necessary.
+3. Add exact third-party dependencies to `dependencies.json` only when necessary, then sync `dependencies.lock.json`.
 4. Implement the app in `src/index.template.html`.
 5. Reuse generic UI patterns from `components/` instead of rebuilding common interactions differently in every app.
 6. Run `build-standalone.bat`.
@@ -94,7 +96,8 @@ A typical development cycle is:
 | `AGENTS.md` | Implementation contract for coding LLMs |
 | `APP_SPEC.md` | Product behavior and acceptance criteria |
 | `app.config.json` | App name, slug, version, descriptions, build settings |
-| `dependencies.json` | Exact npm packages and files to embed |
+| `dependencies.json` | Exact npm packages, files to embed, and update-check policy |
+| `dependencies.lock.json` | Committed tarball SHA-256 lock used by future builds |
 | `src/index.template.html` | Editable application source |
 | `components/` | Reusable UI / connection patterns; most are dependency-free |
 | `build-standalone.bat` | Windows build entry point |
@@ -120,6 +123,7 @@ The repository includes a workflow that builds the generated HTML and deploys `d
 ├─ APP_SPEC.md
 ├─ app.config.json
 ├─ dependencies.json
+├─ dependencies.lock.json
 ├─ components/
 │  ├─ async-state.html
 │  ├─ confirm-dialog.html
@@ -132,7 +136,11 @@ The repository includes a workflow that builds the generated HTML and deploys `d
 │  └─ index.template.html
 ├─ scripts/
 │  ├─ build-self-extract.ps1
+│  ├─ check-dependency-updates.ps1
 │  ├─ check-repository.ps1
+│  ├─ dependency-tools.ps1
+│  ├─ sync-dependency-lock.ps1
+│  ├─ update-dependency.ps1
 │  ├─ verify-self-extract.ps1
 │  └─ verify-standalone.ps1
 ├─ docs/
@@ -145,9 +153,29 @@ The repository includes a workflow that builds the generated HTML and deploys `d
 
 ### Add or update dependencies
 
-Add exact package versions and required files to `dependencies.json`. The starter has no dependencies, so its initial build can complete without downloading packages.
+Add exact package versions and required files to `dependencies.json`, then create the matching committed lock entry:
 
-See `examples/dependencies.dayjs.json`, `examples/dependencies.webrtc-qr.json`, and [Adding Embedded Dependencies](docs/DEPENDENCIES.md) for details.
+```powershell
+.\scripts\sync-dependency-lock.ps1 -Id dayjs
+```
+
+`dependencies.lock.json` stores the expected package tarball SHA-256. Normal builds refuse to continue if the downloaded/cached tarball differs from the lock. The starter has no dependencies, so its initial lock is empty.
+
+Each dependency can also define an update-check policy (`patch`, `minor`, `major`, or `manual`). The weekly `.github/workflows/dependency-updates.yml` workflow checks npm and creates or refreshes a maintenance Issue when an allowed update exists. It never changes versions or opens a pull request automatically.
+
+Check locally:
+
+```powershell
+.\scripts\check-dependency-updates.ps1
+```
+
+Apply the suggested update only after review:
+
+```powershell
+.\scripts\update-dependency.ps1 -Id dayjs
+```
+
+See `examples/dependencies.dayjs.json`, `examples/dependencies.webrtc-qr.json`, and [Embedded Dependency Lifecycle](docs/DEPENDENCIES.md) for policy, lock, Issue, and upgrade details.
 
 To discard the package cache and download pinned packages again:
 
@@ -158,6 +186,7 @@ build-standalone.bat -ForceDownload
 The build process can:
 
 - Download pinned package tarballs from the official npm registry
+- Verify every tarball against committed `dependencies.lock.json`
 - Embed only explicitly declared files
 - Store selected large assets with `gzip` / `auto` compression
 - Record SHA-256 hashes for package tarballs and embedded files
@@ -218,7 +247,7 @@ Static checks are guardrails rather than proof of privacy or security. Before pu
 
 The starter application has no third-party runtime dependencies by default.
 
-Dependencies added to an app are declared with exact versions in `dependencies.json` and should also be reflected in that app's `THIRD_PARTY_NOTICES.md` where required by their licenses.
+Dependencies added to an app are declared with exact versions in `dependencies.json`, locked in `dependencies.lock.json`, and should also be reflected in that app's `THIRD_PARTY_NOTICES.md` where required by their licenses. Scheduled checks only open/update Issues; dependency changes remain a human decision.
 
 ## Contributing
 

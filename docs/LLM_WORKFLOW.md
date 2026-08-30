@@ -12,11 +12,12 @@ Give the coding LLM the repository and this instruction:
 2. Inspect `components/` and reuse generic source snippets where they fit.
 3. Update `app.config.json`.
 4. Ask the LLM to inspect the existing source before replacing the sample.
-5. Let the LLM add exact dependencies only when justified.
-6. Require the LLM to build after each meaningful implementation phase.
-7. Review `dist/dependency-manifest.json` and `dist/build-size-report.json` for unexpected packages, assets, or size growth.
-8. Open both generated HTML variants directly and test the core flow.
-9. Publish only after the no-network check passes.
+5. Let the LLM add exact dependencies only when justified, then require it to sync `dependencies.lock.json`.
+6. For dependency upgrades, use `scripts/update-dependency.ps1`; scheduled dependency Issues are notifications only.
+7. Require the LLM to build after each meaningful implementation phase.
+8. Review `dist/dependency-manifest.json` and `dist/build-size-report.json` for unexpected packages, assets, or size growth.
+9. Open both generated HTML variants directly and test the core flow.
+10. Publish only after the no-network check passes.
 
 ## Information that improves LLM output
 
