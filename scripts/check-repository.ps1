@@ -160,6 +160,45 @@ foreach ($relative in $buildCompatibilityFiles) {
   }
 }
 
+# Regression check: dependency update reporting must handle both zero dependencies and one disabled dependency without network access.
+$dependencyUpdateCheckPath = Join-Path $Root "scripts\check-dependency-updates.ps1"
+$dependencyUpdateTestRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("single-html-template-dependency-check-" + [Guid]::NewGuid().ToString("N"))
+$dependencyUpdateCases = @(
+  @{
+    Name = "empty"
+    Json = '{"dependencies":[]}'
+    DependencyCount = 0
+    CheckedCount = 0
+    DisabledCount = 0
+  },
+  @{
+    Name = "single-disabled"
+    Json = '{"dependencies":[{"id":"fixture","package":"fixture-package","version":"1.0.0","updates":{"enabled":false,"policy":"manual"}}]}'
+    DependencyCount = 1
+    CheckedCount = 0
+    DisabledCount = 1
+  }
+)
+try {
+  New-Item -ItemType Directory -Force -Path $dependencyUpdateTestRoot | Out-Null
+  foreach ($case in $dependencyUpdateCases) {
+    $caseRoot = Join-Path $dependencyUpdateTestRoot ([string]$case.Name)
+    New-Item -ItemType Directory -Force -Path $caseRoot | Out-Null
+    $caseDependenciesPath = Join-Path $caseRoot "dependencies.json"
+    $caseJsonOutput = Join-Path $caseRoot "report.json"
+    $caseMarkdownOutput = Join-Path $caseRoot "report.md"
+    [System.IO.File]::WriteAllText($caseDependenciesPath, [string]$case.Json, (New-Object System.Text.UTF8Encoding($false)))
+    & $dependencyUpdateCheckPath -DependenciesPath $caseDependenciesPath -JsonOutput $caseJsonOutput -MarkdownOutput $caseMarkdownOutput
+    $caseReport = Get-Content -Raw -Encoding UTF8 $caseJsonOutput | ConvertFrom-Json
+    if ([int]$caseReport.dependencyCount -ne [int]$case.DependencyCount) { throw "Dependency update regression '$($case.Name)' reported an unexpected dependencyCount." }
+    if ([int]$caseReport.checkedCount -ne [int]$case.CheckedCount) { throw "Dependency update regression '$($case.Name)' reported an unexpected checkedCount." }
+    if ([int]$caseReport.disabledCount -ne [int]$case.DisabledCount) { throw "Dependency update regression '$($case.Name)' reported an unexpected disabledCount." }
+    if ([int]$caseReport.updateCount -ne 0) { throw "Dependency update regression '$($case.Name)' must not report updates." }
+  }
+} finally {
+  Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $dependencyUpdateTestRoot
+}
+
 # Regression check: runtime identifiers like __APP_INTERNAL_STATE__ are not build placeholders.
 $verifyPath = Join-Path $Root "scripts\verify-standalone.ps1"
 $tempVerifyPath = Join-Path ([System.IO.Path]::GetTempPath()) ("single-html-template-verify-" + [Guid]::NewGuid().ToString("N") + ".html")

@@ -19,7 +19,7 @@ if (-not (Get-Command tar.exe -ErrorAction SilentlyContinue)) {
 }
 
 $config = Read-DependencyJson $DependenciesPath
-$dependencies = if ($config.dependencies) { @($config.dependencies) } else { @() }
+$dependencies = @($config.dependencies)
 $selectedIds = @{}
 foreach ($value in @($Id)) {
   if (-not [string]::IsNullOrWhiteSpace([string]$value)) { $selectedIds[[string]$value] = $true }

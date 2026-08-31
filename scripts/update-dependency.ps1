@@ -14,7 +14,7 @@ $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $DependenciesPath = Join-Path $Root "dependencies.json"
 $LockPath = Join-Path $Root "dependencies.lock.json"
 $config = Read-DependencyJson $DependenciesPath
-$dependencies = if ($config.dependencies) { @($config.dependencies) } else { @() }
+$dependencies = @($config.dependencies)
 $matches = @($dependencies | Where-Object { [string]$_.id -eq $Id })
 if ($matches.Count -ne 1) { throw "Dependency id '$Id' was not found exactly once in dependencies.json." }
 $dependency = $matches[0]

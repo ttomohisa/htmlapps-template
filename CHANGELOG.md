@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1 - Dependency update check collection fix - 2026-08-31
+
+- Fixed dependency collection normalization in `check-dependency-updates.ps1`, `sync-dependency-lock.ps1`, and `update-dependency.ps1`; an empty `dependencies.json` now remains a zero-length array under `Set-StrictMode` instead of becoming `$null`.
+- Added repository regression coverage for both zero dependencies and a single disabled dependency without making npm network requests.
+
 ## 1.2.0 - Dependency lifecycle and Issue-based update monitoring - 2026-08-29
 
 - Added committed `dependencies.lock.json` tarball SHA-256 locking and build-time mismatch rejection.
