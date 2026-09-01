@@ -258,3 +258,7 @@ Bug reports, improvements to the build system, and reusable UI proposals are wel
 Copyright © 2026 ttomohisa
 
 Licensed under the [MIT License](LICENSE). Applications created from this template should update authorship and third-party notices as appropriate.
+
+## WebRTC template note
+
+The reusable QR pairing component considers the application connected only after the designated DataChannel is `open`. Custom DataChannel layouts use `readyChannelLabel` for a reliable control channel.

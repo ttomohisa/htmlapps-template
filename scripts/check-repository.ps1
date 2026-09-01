@@ -226,3 +226,19 @@ if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
 
 Write-Host "[OK] Repository check passed." -ForegroundColor Green
+
+# WebRTC readiness DataChannel regression
+$webrtcReadyText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "components\webrtc-qr-pairing.html")
+if (-not $webrtcReadyText.Contains("readyChannelLabel: null")) {
+  throw "WebRTC component is missing readyChannelLabel."
+}
+if (-not $webrtcReadyText.Contains("requireReadyChannelOpen: true")) {
+  throw "WebRTC component is missing requireReadyChannelOpen."
+}
+if (-not $webrtcReadyText.Contains("readyChannelLabel is required when createDefaultChannel is false")) {
+  throw "Custom WebRTC DataChannel layouts must require readyChannelLabel."
+}
+if (-not $webrtcReadyText.Contains("options.requireReadyChannelOpen!==false&&(!readyChannel||readyChannel.readyState!=='open')")) {
+  throw "WebRTC application-ready must wait for the designated DataChannel to open."
+}
+

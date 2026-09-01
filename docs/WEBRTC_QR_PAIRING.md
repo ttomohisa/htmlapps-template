@@ -307,3 +307,29 @@ At minimum, test on real devices:
 8. Force failure with a VPN / guest network and inspect the diagnostics.
 9. Deny camera permission and confirm the manual code path still works.
 10. Inspect DevTools and confirm no runtime CDN/API request is made.
+
+## Connection readiness contract
+
+`RTCPeerConnection.connectionState === 'connected'` means ICE/DTLS transport is established, but it does not guarantee that the application's control DataChannel is usable.
+
+Application-ready requires both:
+
+1. the current PeerConnection is `connected`;
+2. the designated readiness DataChannel is `readyState === 'open'`.
+
+The default readiness channel is `app-data`. For custom channels, use a reliable control channel:
+
+```js
+const pairing = AppWebRtcQrPairing.mount(root, {
+  createDefaultChannel: false,
+  readyChannelLabel: 'control',
+  onPeerCreated({ role, createDataChannel }) {
+    if (role !== 'host') return;
+    createDataChannel('control', { ordered: true });
+  }
+});
+```
+
+Do not close pairing UI, switch to the live application state, or tear down the PeerConnection from raw `connectionstatechange` / `iceconnectionstatechange`. Use `onConnected` as the application-ready signal.
+
+`requireReadyChannelOpen: false` is reserved for unusual WebRTC flows that intentionally use no DataChannel.

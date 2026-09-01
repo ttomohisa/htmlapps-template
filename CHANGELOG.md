@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.2 - WebRTC DataChannel-ready connection gate - 2026-09-01
+
+- Application `onConnected` now waits for both PeerConnection `connected` and the designated readiness DataChannel `open`.
+- Added `readyChannelLabel` / `requireReadyChannelOpen` for custom DataChannel layouts.
+- Added repository regression checks for the readiness contract.
+- Updated bilingual WebRTC/component/template guidance.
+
 ## 1.2.1 - Dependency update check collection fix - 2026-08-31
 
 - Fixed dependency collection normalization in `check-dependency-updates.ps1`, `sync-dependency-lock.ps1`, and `update-dependency.ps1`; an empty `dependencies.json` now remains a zero-length array under `Set-StrictMode` instead of becoming `$null`.

@@ -219,3 +219,7 @@ Do not claim a browser, device, build, or network test was performed unless it w
 - Do not depend on `Get-FileHash`; use .NET SHA-256 APIs.
 - Avoid `::new()` in required PowerShell build and verification scripts.
 - Verify only declared build placeholders, not arbitrary `__UPPERCASE__` runtime identifiers.
+
+## WebRTC application-ready rule
+
+For WebRTC DataChannel apps, never treat raw `RTCPeerConnection.connectionState === 'connected'` as application-ready. Use the reusable component's `onConnected`. When `createDefaultChannel:false`, set `readyChannelLabel` to a reliable control channel.

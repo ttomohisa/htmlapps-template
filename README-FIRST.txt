@@ -12,3 +12,7 @@ Single HTML App Template
 9. Review dist\build-size-report.json, then open dist\index.html and dist\index.self-extract.html directly and test both with the network disabled.
 
 Do not edit either generated HTML in dist\ manually.
+
+WebRTC readiness
+
+For custom WebRTC DataChannel layouts, set readyChannelLabel to a reliable control channel and wait for onConnected rather than raw PeerConnection connected.

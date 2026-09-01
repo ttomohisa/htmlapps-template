@@ -13,3 +13,7 @@ These files are source snippets for apps created from this template. They are **
 Documentation: [English](../docs/COMPONENTS.md) / [日本語](../docs/COMPONENTS.ja.md)
 
 WebRTC pairing details: [English](../docs/WEBRTC_QR_PAIRING.md) / [日本語](../docs/WEBRTC_QR_PAIRING.ja.md)
+
+## WebRTC readiness note
+
+The WebRTC pairing component waits for the designated readiness DataChannel to open before reporting application-ready. Custom DataChannel layouts use `readyChannelLabel` for a reliable control channel.

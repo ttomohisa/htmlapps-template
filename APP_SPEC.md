@@ -122,3 +122,7 @@ The upper-right header includes a compact help button. It opens a bilingual â€œä
 - any browser or device constraints relevant to the app.
 
 Acceptance criteria: help content is updated together with each user-facing behavior change and contains no leftover starter instructions.
+
+## WebRTC readiness requirement
+
+When an app uses peer-to-peer WebRTC DataChannels, define which reliable channel represents application readiness. Custom channel layouts must set `readyChannelLabel`; do not define application-ready from ICE/PeerConnection `connected` alone.

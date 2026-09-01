@@ -232,3 +232,7 @@ Useful mount options include `initialPage`, `pageTopTarget`, `pageTopOffset`, `o
 - Keep `env(safe-area-inset-bottom)` and enough body bottom padding so content cannot hide behind the bar.
 - Preserve visible focus, `aria-current`, semantic buttons, and native `disabled` behavior.
 - Test at 320, 360, 390/393, and 430px widths and confirm there is no page-level horizontal scrolling.
+
+## WebRTC application-ready rule
+
+For `webrtc-qr-pairing.html`, PeerConnection `connected` alone is not application-ready. The designated readiness DataChannel must also be `open`. Custom channel layouts set `readyChannelLabel` to a reliable control channel.

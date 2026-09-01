@@ -258,3 +258,7 @@ GitHub Pages版では最初のHTML取得に通信が必要です。完全にネ�
 Copyright © 2026 ttomohisa
 
 [MIT License](LICENSE) で公開しています。このテンプレートから作成したアプリでは、作者名と第三者ライセンス表記を適切に更新してください。
+
+## WebRTCテンプレート補足
+
+再利用QRペアリングコンポーネントでは、指定したDataChannelが `open` になって初めてアプリ接続済みとします。独自Channel構成ではreliableな制御Channelを `readyChannelLabel` に指定します。

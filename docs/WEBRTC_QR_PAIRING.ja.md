@@ -332,3 +332,29 @@ WebRTC DataChannelの直接接続を許可するために、CDNやAPI接続をCS
 8. VPN / ゲストWi-Fi等で失敗させ、診断が意味のある内容になる。
 9. カメラ権限拒否時に手動コードへ逃げられる。
 10. DevToolsで実行時CDN/APIアクセスがない。
+
+## 接続成立の契約
+
+`RTCPeerConnection.connectionState === 'connected'` はICE/DTLSの経路成立を示しますが、アプリが使うControl DataChannelまで利用可能になったことは保証しません。
+
+アプリ接続済みとする条件は次の2つです。
+
+1. 現在のPeerConnectionが `connected`
+2. 準備完了判定に指定したDataChannelが `readyState === 'open'`
+
+標準構成では `app-data` が準備完了Channelです。独自Channel構成ではreliableな制御Channelを指定します。
+
+```js
+const pairing = AppWebRtcQrPairing.mount(root, {
+  createDefaultChannel: false,
+  readyChannelLabel: 'control',
+  onPeerCreated({ role, createDataChannel }) {
+    if (role !== 'host') return;
+    createDataChannel('control', { ordered: true });
+  }
+});
+```
+
+生の `connectionstatechange` / `iceconnectionstatechange` を見て接続UIを閉じたり、ライブ画面へ切り替えたり、PeerConnectionを破棄したりしないでください。アプリが利用可能になった合図は `onConnected` を使います。
+
+DataChannelを使わない特殊用途だけ `requireReadyChannelOpen: false` を指定できます。

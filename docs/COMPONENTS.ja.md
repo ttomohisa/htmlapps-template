@@ -250,3 +250,7 @@ mobileBar.setEnabled('save', true);
 - `env(safe-area-inset-bottom)` と本文側の下余白を維持し、バーで内容を隠さないようにします。
 - フォーカス表示、`aria-current`、標準button、`disabled` セマンティクスを維持します。
 - 320 / 360 / 390〜393 / 430px幅で確認し、ページ全体の横スクロールが出ないことを確認します。
+
+## WebRTCの接続成立ルール
+
+`webrtc-qr-pairing.html` ではPeerConnectionの `connected` だけをアプリ接続済みとして扱いません。指定した準備完了DataChannelが `open` になって初めて `onConnected` を発火します。独自Channel構成ではreliableな制御Channelを `readyChannelLabel` に指定します。

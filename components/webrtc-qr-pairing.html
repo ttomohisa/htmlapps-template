@@ -218,6 +218,8 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
     decoderAssetKey: 'decoder',
     dataChannelLabel: 'app-data',
     dataChannelInit: { ordered: true },
+    readyChannelLabel: null,
+    requireReadyChannelOpen: true,
     createDefaultChannel: true,
     autoStartJoinScanner: true,
     notify: null,
@@ -239,6 +241,10 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
   function mount(root, userOptions={}) {
     if (!(root instanceof Element)) throw new TypeError('AppWebRtcQrPairing.mount(root): root must be an Element');
     const options = { ...defaults, ...userOptions, dataChannelInit:{...defaults.dataChannelInit,...(userOptions.dataChannelInit||{})} };
+    const readyChannelLabel = String(options.readyChannelLabel || (options.createDefaultChannel !== false ? options.dataChannelLabel : '') || '').trim();
+    if (options.requireReadyChannelOpen !== false && !readyChannelLabel) {
+      throw new TypeError('AppWebRtcQrPairing.mount: readyChannelLabel is required when createDefaultChannel is false unless requireReadyChannelOpen is false');
+    }
     let language = options.language === 'en' ? 'en' : 'ja';
     const t = key => COPY[language]?.[key] ?? COPY.en[key] ?? key;
     const notify = (message, tone='default') => {
@@ -254,8 +260,8 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
 
     const state = {
       role:'',
-      host:{ pc:null, channel:null, attempt:0, everConnected:false, offerCode:'', answerApplied:false, failureHandling:false },
-      join:{ pc:null, channel:null, pendingOffer:null, attempt:0, everConnected:false, answerCode:'', answerState:'idle', autoRetryCount:0, autoRetryTimer:0, failureHandling:false },
+      host:{ pc:null, channel:null, readyChannel:null, attempt:0, everConnected:false, offerCode:'', answerApplied:false, failureHandling:false },
+      join:{ pc:null, channel:null, readyChannel:null, pendingOffer:null, attempt:0, everConnected:false, answerCode:'', answerState:'idle', autoRetryCount:0, autoRetryTimer:0, failureHandling:false },
       qr:{ hostPages:[], hostIndex:0, hostTimer:0, joinPages:[], joinIndex:0, joinTimer:0 },
       scanner:{ mode:'', stream:null, frame:0, decoder:null, canvasCtx:null, lastDecode:0, session:'', total:0, parts:new Map() },
       connected:false,
@@ -369,18 +375,33 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       const bucket=state[role];
       const current=()=>isCurrentPc(role,pc,attempt);
       if(!current()){try{channel.close();}catch{}return;}
-      if(!bucket.channel&&channel.label===options.dataChannelLabel)bucket.channel=channel;
-      channel.addEventListener('open',()=>{if(!current()){try{channel.close();}catch{}return;}if(!bucket.channel)bucket.channel=channel;if(typeof options.onChannel==='function')options.onChannel({role,pc,channel});if(pc.connectionState==='connected')markConnected(role,pc,attempt);});
+      const isDefaultChannel=channel.label===options.dataChannelLabel;
+      const isReadyChannel=Boolean(readyChannelLabel)&&channel.label===readyChannelLabel;
+      if(isDefaultChannel&&!bucket.channel)bucket.channel=channel;
+      if(isReadyChannel&&!bucket.readyChannel)bucket.readyChannel=channel;
+      channel.addEventListener('open',()=>{
+        if(!current()){try{channel.close();}catch{}return;}
+        if(isDefaultChannel&&!bucket.channel)bucket.channel=channel;
+        if(isReadyChannel&&!bucket.readyChannel)bucket.readyChannel=channel;
+        if(typeof options.onChannel==='function')options.onChannel({role,pc,channel});
+        if(pc.connectionState==='connected')markConnected(role,pc,attempt);
+      });
       channel.addEventListener('message',event=>{if(current()&&typeof options.onMessage==='function')options.onMessage({role,pc,channel,data:event.data,event});});
-      channel.addEventListener('close',()=>{if(current()&&bucket.channel===channel)bucket.channel=null;});
+      channel.addEventListener('close',()=>{
+        if(!current())return;
+        if(bucket.channel===channel)bucket.channel=null;
+        if(bucket.readyChannel===channel)bucket.readyChannel=null;
+      });
     }
     function markConnected(role, pc, attempt) {
       if(!isCurrentPc(role,pc,attempt))return;
-      const bucket=state[role];
-      if(options.createDefaultChannel!==false&&(!bucket.channel||bucket.channel.readyState!=='open'))return;
+      const bucket=state[role],readyChannel=bucket.readyChannel;
+      if(options.requireReadyChannelOpen!==false&&(!readyChannel||readyChannel.readyState!=='open'))return;
       if(bucket.everConnected)return;
-      bucket.everConnected=true;state.connected=true;setStep(role,3);setStatus(role,t('connected'),'active');q(`[data-connected="${role}"]`).hidden=false;setCoach(role,role==='host'?'checking':'answer');q('[data-fullscreen]').hidden=true;emitState(role,'connected',{pc,channel:bucket.channel});if(typeof options.onConnected==='function')options.onConnected({role,pc,channel:bucket.channel});stopScanner();stopQrCycles();
+      const connectedChannel=readyChannel||bucket.channel||null;
+      bucket.everConnected=true;state.connected=true;setStep(role,3);setStatus(role,t('connected'),'active');q(`[data-connected="${role}"]`).hidden=false;setCoach(role,role==='host'?'checking':'answer');q('[data-fullscreen]').hidden=true;emitState(role,'connected',{pc,channel:connectedChannel,readyChannel});if(typeof options.onConnected==='function')options.onConnected({role,pc,channel:connectedChannel,readyChannel});stopScanner();stopQrCycles();
     }
+
     async function handleConnectionState(role, connectionState, pc, attempt) {
       if(!isCurrentPc(role,pc,attempt))return; const bucket=state[role];
       if(connectionState==='connected'){markConnected(role,pc,attempt);return;}
@@ -393,7 +414,7 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       else if(connectionState==='connecting')setStatus(role,t('checking'),'warning');
     }
 
-    function closePc(role) { const bucket=state[role], pc=bucket.pc; bucket.pc=null;bucket.channel=null;bucket.everConnected=false;bucket.failureHandling=false;if(pc){try{pc.getSenders?.().forEach(()=>{});}catch{}try{pc.close();}catch{}} }
+    function closePc(role) { const bucket=state[role], pc=bucket.pc; bucket.pc=null;bucket.channel=null;bucket.readyChannel=null;bucket.everConnected=false;bucket.failureHandling=false;if(pc){try{pc.getSenders?.().forEach(()=>{});}catch{}try{pc.close();}catch{}} }
     function resetHost({keepView=false}={}) { state.host.attempt+=1; closePc('host');state.host.offerCode='';state.host.answerApplied=false;state.connected=false;stopQr('host');stopScanner();q('[data-host-offer-code]').value='';q('[data-host-answer-input]').value='';q('[data-action="host-copy"]').disabled=true;q('[data-action="host-scan-answer"]').disabled=true;q('[data-action="host-apply-answer"]').disabled=true;q('[data-connected="host"]').hidden=true;q('[data-diagnostic="host"]').hidden=true;setStep('host',1);setCoach('host','offer');setStatus('host',t('stateNew'));renderQrPlaceholder('host',t('offerPlaceholder'));if(!keepView)showView('chooser'); }
     function resetJoin({preserveOffer=false,preserveRetry=false,keepView=false}={}) { state.join.attempt+=1; closePc('join');state.connected=false;stopQr('join');stopScanner();state.join.answerCode='';state.join.answerState=preserveOffer&&state.join.pendingOffer?'prepare':'idle';if(!preserveOffer)state.join.pendingOffer=null;if(!preserveRetry)state.join.autoRetryCount=0;if(state.join.autoRetryTimer)clearTimeout(state.join.autoRetryTimer);state.join.autoRetryTimer=0;q('[data-join-answer-code]').value='';q('[data-join-answer]').hidden=true;q('[data-connected="join"]').hidden=true;q('[data-diagnostic="join"]').hidden=true;q('[data-join-prepare]').hidden=!state.join.pendingOffer;setStep('join',state.join.pendingOffer?2:1);setCoach('join',state.join.pendingOffer?'prepare':'scan');setStatus('join',t('stateNew'));if(!keepView)showView('chooser'); }
     function resetAll() { resetHost({keepView:true});resetJoin({keepView:true});state.role='';showView('chooser'); }
@@ -468,8 +489,8 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       startHost(){return startHost();},
       startJoin(){resetHost({keepView:true});resetJoin({keepView:true});state.role='join';showView('join');applyLanguage();setCoach('join','scan');return options.autoStartJoinScanner?startScanner('join'):Promise.resolve();},
       showRoleChooser(){resetAll();},
-      send(data){const ch=state[state.role]?.channel;if(!ch||ch.readyState!=='open')throw new Error('DataChannel is not open');ch.send(data);},
-      channel(){return state[state.role]?.channel||null;},
+      send(data){const bucket=state[state.role],ch=bucket?.readyChannel||bucket?.channel;if(!ch||ch.readyState!=='open')throw new Error('DataChannel is not open');ch.send(data);},
+      channel(){const bucket=state[state.role];return bucket?.readyChannel||bucket?.channel||null;},
       peerConnection(){return state[state.role]?.pc||null;},
       role(){return state.role;},
       close(){resetAll();},
