@@ -318,7 +318,7 @@ foreach ($dependency in $dependencies) {
 
 $manifest = [ordered]@{
   schemaVersion = 2
-  builder = "single-html-app-template/1.2"
+  builder = "single-html-app-template/1.3"
   generatedAtUtc = [DateTime]::UtcNow.ToString("o")
   app = [ordered]@{
     name = [string]$appConfig.name

@@ -219,7 +219,7 @@ $syntheticHtml = @'
 '@
 try {
   [System.IO.File]::WriteAllText($tempVerifyPath, $syntheticHtml, (New-Object System.Text.UTF8Encoding($false)))
-  & $verifyPath -Path $tempVerifyPath -RequireNetworkBlock $true
+  & $verifyPath -Path $tempVerifyPath -RequireNetworkBlock $true -RequireCanonicalIcon $false
 } finally {
   Remove-Item -Force -ErrorAction SilentlyContinue $tempVerifyPath
 }

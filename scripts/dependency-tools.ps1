@@ -1,7 +1,7 @@
 Set-StrictMode -Version Latest
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$Script:DependencyToolsUserAgent = "single-html-app-template/1.2"
+$Script:DependencyToolsUserAgent = "single-html-app-template/1.3"
 
 function Read-DependencyJson([string]$Path) {
   if (-not (Test-Path $Path)) { throw "Required file not found: $Path" }

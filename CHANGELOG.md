@@ -7,6 +7,7 @@
 - Added `assets/favicon.svg` as the canonical icon source. The readable build now embeds the exact same SVG payload for both the browser favicon and upper-left application brand icon, and verification rejects drift between them.
 - Reworked the help dialog into a viewport-bounded flex layout with a dedicated scroll body and safe-area-aware bottom padding so long Japanese / English help remains reachable on smartphones.
 - Documented `Set-StrictMode` collection normalization (`@(...)` before `.Count`) and expanded release / offline checks for the new guardrails.
+- Kept canonical favicon/header-icon verification mandatory for real standalone builds while allowing explicitly marked synthetic verifier fixtures to omit product chrome.
 
 ## 1.2.2 - WebRTC DataChannel-ready connection gate - 2026-09-01
 
