@@ -31,8 +31,10 @@ GitHub Pages delivers the initial HTML. The starter is designed so application p
 - Record SHA-256 hashes for downloaded package tarballs and embedded files
 - Block runtime network connections with `connect-src 'none'`
 - Avoid runtime CDN, remote fonts, analytics, and telemetry by default
+- Run a Windows PowerShell syntax / encoding preflight before builds so quoting errors and BOM-less non-ASCII scripts fail early
 - Validate builds and deploy GitHub Pages with GitHub Actions
-- Start with Japanese / English UI, responsive layout, keyboard access, embedded SVG favicon, and a light-only interface
+- Use `assets/favicon.svg` as the single icon source for both the browser favicon and upper-left application brand icon
+- Start with Japanese / English UI, responsive layout, keyboard access, and a light-only interface
 - Reuse confirmation dialogs, Undo toasts, popover menus, numeric setting fields, async-state guards, and smartphone bottom bars with page switching
 - Keep product requirements in `APP_SPEC.md` and implementation rules for coding LLMs in `AGENTS.md`
 - Require file-producing apps to let users edit the output filename before export
@@ -48,7 +50,7 @@ GitHub Pages delivers the initial HTML. The starter is designed so application p
 4. Update `app.config.json` with the app name, slug, version, description, and repository information.
 5. Tell your coding LLM to read `AGENTS.md` before implementation.
 6. Edit `src/index.template.html` and reuse files from `components/` where appropriate.
-7. Run `build-standalone.bat` on Windows.
+7. Run `build-standalone.bat` on Windows. It first validates every repository `.ps1` file for parser errors and unsafe BOM-less non-ASCII source, then starts the build.
 8. Test the generated files in `dist/`, including with the network disabled where applicable.
 
 A reusable LLM request and workflow are available in [LLM Workflow](docs/LLM_WORKFLOW.md).
@@ -137,6 +139,7 @@ The repository includes a workflow that builds the generated HTML and deploys `d
 ├─ scripts/
 │  ├─ build-self-extract.ps1
 │  ├─ check-dependency-updates.ps1
+│  ├─ check-powershell-syntax.ps1
 │  ├─ check-repository.ps1
 │  ├─ dependency-tools.ps1
 │  ├─ sync-dependency-lock.ps1

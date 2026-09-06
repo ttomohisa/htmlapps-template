@@ -12,6 +12,7 @@ Set-StrictMode -Version Latest
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $TemplatePath = Join-Path $Root "src\index.template.html"
 $AppConfigPath = Join-Path $Root "app.config.json"
+$AppIconPath = Join-Path $Root "assets\favicon.svg"
 $DependenciesPath = Join-Path $Root "dependencies.json"
 $DependencyLockPath = Join-Path $Root "dependencies.lock.json"
 $VerifyPath = Join-Path $Root "scripts\verify-standalone.ps1"
@@ -183,6 +184,12 @@ if (-not (Get-Command tar.exe -ErrorAction SilentlyContinue)) {
   throw "tar.exe was not found. Use a current Windows 10/11 environment, or install bsdtar and expose it as tar.exe."
 }
 
+if (-not (Test-Path -LiteralPath $AppIconPath -PathType Leaf)) {
+  throw "Canonical app icon was not found: $AppIconPath"
+}
+$appIconBytes = [System.IO.File]::ReadAllBytes($AppIconPath)
+$appIconDataUri = "data:image/svg+xml;base64," + [Convert]::ToBase64String($appIconBytes)
+
 $appConfig = Get-Json $AppConfigPath
 $dependencyConfig = Get-Json $DependenciesPath
 $dependencyLock = Get-Json $DependencyLockPath
@@ -328,11 +335,21 @@ $replacements = [ordered]@{
   "__APP_CONFIG_JSON__" = ConvertTo-SafeJson $appConfig 20
   "__BUILD_MANIFEST_JSON__" = ConvertTo-SafeJson $manifest 40
   "__EMBEDDED_ASSET_BUNDLE_JSON__" = $assetBundleJson
+  "__APP_ICON_DATA_URI__" = $appIconDataUri
+}
+$replacementExpectedCounts = @{
+  "__APP_CONFIG_JSON__" = 1
+  "__BUILD_MANIFEST_JSON__" = 1
+  "__EMBEDDED_ASSET_BUNDLE_JSON__" = 1
+  "__APP_ICON_DATA_URI__" = 2
 }
 
 foreach ($entry in $replacements.GetEnumerator()) {
   $count = ([regex]::Matches($template, [regex]::Escape($entry.Key))).Count
-  if ($count -ne 1) { throw "Template placeholder $($entry.Key) must occur exactly once; found $count." }
+  $expectedCount = [int]$replacementExpectedCounts[$entry.Key]
+  if ($count -ne $expectedCount) {
+    throw "Template placeholder $($entry.Key) must occur exactly $expectedCount time(s); found $count."
+  }
   $template = $template.Replace($entry.Key, [string]$entry.Value)
 }
 

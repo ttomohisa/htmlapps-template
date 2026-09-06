@@ -10,8 +10,10 @@ Describe the user-visible change.
 
 ## Verification
 
+- [ ] `scripts/check-powershell-syntax.ps1` passes.
 - [ ] `scripts/check-repository.ps1` passes.
 - [ ] `dist/index.html` opens directly.
+- [ ] Browser favicon and upper-left app icon use the same canonical artwork.
 - [ ] `dist/index.self-extract.html` expands and opens directly without mojibake.
 - [ ] The self-extracting loader shows the same favicon as `dist/index.html`.
 - [ ] Main flow tested on desktop.

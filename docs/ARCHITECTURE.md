@@ -62,13 +62,15 @@ The update checker is a repository-maintenance network operation. It does not ru
 
 ## Build placeholders
 
-The source template contains exactly one of each:
+The source template contains exactly one of each data placeholder:
 
 - `__APP_CONFIG_JSON__`
 - `__BUILD_MANIFEST_JSON__`
 - `__EMBEDDED_ASSET_BUNDLE_JSON__`
 
-Do not rename or duplicate them without changing the builder and verifier. Other runtime identifiers that happen to use a `__NAME__` convention are allowed and must not be rejected as build placeholders.
+`__APP_ICON_DATA_URI__` intentionally appears exactly twice: once for the browser favicon and once for the upper-left application brand icon. The builder reads `assets/favicon.svg` once and substitutes the same Base64 data URI into both locations; the standalone verifier rejects mismatched icon payloads.
+
+Do not rename or duplicate these placeholders without changing the builder and verifier. Other runtime identifiers that happen to use a `__NAME__` convention are allowed and must not be rejected as build placeholders.
 
 ## Embedded asset API
 

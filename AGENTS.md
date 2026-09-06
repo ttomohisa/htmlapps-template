@@ -14,6 +14,7 @@ This file is the first instruction for any coding LLM or agent working in this r
 
 - Generate two one-file release variants: readable `dist/index.html` and gzip self-extracting `dist/index.self-extract.html`.
 - Keep `scripts/build-self-extract.ps1` and the generated self-extract loader ASCII-only; encode loader UI text instead of placing non-ASCII literals in that PowerShell source.
+- `assets/favicon.svg` is the canonical app icon source. The readable build must embed that exact SVG for both the browser favicon and the upper-left application brand icon; do not maintain separate icon artwork by hand.
 - The self-extract loader must inherit the embedded favicon from `dist/index.html`; do not maintain a second favicon by hand.
 - The app must work when `dist/index.html` is opened directly with `file://` unless `APP_SPEC.md` explicitly says otherwise.
 - No runtime CDN, external font, analytics, telemetry, API request, or hidden network dependency.
@@ -127,9 +128,10 @@ Define the coordinate transform once and reuse it. Test portrait smartphone medi
 
 ## Required checks before completion
 
-Run:
+Run the PowerShell syntax / encoding preflight first, then the repository check:
 
 ```powershell
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-powershell-syntax.ps1
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-repository.ps1
 ```
 
@@ -213,9 +215,13 @@ Do not claim a browser, device, build, or network test was performed unless it w
 - Whenever application behavior changes, update the content between `APP:HELP:BEGIN` and `APP:HELP:END` in the same change.
 - Include actual basic operations, privacy behavior, limitations, and data-loss risks. Do not leave starter-specific help in a finished app.
 - The dialog must close with its close button, `Esc`, and a click on the backdrop.
+- On smartphones and short viewports, keep the header fixed inside the dialog and make the body itself scrollable with safe-area-aware bottom padding. Verify that the final help item can always be reached without the dialog extending beyond the viewport.
 
 ## Build compatibility guardrails
 
+- Run `scripts/check-powershell-syntax.ps1` before the build in local Windows flows and CI so parser errors are reported before application checks start.
+- PowerShell source that contains non-ASCII text must be saved as UTF-8 with BOM when Windows PowerShell 5.1 may execute it. Prefer ASCII-only build / verification scripts when practical. Never rely on BOM-less UTF-8 with Japanese or other non-ASCII literals.
+- Under `Set-StrictMode`, normalize command / JSON collections with `@(...)` before using `.Count`; test empty and one-item cases.
 - Do not depend on `Get-FileHash`; use .NET SHA-256 APIs.
 - Avoid `::new()` in required PowerShell build and verification scripts.
 - Verify only declared build placeholders, not arbitrary `__UPPERCASE__` runtime identifiers.

@@ -5,7 +5,8 @@ param(
   [string[]]$ForbiddenPlaceholders = @(
     "__APP_CONFIG_JSON__",
     "__BUILD_MANIFEST_JSON__",
-    "__EMBEDDED_ASSET_BUNDLE_JSON__"
+    "__EMBEDDED_ASSET_BUNDLE_JSON__",
+    "__APP_ICON_DATA_URI__"
   )
 )
 
@@ -34,6 +35,18 @@ foreach ($placeholder in @($ForbiddenPlaceholders)) {
 
 if ($RequireNetworkBlock -and $html -notmatch "connect-src\s+'none'") {
   throw "connect-src 'none' is missing from Content Security Policy"
+}
+
+$faviconMatch = [regex]::Match($html, '<link[^>]+rel=["'']icon["''][^>]+href=["''](?<uri>data:image/svg\+xml;base64,[A-Za-z0-9+/=]+)["'']')
+$brandIconMatch = [regex]::Match($html, '<img[^>]+id=["'']appBrandIcon["''][^>]+src=["''](?<uri>data:image/svg\+xml;base64,[A-Za-z0-9+/=]+)["'']')
+if (-not $faviconMatch.Success) {
+  throw "Embedded SVG favicon is missing from standalone HTML"
+}
+if (-not $brandIconMatch.Success) {
+  throw "Header brand icon is missing from standalone HTML"
+}
+if ($faviconMatch.Groups["uri"].Value -ne $brandIconMatch.Groups["uri"].Value) {
+  throw "Header brand icon must use the exact same embedded SVG asset as the favicon"
 }
 
 foreach ($check in $checks) {

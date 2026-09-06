@@ -31,8 +31,10 @@ GitHub Pagesから最初のHTMLを取得した後は、アプリ内の処理を�
 - 取得したpackage tarballと内包ファイルのSHA-256を記録
 - `connect-src 'none'` により実行時のネットワーク接続を遮断
 - 実行時CDN、外部フォント、分析タグ、テレメトリを初期状態では使用しない
+- ビルド前にWindows PowerShellの構文・文字コードを検査し、引用符ミスやBOMなし非ASCIIスクリプトを早期検出
 - GitHub Actionsでビルド検証とGitHub Pages公開
-- 日英UI、レスポンシブ表示、キーボード操作、SVG favicon、ライトモード固定のスターター
+- `assets/favicon.svg` をfaviconと左上ブランドアイコンの共通ソースとして使用
+- 日英UI、レスポンシブ表示、キーボード操作、ライトモード固定のスターター
 - 確認ダイアログ、Undo Toast、ポップオーバーメニュー、数値設定、非同期状態ガード、ページ切替対応のスマホ固定ボトムバーを再利用可能
 - 製品仕様を `APP_SPEC.md`、コーディングLLM向け実装ルールを `AGENTS.md` に分離
 - ファイル出力アプリでは、保存前に出力ファイル名を編集できることを共通UXルール化
@@ -48,7 +50,7 @@ GitHub Pagesから最初のHTMLを取得した後は、アプリ内の処理を�
 4. `app.config.json` のアプリ名、slug、バージョン、説明、リポジトリ情報を変更します。
 5. コーディングLLMには、実装前に `AGENTS.md` を読むよう指示します。
 6. `src/index.template.html` を編集し、必要に応じて `components/` の共通部品を利用します。
-7. Windowsで `build-standalone.bat` を実行します。
+7. Windowsで `build-standalone.bat` を実行します。最初にリポジトリ内の `.ps1` を構文解析し、Windows PowerShell 5.1で問題になるBOMなし非ASCIIソースも検出してからビルドします。
 8. `dist/` に生成されたHTMLを直接開き、必要に応じてネットワークを切った状態でも主要機能を確認します。
 
 そのまま利用できる依頼文と推奨手順は [LLMでアプリを作る手順](docs/LLM_WORKFLOW.ja.md) にあります。
@@ -137,6 +139,7 @@ dist/
 ├─ scripts/
 │  ├─ build-self-extract.ps1
 │  ├─ check-dependency-updates.ps1
+│  ├─ check-powershell-syntax.ps1
 │  ├─ check-repository.ps1
 │  ├─ dependency-tools.ps1
 │  ├─ sync-dependency-lock.ps1

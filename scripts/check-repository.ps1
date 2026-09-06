@@ -10,6 +10,7 @@ $required = @(
   "AGENTS.md",
   "APP_SPEC.md",
   "app.config.json",
+  "assets\favicon.svg",
   "dependencies.json",
   "dependencies.lock.json",
   ".github\workflows\dependency-updates.yml",
@@ -30,6 +31,7 @@ $required = @(
   "src\index.template.html",
   "build-standalone.ps1",
   "scripts\build-self-extract.ps1",
+  "scripts\check-powershell-syntax.ps1",
   "scripts\dependency-tools.ps1",
   "scripts\check-dependency-updates.ps1",
   "scripts\sync-dependency-lock.ps1",
@@ -49,6 +51,8 @@ foreach ($relative in $required) {
   $path = Join-Path $Root $relative
   if (-not (Test-Path $path)) { throw "Required repository file is missing: $relative" }
 }
+
+& (Join-Path $Root "scripts\check-powershell-syntax.ps1") -RootPath $Root
 
 $mobileBottomBarPath = Join-Path $Root "components\mobile-bottom-bar.html"
 $mobileBottomBarText = Get-Content -Raw -Encoding UTF8 $mobileBottomBarPath
@@ -112,12 +116,15 @@ foreach ($requiredDependencyId in @("qrcode-generator", "jsqr")) {
 $sourceText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "src\index.template.html")
 if (-not $sourceText.Contains("__EMBEDDED_ASSET_BUNDLE_JSON__")) { throw "src\index.template.html must embed the asset bundle JSON directly." }
 if ($sourceText.Contains("__EMBEDDED_ASSET_BUNDLE_BASE64__")) { throw "Legacy double-Base64 asset bundle placeholder must not return." }
+$iconPlaceholderCount = ([regex]::Matches($sourceText, [regex]::Escape("__APP_ICON_DATA_URI__"))).Count
+if ($iconPlaceholderCount -ne 2) { throw "src\index.template.html must use __APP_ICON_DATA_URI__ exactly twice: favicon and header icon." }
+if (-not $sourceText.Contains('id="appBrandIcon"')) { throw "src\index.template.html is missing the canonical header brand icon marker." }
 foreach ($token in @("bytesAsync", "blobUrlAsync", "outputFilename", "window.AppToast")) {
   if (-not $sourceText.Contains($token)) { throw "src\index.template.html is missing required template behavior marker: $token" }
 }
 
 $builderText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "build-standalone.ps1")
-foreach ($token in @("compressionSetting", "Compress-GzipBytes", "build-size-report.json", "sizeBudget", "DependencyLockPath", "tarballSha256", "__EMBEDDED_ASSET_BUNDLE_JSON__")) {
+foreach ($token in @("compressionSetting", "Compress-GzipBytes", "build-size-report.json", "sizeBudget", "DependencyLockPath", "tarballSha256", "__EMBEDDED_ASSET_BUNDLE_JSON__", "AppIconPath", "__APP_ICON_DATA_URI__")) {
   if (-not $builderText.Contains($token)) { throw "build-standalone.ps1 is missing required asset pipeline marker: $token" }
 }
 if ($builderText.Contains("__EMBEDDED_ASSET_BUNDLE_BASE64__")) { throw "build-standalone.ps1 must not wrap the full asset bundle in Base64." }
@@ -142,6 +149,7 @@ for ($index = $selfExtractBuilderStart; $index -lt $selfExtractBuilderBytes.Leng
 $buildCompatibilityFiles = @(
   "build-standalone.ps1",
   "scripts\build-self-extract.ps1",
+  "scripts\check-powershell-syntax.ps1",
   "scripts\verify-standalone.ps1",
   "scripts\verify-self-extract.ps1",
   "scripts\dependency-tools.ps1",

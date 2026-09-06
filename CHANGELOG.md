@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 - Build preflight, canonical app icon, and mobile help hardening - 2026-09-06
+
+- Added `scripts/check-powershell-syntax.ps1` and run it before local / CI builds to catch parser errors before repository checks.
+- The preflight also rejects BOM-less PowerShell source containing non-ASCII bytes, preventing Windows PowerShell 5.1 mojibake from turning localized strings into syntax failures.
+- Added `assets/favicon.svg` as the canonical icon source. The readable build now embeds the exact same SVG payload for both the browser favicon and upper-left application brand icon, and verification rejects drift between them.
+- Reworked the help dialog into a viewport-bounded flex layout with a dedicated scroll body and safe-area-aware bottom padding so long Japanese / English help remains reachable on smartphones.
+- Documented `Set-StrictMode` collection normalization (`@(...)` before `.Count`) and expanded release / offline checks for the new guardrails.
+
 ## 1.2.2 - WebRTC DataChannel-ready connection gate - 2026-09-01
 
 - Application `onConnected` now waits for both PeerConnection `connected` and the designated readiness DataChannel `open`.

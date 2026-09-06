@@ -52,4 +52,6 @@ Ask for a review at these natural boundaries:
 - Touch and narrow-screen behavior is working.
 - Export/import behavior is working.
 - Dependencies and licenses are final.
+- PowerShell syntax / encoding preflight passes before the build.
 - Build and no-network verification pass.
+- Smartphone help / modal content remains fully reachable at short viewport heights.

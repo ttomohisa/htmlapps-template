@@ -121,7 +121,7 @@ The upper-right header includes a compact help button. It opens a bilingual â€œä
 - limitations and data-loss risks,
 - any browser or device constraints relevant to the app.
 
-Acceptance criteria: help content is updated together with each user-facing behavior change and contains no leftover starter instructions.
+Acceptance criteria: help content is updated together with each user-facing behavior change, contains no leftover starter instructions, and remains fully scrollable at narrow smartphone widths / short viewport heights so the final item and close control are always reachable.
 
 ## WebRTC readiness requirement
 
