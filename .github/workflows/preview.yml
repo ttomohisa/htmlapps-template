@@ -113,7 +113,24 @@ jobs:
             throw "Cloudflare Preview deployment failed with exit code $($process.ExitCode)."
           }
 
-          $jsonText = Get-Content -Raw -Encoding UTF8 $stdoutPath
+          $stdoutBytes = [System.IO.File]::ReadAllBytes($stdoutPath)
+
+          if ($stdoutBytes.Length -ge 2 -and $stdoutBytes[0] -eq 0xFF -and $stdoutBytes[1] -eq 0xFE) {
+            $jsonText = [System.Text.Encoding]::Unicode.GetString($stdoutBytes)
+          } elseif ($stdoutBytes.Length -ge 2 -and $stdoutBytes[0] -eq 0xFE -and $stdoutBytes[1] -eq 0xFF) {
+            $jsonText = [System.Text.Encoding]::BigEndianUnicode.GetString($stdoutBytes)
+          } else {
+            $jsonText = [System.Text.Encoding]::UTF8.GetString($stdoutBytes)
+          }
+
+          $jsonStart = $jsonText.IndexOf('{')
+          $jsonEnd = $jsonText.LastIndexOf('}')
+
+          if ($jsonStart -lt 0 -or $jsonEnd -lt $jsonStart) {
+            throw "Wrangler completed successfully but did not return a JSON object."
+          }
+
+          $jsonText = $jsonText.Substring($jsonStart, $jsonEnd - $jsonStart + 1)
           $result = $jsonText | ConvertFrom-Json
           $previewUrl = [string]$result.preview.urls[0]
 
