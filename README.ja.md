@@ -116,7 +116,7 @@ dist/
 - `CLOUDFLARE_API_TOKEN` — Workers Scriptsを編集できるCloudflare API Token
 - `CLOUDFLARE_ACCOUNT_ID` — Preview Workerを置くCloudflare Account ID
 
-両方のSecretが利用できる場合、`.github/workflows/preview.yml` は通常のPowerShell事前検査とRepository Checkを実行して `dist` を生成し、固定したWrangler `4.135.0` で共有Worker `bk-previews` へPreviewを作成します。PreviewはGitHubのrepository IDとPR番号から一意に識別し、URLの疎通確認後にPRコメントへ固定URLを投稿・更新します。PRを閉じるとPreviewも自動削除します。
+両方のSecretが利用できる場合、`.github/workflows/preview.yml` はPRの作成・更新・再オープン時に通常のPowerShell事前検査とRepository Checkを実行して `dist` を生成し、固定したWrangler `4.135.0` で共有Worker `bk-previews` へPreviewを作成します。PreviewはGitHubのrepository IDとPR番号から一意に識別し、URLの疎通確認後にPRコメントへ固定URLを投稿・更新します。PRを閉じたときは、別workflowの `.github/workflows/preview-cleanup.yml` がPreviewを削除します。
 
 CloudflareのSecretをfork由来のPRへ渡さないよう、Preview deploymentは同一repository内のbranchから作成されたPRだけを対象にします。このテンプレートから新しいrepositoryを作成してもGitHub ActionsのSecretは引き継がれないため、PR Previewを使う各repositoryで2つのSecretを設定してください。Secretがないrepositoryではビルド検証は通常どおり実行し、Preview deploymentだけをnotice付きでスキップします。
 
