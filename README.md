@@ -20,7 +20,7 @@ GitHub Pages delivers the initial HTML. The starter is designed so application p
 
 ## Features
 
-- Build a complete browser app into `dist/index.html`
+- Build a complete browser app into `dist/index.html` and automatically copy the readable build to the repository root using the repository name without a leading `htmlapps-` (for example `htmlapps-tap-counter` → `tap-counter.html`)
 - Also generate an optional gzip self-extracting `dist/index.self-extract.html`
 - Build on Windows by double-clicking `build-standalone.bat`
 - No Python or Node.js required for the standard build flow
@@ -76,7 +76,7 @@ dist/
 └─ .nojekyll
 ```
 
-`dist/index.html` and `dist/index.self-extract.html` are generated files. Edit `src/index.template.html` and rebuild instead of modifying them directly.
+`dist/index.html`, `dist/index.self-extract.html`, and the repository-root readable copy are generated files. The root copy is named from `app.config.json` → `repository.name` with a leading `htmlapps-` removed and is byte-for-byte identical to `dist/index.html`. For example, `htmlapps-tap-counter` generates `tap-counter.html`. Edit `src/index.template.html` and rebuild instead of modifying generated HTML directly.
 
 ## Usage
 
