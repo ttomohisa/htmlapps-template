@@ -71,25 +71,50 @@ jobs:
         run: |
           $env:CLOUDFLARE_API_TOKEN = $env:CLOUDFLARE_API_TOKEN.Trim()
           $env:CLOUDFLARE_ACCOUNT_ID = $env:CLOUDFLARE_ACCOUNT_ID.Trim()
+          $env:NO_COLOR = "1"
 
           if ($env:CLOUDFLARE_ACCOUNT_ID -notmatch '^[A-Za-z0-9_-]+$') {
             throw "CLOUDFLARE_ACCOUNT_ID contains invalid characters. Save only the Account ID value in the GitHub secret, without quotes or extra text."
           }
 
           $previewName = "r${{ github.event.repository.id }}-pr-${{ github.event.pull_request.number }}"
+          $stdoutPath = Join-Path $env:RUNNER_TEMP "wrangler-preview.json"
+          $stderrPath = Join-Path $env:RUNNER_TEMP "wrangler-preview.stderr.log"
+
           Write-Host "Preview name: $previewName"
 
-          $output = & npx --yes "wrangler@$env:WRANGLER_VERSION" preview `
-            --config wrangler.preview.jsonc `
-            --name $previewName `
-            --message "PR #${{ github.event.pull_request.number }} ${{ github.event.pull_request.head.sha }}" `
-            --json
+          $arguments = @(
+            "--yes"
+            "wrangler@$env:WRANGLER_VERSION"
+            "preview"
+            "--config"
+            "wrangler.preview.jsonc"
+            "--name"
+            $previewName
+            "--json"
+          )
 
-          if ($LASTEXITCODE -ne 0) {
-            throw "Cloudflare Preview deployment failed."
+          $process = Start-Process -FilePath "npx.cmd" `
+            -ArgumentList $arguments `
+            -NoNewWindow `
+            -Wait `
+            -PassThru `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath
+
+          if (Test-Path $stderrPath) {
+            $stderrText = Get-Content -Raw -Encoding UTF8 $stderrPath
+            if (-not [string]::IsNullOrWhiteSpace($stderrText)) {
+              Write-Host $stderrText
+            }
           }
 
-          $result = (($output -join [Environment]::NewLine) | ConvertFrom-Json)
+          if ($process.ExitCode -ne 0) {
+            throw "Cloudflare Preview deployment failed with exit code $($process.ExitCode)."
+          }
+
+          $jsonText = Get-Content -Raw -Encoding UTF8 $stdoutPath
+          $result = $jsonText | ConvertFrom-Json
           $previewUrl = [string]$result.preview.urls[0]
 
           if ([string]::IsNullOrWhiteSpace($previewUrl)) {
