@@ -20,7 +20,7 @@ GitHub Pagesから最初のHTMLを取得した後は、アプリ内の処理を�
 
 ## 主な機能
 
-- ブラウザーアプリ全体を `dist/index.html` 1ファイルへビルド
+- ブラウザーアプリ全体を `dist/index.html` 1ファイルへビルドし、リポジトリ名先頭の `htmlapps-` を外した名前（例: `htmlapps-tap-counter` → `tap-counter.html`）でもリポジトリ直下へ自動コピー
 - gzip自己解凍版 `dist/index.self-extract.html` も任意で生成
 - Windowsでは `build-standalone.bat` をダブルクリックしてビルド可能
 - 標準のビルド手順ではPythonやNode.jsが不要
