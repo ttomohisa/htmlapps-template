@@ -15,12 +15,13 @@ build-standalone.ps1         Dependency lock verification, embed, and build
 scripts/check-dependency-updates.ps1  Update discovery/reporting
 scripts/update-dependency.ps1          Reviewed upgrade helper
 scripts/verify-standalone.ps1 Static release checks
+<repo-name-without-htmlapps->.html  Generated repository-root copy of the readable artifact
 dist/index.html              Generated readable release artifact
 dist/index.self-extract.html Generated gzip self-extracting artifact
 dist/build-size-report.json    Generated size and embedded-asset storage report
 ```
 
-`dist/index.html` and `dist/index.self-extract.html` are generated and must not be edited manually.
+`dist/index.html`, `dist/index.self-extract.html`, and the repository-root readable copy are generated and must not be edited manually. The root copy is named from `app.config.json` `repository.name`, with a leading `htmlapps-` removed, and must remain byte-for-byte identical to `dist/index.html`.
 
 
 ## Reusable component layer
@@ -42,7 +43,7 @@ The starter includes the canonical confirmation and toast APIs in the default so
 9. Optionally gzip each declared asset (`gzip` / `auto`), then Base64-encode the stored bytes exactly once.
 10. Embed the asset bundle JSON directly, avoiding a second Base64 wrapper around the whole bundle.
 11. Replace the three source placeholders exactly once.
-12. Write and verify `dist/index.html`.
+12. Write and verify `dist/index.html`, then copy it byte-for-byte to the repository root using `repository.name` with a leading `htmlapps-` removed.
 13. Gzip that HTML, embed it into a small ASCII-only native `DecompressionStream` loader, inherit the readable HTML favicon, and write `dist/index.self-extract.html`.
 14. Verify that the loader stays ASCII-only and embedded-only, the favicon matches the readable HTML, and the gzip payload restores byte-for-byte.
 15. Write manifests, `build-size-report.json`, and `dist/.nojekyll`; emit warning-only size-budget messages when configured thresholds are exceeded.
