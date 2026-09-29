@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added automatic repository-root HTML generation: normal builds copy `dist/index.html` byte-for-byte to `<repository-name-without-htmlapps-prefix>.html`, and repository checks verify the copy exists and matches.
+
 - Split Cloudflare PR Preview creation and PR-close cleanup into separate workflows so normal Preview runs contain only deployment checks and cleanup runs independently on `closed`.
 
 - Added optional Cloudflare Workers PR Previews using pinned Wrangler 4.135.0, with same-repository secret protection, standalone build verification, Preview probing, stable PR comments, and automatic cleanup when a PR closes.

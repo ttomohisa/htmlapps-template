@@ -79,6 +79,7 @@ jobs:
         with:
           name: standalone-html-${{ github.sha }}
           path: |
+            *.html
             dist/index.html
             dist/index.self-extract.html
             dist/dependency-manifest.json

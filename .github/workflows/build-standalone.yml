@@ -43,6 +43,7 @@ jobs:
         with:
           name: standalone-html-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            *.html
             dist/index.html
             dist/index.self-extract.html
             dist/dependency-manifest.json

@@ -7,7 +7,7 @@ This file is the product contract for the application created from this template
 - **Working name:** Single HTML App Starter
 - **One-sentence purpose:** Demonstrate the template's local-first, responsive, bilingual, single-file application foundation.
 - **Primary users:** Developers and LLM coding agents starting a new browser utility.
-- **Release artifacts:** `dist/index.html` and `dist/index.self-extract.html`
+- **Release artifacts:** `dist/index.html`, `dist/index.self-extract.html`, and a repository-root copy of the readable build named from `repository.name` with a leading `htmlapps-` removed
 
 ## 2. Problem and outcome
 
@@ -80,7 +80,7 @@ Current stable desktop and mobile versions of Chromium, Firefox, and Safari. Dir
 
 ## 10. Acceptance criteria
 
-- `build-standalone.ps1` produces the readable HTML and a gzip self-extracting variant.
+- `build-standalone.ps1` produces the readable HTML, a gzip self-extracting variant, and an exact repository-root copy named from `repository.name` with a leading `htmlapps-` removed (for example `htmlapps-tap-counter` → `tap-counter.html`).
 - Embedded asset bytes are Base64-encoded exactly once; the complete asset-bundle JSON is not wrapped in a second Base64 layer.
 - Assets configured with `gzip` / `auto` can be read through the async embedded-asset API, and the build writes `build-size-report.json`.
 - `scripts/verify-standalone.ps1` passes.
