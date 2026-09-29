@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Added optional Cloudflare Workers PR Previews using pinned Wrangler 4.135.0, with same-repository secret protection, standalone build verification, Preview probing, stable PR comments, and automatic cleanup when a PR closes.
+- Added `wrangler.preview.jsonc` for the shared `bk-previews` static-assets Worker while keeping GitHub Pages as the production publishing path.
+- Documented the required `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets and the fact that template-created repositories must configure them individually.
+
 ## 1.3.0 - Build preflight, canonical app icon, and mobile help hardening - 2026-09-06
 
 - Added `scripts/check-powershell-syntax.ps1` and run it before local / CI builds to catch parser errors before repository checks.

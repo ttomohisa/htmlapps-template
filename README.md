@@ -33,6 +33,7 @@ GitHub Pages delivers the initial HTML. The starter is designed so application p
 - Avoid runtime CDN, remote fonts, analytics, and telemetry by default
 - Run a Windows PowerShell syntax / encoding preflight before builds so quoting errors and BOM-less non-ASCII scripts fail early
 - Validate builds and deploy GitHub Pages with GitHub Actions
+- Create Cloudflare Workers PR Previews when Cloudflare repository secrets are configured, then probe and comment the stable Preview URL
 - Use `assets/favicon.svg` as the single icon source for both the browser favicon and upper-left application brand icon
 - Start with Japanese / English UI, responsive layout, keyboard access, and a light-only interface
 - Reuse confirmation dialogs, Undo toasts, popover menus, numeric setting fields, async-state guards, and smartphone bottom bars with page switching
@@ -105,6 +106,21 @@ A typical development cycle is:
 | `build-standalone.bat` | Windows build entry point |
 | `build-standalone.ps1` | Standalone HTML builder |
 | `docs/LLM_WORKFLOW.md` | Recommended workflow for coding LLMs |
+
+## Preview pull requests with Cloudflare Workers
+
+The template includes an optional PR Preview workflow for checking the generated app on desktop and real smartphones before merge.
+
+Configure these repository secrets under **Settings → Secrets and variables → Actions**:
+
+- `CLOUDFLARE_API_TOKEN` — a token that can edit Workers Scripts
+- `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account ID that owns the Preview Worker
+
+When both secrets are available, `.github/workflows/preview.yml` runs the normal PowerShell preflight and repository check, builds `dist`, and deploys it with pinned Wrangler `4.135.0` to the shared `bk-previews` Worker. Each repository/PR gets a stable Preview identified from the GitHub repository ID and PR number. The workflow probes the URL, posts or updates the Preview link on the PR, and deletes the Preview when the PR closes.
+
+Preview deployment is limited to branches from the same repository so Cloudflare credentials are not exposed to forked pull requests. Repositories created from this template do not inherit GitHub Actions secrets; configure the two secrets in each repository where PR Preview hosting is desired. If the secrets are absent, the build still runs and Preview deployment is skipped with a workflow notice.
+
+`wrangler.preview.jsonc` is Preview-only configuration. Production publishing remains on GitHub Pages unless an application intentionally changes its hosting setup.
 
 ## Publish with GitHub Pages
 

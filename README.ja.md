@@ -33,6 +33,7 @@ GitHub Pagesから最初のHTMLを取得した後は、アプリ内の処理を�
 - 実行時CDN、外部フォント、分析タグ、テレメトリを初期状態では使用しない
 - ビルド前にWindows PowerShellの構文・文字コードを検査し、引用符ミスやBOMなし非ASCIIスクリプトを早期検出
 - GitHub Actionsでビルド検証とGitHub Pages公開
+- Cloudflare用Secretが設定されたリポジトリでは、PRごとにWorkers Previewを自動作成し、疎通確認後に固定Preview URLをPRへコメント
 - `assets/favicon.svg` をfaviconと左上ブランドアイコンの共通ソースとして使用
 - 日英UI、レスポンシブ表示、キーボード操作、ライトモード固定のスターター
 - 確認ダイアログ、Undo Toast、ポップオーバーメニュー、数値設定、非同期状態ガード、ページ切替対応のスマホ固定ボトムバーを再利用可能
@@ -105,6 +106,21 @@ dist/
 | `build-standalone.bat` | Windows向けビルド入口 |
 | `build-standalone.ps1` | 単一HTMLビルダー |
 | `docs/LLM_WORKFLOW.ja.md` | コーディングLLMへ依頼する推奨手順 |
+
+## Pull RequestをCloudflare Workersでプレビューする
+
+このテンプレートには、マージ前に生成済みアプリをPCや実際のスマートフォンから確認するための、任意のPR Preview workflowが含まれています。
+
+**Settings → Secrets and variables → Actions** で、次のRepository Secretを設定します。
+
+- `CLOUDFLARE_API_TOKEN` — Workers Scriptsを編集できるCloudflare API Token
+- `CLOUDFLARE_ACCOUNT_ID` — Preview Workerを置くCloudflare Account ID
+
+両方のSecretが利用できる場合、`.github/workflows/preview.yml` は通常のPowerShell事前検査とRepository Checkを実行して `dist` を生成し、固定したWrangler `4.135.0` で共有Worker `bk-previews` へPreviewを作成します。PreviewはGitHubのrepository IDとPR番号から一意に識別し、URLの疎通確認後にPRコメントへ固定URLを投稿・更新します。PRを閉じるとPreviewも自動削除します。
+
+CloudflareのSecretをfork由来のPRへ渡さないよう、Preview deploymentは同一repository内のbranchから作成されたPRだけを対象にします。このテンプレートから新しいrepositoryを作成してもGitHub ActionsのSecretは引き継がれないため、PR Previewを使う各repositoryで2つのSecretを設定してください。Secretがないrepositoryではビルド検証は通常どおり実行し、Preview deploymentだけをnotice付きでスキップします。
+
+`wrangler.preview.jsonc` はPR Preview専用設定です。本番公開は、個別アプリで明示的に変更しない限り従来どおりGitHub Pagesを使用します。
 
 ## GitHub Pagesで公開する
 
