@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Split Cloudflare PR Preview creation and PR-close cleanup into separate workflows so normal Preview runs contain only deployment checks and cleanup runs independently on `closed`.
+
 - Added optional Cloudflare Workers PR Previews using pinned Wrangler 4.135.0, with same-repository secret protection, standalone build verification, Preview probing, stable PR comments, and automatic cleanup when a PR closes.
 - Added `wrangler.preview.jsonc` for the shared `bk-previews` static-assets Worker while keeping GitHub Pages as the production publishing path.
 - Documented the required `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets and the fact that template-created repositories must configure them individually.
