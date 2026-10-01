@@ -124,8 +124,14 @@ foreach ($token in @("bytesAsync", "blobUrlAsync", "outputFilename", "window.App
 }
 
 $builderText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "build-standalone.ps1")
-foreach ($token in @("compressionSetting", "Compress-GzipBytes", "build-size-report.json", "sizeBudget", "DependencyLockPath", "tarballSha256", "__EMBEDDED_ASSET_BUNDLE_JSON__", "AppIconPath", "__APP_ICON_DATA_URI__", "rootHtmlOutputPath", 'StartsWith("htmlapps-"')) {
+foreach ($token in @("compressionSetting", "Compress-GzipBytes", "build-size-report.json", "sizeBudget", "DependencyLockPath", "tarballSha256", "__EMBEDDED_ASSET_BUNDLE_JSON__", "AppIconPath", "__APP_ICON_DATA_URI__", "rootHtmlOutputPath")) {
   if (-not $builderText.Contains($token)) { throw "build-standalone.ps1 is missing required asset pipeline marker: $token" }
+}
+# Match only the StartsWith call prefix so the check accepts overloads such as
+# StartsWith("htmlapps-", [System.StringComparison]::OrdinalIgnoreCase).
+$repositoryPrefixMarker = 'StartsWith("htmlapps-"'
+if (-not $builderText.Contains($repositoryPrefixMarker)) {
+  throw "build-standalone.ps1 must strip the htmlapps- repository prefix when generating the repository-root HTML filename."
 }
 if ($builderText.Contains("__EMBEDDED_ASSET_BUNDLE_BASE64__")) { throw "build-standalone.ps1 must not wrap the full asset bundle in Base64." }
 
