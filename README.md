@@ -36,6 +36,7 @@ GitHub Pages delivers the initial HTML. The starter is designed so application p
 - Create Cloudflare Workers PR Previews when Cloudflare repository secrets are configured, then probe and comment the stable Preview URL
 - Use `assets/favicon.svg` as the single icon source for both the browser favicon and upper-left application brand icon
 - Start with Japanese / English UI, responsive layout, keyboard access, and a light-only interface
+- Embed pinned Browser Kitty UI 1.0.0 at build time: shared language preference, confirmed browser-save status with retry, and consistent disabled/busy buttons. See [component API](docs/COMPONENTS.md).
 - Reuse confirmation dialogs, Undo toasts, popover menus, numeric setting fields, async-state guards, and smartphone bottom bars with page switching
 - Keep product requirements in `APP_SPEC.md` and implementation rules for coding LLMs in `AGENTS.md`
 - Require file-producing apps to let users edit the output filename before export

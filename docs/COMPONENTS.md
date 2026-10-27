@@ -2,7 +2,50 @@
 
 `components/` contains UI snippets that can be reused when creating a new single-HTML app from this template.
 
-They are not automatically loaded by the builder. Copy or adapt the component into `src/index.template.html` so the release remains one self-contained HTML file. Most components are dependency-free; the WebRTC QR pairing component is dependency-aware and uses pinned assets through the existing standalone asset pipeline.
+Most snippets are copied or adapted into `src/index.template.html`. The pinned UI conventions below are embedded by the builder. The release remains one self-contained HTML file. Most components are dependency-free; the WebRTC QR pairing component uses pinned assets through the existing standalone asset pipeline.
+
+## Browser Kitty UI conventions 1.0.0
+
+This repository owns the canonical dependency-free `components/ui-conventions.js` and `.css`. Consumers vendor the exact bytes, `components/ui-conventions.lock.json`, and `scripts/embed-ui-conventions.ps1`; they update their adapters independently. There is no runtime fetch and no automatic upgrade. Preserve LF line endings because pins describe file bytes.
+
+Use exactly one CSS and JS placeholder in the app source:
+
+```html
+<style>__BK_UI_CSS__</style>
+<script>__BK_UI_JS__</script>
+```
+
+Embed shared CSS after the app CSS so explicit shared button states keep their specified colors. In the existing PowerShell builder, after reading the template and before other substitutions:
+
+```powershell
+. (Join-Path $Root 'scripts\embed-ui-conventions.ps1')
+$template = Expand-BrowserKittyUI -Template $template -ComponentsPath (Join-Path $Root 'components')
+```
+
+The helper requires one occurrence of each marker and validates SHA-256 against the lock before substitution. The lock shape is `{ "version": "1.0.0", "source": "htmlapps-template", "files": { "ui-conventions.js": "<sha256>", "ui-conventions.css": "<sha256>" } }`. Record the component/rules version in HTML metadata. Keep lock updates intentional and copy both canonical assets together; do not fix drift by blindly accepting a new hash.
+
+The browser global is `BrowserKittyUI`; Node can `require()` the same file. The public API is:
+
+| API | Contract |
+| --- | --- |
+| `version`, `languageKey` | `1.0.0`, `browser-kitty:ui-language:v1` |
+| `resolveLanguage({url, storage, legacyKeys, languages})` | Read only: valid URL ja/en → shared preference → ordered legacy keys → first supported navigator language → en. Regional navigator language tags resolve to ja/en. Omitted dependencies use safe browser defaults. Passing `storage:null` disables storage. URL and legacy values never write the shared preference. |
+| `chooseLanguage(language, {storage, url, history})` | Validate ja/en, explicitly write the shared key, replace an existing URL lang without adding history. Return `{language,persisted,urlUpdated}` even when storage/history fails. Application applies the language and announces `languageSessionOnly` when `persisted` is false. Never write the old app language key. |
+| `text(key, language, values)` | Common literal copy. Keys: `sessionOnly`, `manualSave`, `dirty`, `saving`, `saved`, `saveFailed`, `downloadStarted`, `previousResult`, `stopping`, `stopProcessing`, `cancel`, `languageSessionOnly`. `saved` accepts a display string `values.time`. Render through `textContent`. |
+| `setButtonState(button, state)` | `ready`, `unavailable`, `busy`, `stopping`; sets native disabled, `data-bk-state`, and busy semantics. Does not change labels or icons. App owns labels, reasons, valid preconditions and request guards. |
+| `setSaveStatus(element, {mode,state,language,time})` | Modes `session`, `manual`, `autosave`; states `dirty`, `saving`, `saved`, `error`. Text only, `role=status`, `aria-live=polite`. Session/manual modes always explain retention rather than claiming browser-save success. Only report autosave `saved` after confirming actual persistence of the current content. |
+
+```js
+let language = BrowserKittyUI.resolveLanguage({legacyKeys: ['my-app:language']});
+BrowserKittyUI.setButtonState(saveButton, result ? 'ready' : 'unavailable');
+BrowserKittyUI.setSaveStatus(status, {mode: 'autosave', state: 'error', language});
+```
+
+Opt in per control: `data-bk-button data-bk-variant="primary|secondary|danger"`. The stylesheet includes native `:disabled`, busy/stopping spinner, reduced motion, green focus rings, `data-bk-header-action` 44×44px targets, and `data-bk-save-status` text/error styles. It does not crawl the DOM or override unrelated buttons. Give disabled reasons beside the control. Keep language/help available during processing. Use `downloadStarted` after browser download handoff; ordinary downloads cannot confirm disk completion.
+
+Keep translations and state in the app. Changing language must retain inputs, selection and in-flight work, update document language/title/help/live labels, and never reactively switch another editing tab. Shared storage is same-origin only, with no guarantee between file URLs. Continue using existing `AppConfirm`, `AppToast` and async guards; this library does not persist projects or implement deletion.
+
+The starter demonstrates browser-save failure/retry, literal status, empty-text restoration, explicit language choice and busy clipboard guards. Run `node --test scripts/test-ui-conventions.cjs scripts/test-starter-ui.cjs` for behavior tests; the ordinary PowerShell repository check also runs hash/marker embed regressions without requiring Node.
 
 ## Fully serverless WebRTC QR pairing
 

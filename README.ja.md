@@ -36,6 +36,7 @@ GitHub Pagesから最初のHTMLを取得した後は、アプリ内の処理を�
 - Cloudflare用Secretが設定されたリポジトリでは、PRごとにWorkers Previewを自動作成し、疎通確認後に固定Preview URLをPRへコメント
 - `assets/favicon.svg` をfaviconと左上ブランドアイコンの共通ソースとして使用
 - 日英UI、レスポンシブ表示、キーボード操作、ライトモード固定のスターター
+- Browser Kitty共通UI 1.0.0を固定hashで内包。共通言語設定、確認済みのブラウザー保存状態と再試行、統一した無効・処理中ボタン。[部品API](docs/COMPONENTS.ja.md)を参照。
 - 確認ダイアログ、Undo Toast、ポップオーバーメニュー、数値設定、非同期状態ガード、ページ切替対応のスマホ固定ボトムバーを再利用可能
 - 製品仕様を `APP_SPEC.md`、コーディングLLM向け実装ルールを `AGENTS.md` に分離
 - ファイル出力アプリでは、保存前に出力ファイル名を編集できることを共通UXルール化

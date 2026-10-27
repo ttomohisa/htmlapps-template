@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added canonical Browser Kitty UI conventions 1.0.0 for language resolution, explicit shared preferences, literal save status, and opt-in disabled/busy button styles. Build-time embedding verifies pinned SHA-256 hashes and keeps both HTML variants offline.
+- Connected the starter to confirmed browser-save status with retry, busy clipboard protection, explicit output scope, accurate download-start notices, and language switching that preserves empty text and selection. Added behavior and embed regression tests and bilingual component documentation.
+
 - Added automatic repository-root HTML generation: normal builds copy `dist/index.html` byte-for-byte to `<repository-name-without-htmlapps-prefix>.html`, and repository checks verify the copy exists and matches.
 
 - Split Cloudflare PR Preview creation and PR-close cleanup into separate workflows so normal Preview runs contain only deployment checks and cleanup runs independently on `closed`.

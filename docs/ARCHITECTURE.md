@@ -42,7 +42,7 @@ The starter includes the canonical confirmation and toast APIs in the default so
 8. Calculate SHA-256 hashes for every original embedded asset.
 9. Optionally gzip each declared asset (`gzip` / `auto`), then Base64-encode the stored bytes exactly once.
 10. Embed the asset bundle JSON directly, avoiding a second Base64 wrapper around the whole bundle.
-11. Replace the three source placeholders exactly once.
+11. Verify pinned Browser Kitty UI component hashes and embed the CSS/JS markers exactly once, then replace the three data placeholders exactly once.
 12. Write and verify `dist/index.html`, then copy it byte-for-byte to the repository root using `repository.name` with a leading `htmlapps-` removed.
 13. Gzip that HTML, embed it into a small ASCII-only native `DecompressionStream` loader, inherit the readable HTML favicon, and write `dist/index.self-extract.html`.
 14. Verify that the loader stays ASCII-only and embedded-only, the favicon matches the readable HTML, and the gzip payload restores byte-for-byte.
@@ -68,6 +68,8 @@ The source template contains exactly one of each data placeholder:
 - `__APP_CONFIG_JSON__`
 - `__BUILD_MANIFEST_JSON__`
 - `__EMBEDDED_ASSET_BUNDLE_JSON__`
+
+It also declares one `__BK_UI_JS__` and one `__BK_UI_CSS__`. `scripts/embed-ui-conventions.ps1` validates `components/ui-conventions.lock.json` before replacing these with exact canonical file contents. The generated HTML records UI component version 1.0.0; no runtime import is added. See `docs/COMPONENTS.md` for the adapter API and pin format.
 
 `__APP_ICON_DATA_URI__` intentionally appears exactly twice: once for the browser favicon and once for the upper-left application brand icon. The builder reads `assets/favicon.svg` once and substitutes the same Base64 data URI into both locations; the standalone verifier rejects mismatched icon payloads.
 

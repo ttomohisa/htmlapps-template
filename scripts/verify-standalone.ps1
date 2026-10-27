@@ -7,7 +7,9 @@ param(
     "__APP_CONFIG_JSON__",
     "__BUILD_MANIFEST_JSON__",
     "__EMBEDDED_ASSET_BUNDLE_JSON__",
-    "__APP_ICON_DATA_URI__"
+    "__APP_ICON_DATA_URI__",
+    "__BK_UI_JS__",
+    "__BK_UI_CSS__"
   )
 )
 

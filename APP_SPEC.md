@@ -37,6 +37,11 @@ A successful replacement app should state here:
 - Copy text with a compatibility fallback.
 - Download UTF-8 plain text with a user-editable output filename and a predictable `.txt` extension.
 - Save the current text in local storage when available.
+- Embed the pinned Browser Kitty UI conventions 1.0.0 from canonical `components/ui-conventions.js` / `.css`. Builds reject missing/duplicate embed markers and SHA-256 drift against `components/ui-conventions.lock.json`.
+- Resolve language in this order: valid URL `lang`, shared preference, legacy app preference, first supported navigator language, English. Only explicit language choice writes the shared key; update an existing URL `lang` with `replaceState`. Storage failure keeps the screen switch and reports session-only language. Language changes preserve text, selection, and empty input.
+- Display browser autosave status directly below the workspace name. Show saved only after a successful write or successful restoration; retain work and provide Retry save, Copy text and Save text after a failed write. Only confirmed saves update the displayed time.
+- Mark common buttons explicitly; unavailable actions are natively disabled. Clipboard work uses a busy guard to prevent duplicate requests. Clear input is reversible and uses a normal secondary button.
+- Show that export includes all editor text, retain editable filenames, and report downloads as started rather than claiming disk completion.
 - Use the reusable `AppToast.show()` Undo pattern for reversible Clear / Restore sample operations. Reserve `AppConfirm.ask()` for irreversible or high-risk actions.
 - Switch Japanese and English without reloading.
 - Use a light-only interface; do not add a dark-mode or theme switcher.

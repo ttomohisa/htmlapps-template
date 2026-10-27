@@ -53,6 +53,7 @@ foreach ($relative in $required) {
 }
 
 & (Join-Path $Root "scripts\check-powershell-syntax.ps1") -RootPath $Root
+& (Join-Path $Root "scripts\test-ui-embed.ps1")
 
 $mobileBottomBarPath = Join-Path $Root "components\mobile-bottom-bar.html"
 $mobileBottomBarText = Get-Content -Raw -Encoding UTF8 $mobileBottomBarPath

@@ -2,7 +2,37 @@
 
 `components/` には、このテンプレートから新しい単一HTMLアプリを作るときに再利用できるUI部品を置きます。
 
-これらはビルダーが自動で読み込むライブラリではありません。必要な部品を `src/index.template.html` にコピーまたは組み込み、アプリの翻訳・状態・操作へ合わせて調整してください。最終成果物はこれまでどおり1つのHTMLです。多くは依存なしですが、WebRTC QRペアリングは既存のAsset Pipelineで固定バージョンのQRライブラリを内包する依存ありコンポーネントです。
+通常の部品は `src/index.template.html` にコピーまたは組み込みます。次の共通UI規約部品は固定版をビルダーが内包します。最終成果物は1つのHTMLです。WebRTC QRペアリングは既存のAsset Pipelineで固定版のQRライブラリを内包します。
+
+## Browser Kitty 共通UI規約 1.0.0
+
+このリポジトリの `components/ui-conventions.js` と `.css` が正本です。利用側は両ファイル、`components/ui-conventions.lock.json`、`scripts/embed-ui-conventions.ps1` をそのままコピーし、アプリ固有の接続処理を持ちます。実行時通信と自動更新はありません。SHA-256はファイルのバイト列を検証するため、LF改行を維持してください。
+
+ソースに各1個の `<style>__BK_UI_CSS__</style>` と `<script>__BK_UI_JS__</script>` を配置します。共通CSSはアプリCSSの後に置きます。既存ビルダーでテンプレートを読み込んだ後、他の置換の前に実行します。
+
+```powershell
+. (Join-Path $Root 'scripts\embed-ui-conventions.ps1')
+$template = Expand-BrowserKittyUI -Template $template -ComponentsPath (Join-Path $Root 'components')
+```
+
+ヘルパーはマーカーの欠落・重複と固定SHA-256の不一致で失敗します。lock形式は `{ "version": "1.0.0", "source": "htmlapps-template", "files": { "ui-conventions.js": "<sha256>", "ui-conventions.css": "<sha256>" } }`。配布HTMLにも規約・部品版を記録します。差異を消すためだけにhashを書き換えず、正本の両ファイルを意図的に更新してください。
+
+ブラウザーAPIは `BrowserKittyUI`、Nodeでは同じファイルを `require()` できます。
+
+| API | 契約 |
+| --- | --- |
+| `version`, `languageKey` | `1.0.0`, `browser-kitty:ui-language:v1` |
+| `resolveLanguage({url,storage,legacyKeys,languages})` | 読み取りのみ。有効なURL ja/en → 共通設定 → 指定順の旧設定 → ブラウザー言語一覧で最初の対応言語 → en。ja-JP等にも対応。省略時は安全にブラウザー既定値へアクセスし、`storage:null` は保存領域を使いません。URLや旧設定を読むだけで共通設定へ書き込みません。 |
+| `chooseLanguage(language,{storage,url,history})` | ja/enを検証し、明示操作時だけ共通設定を書きます。既存URLのlangだけを履歴追加なしで更新。失敗しても `{language,persisted,urlUpdated}` を返します。画面翻訳はアプリが行い、`persisted:false` なら `languageSessionOnly` を通知します。旧設定には書きません。 |
+| `text(key,language,values)` | 共通文言。`sessionOnly`, `manualSave`, `dirty`, `saving`, `saved`, `saveFailed`, `downloadStarted`, `previousResult`, `stopping`, `stopProcessing`, `cancel`, `languageSessionOnly`。`saved` は表示用文字列 `values.time` を追加できます。`textContent` で表示します。 |
+| `setButtonState(button,state)` | `ready`, `unavailable`, `busy`, `stopping`。実際のdisabled、`data-bk-state`、処理中の読み上げ属性を設定し、文言・アイコンは維持。前提条件、理由、進行形のラベル、二重処理ガードはアプリが持ちます。 |
+| `setSaveStatus(element,{mode,state,language,time})` | modeは`session/manual/autosave`、stateは`dirty/saving/saved/error`。文字列のみで表示し、`role=status`、`aria-live=polite` を設定。session/manualは保持条件を表示し、自動保存成功を主張しません。autosaveのsavedは現在の内容の永続化を確認した時だけ渡します。 |
+
+ボタンごとに `data-bk-button data-bk-variant="primary|secondary|danger"` を指定します。標準disabled、busy/stoppingスピナー、動きを減らす設定、緑のフォーカスリングに対応。`data-bk-header-action` は44×44pxの操作領域、`data-bk-save-status` は保存状態表示です。対象外のボタンへ一括適用しません。無効理由は近くに置き、処理中も言語・ヘルプを使えるようにします。通常ダウンロードには `downloadStarted` を使い、端末への書込み完了と誤認させません。
+
+翻訳・処理・保存・削除はアプリが所有します。言語切替で入力・選択・処理を維持し、document.lang、タイトル、ヘルプ、読み上げ名も更新します。別タブを突然切り替えません。共通設定は同じorigin内のみで、file URL間の共有は保証しません。既存 `AppConfirm`、`AppToast`、非同期ガードを引き続き使います。
+
+スターターは保存成功・失敗・再試行、空入力の復元、共通言語切替、コピーの二重実行防止を示します。動作検証は `node --test scripts/test-ui-conventions.cjs scripts/test-starter-ui.cjs`。通常のPowerShell検証はNodeなしでhashとマーカーの回帰検証も実行します。
 
 ## 完全サーバーレスWebRTC QRペアリング
 
