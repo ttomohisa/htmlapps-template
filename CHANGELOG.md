@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Preserve danger/secondary button contrast when app hover rules have greater specificity. Added an embedded browser cascade regression fixture covering enabled hover, disabled and busy states.
+
 - Added canonical Browser Kitty UI conventions 1.0.0 for language resolution, explicit shared preferences, literal save status, and opt-in disabled/busy button styles. Build-time embedding verifies pinned SHA-256 hashes and keeps both HTML variants offline.
 - Connected the starter to confirmed browser-save status with retry, busy clipboard protection, explicit output scope, accurate download-start notices, and language switching that preserves empty text and selection. Added behavior and embed regression tests and bilingual component documentation.
 

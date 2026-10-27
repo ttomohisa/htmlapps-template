@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shared UI cascade regression</title>
+<style id="app-css">.button:hover:not(:disabled) { background: #E9E9E5; color: #FFFFFF; } .button.primary:hover { background: #0E503F; } button:disabled { opacity: .5; }</style>
+<style id="shared-css">__BK_UI_CSS__</style>
+</head><body>
+<button id="danger" class="button fixture-hover" data-bk-button data-bk-variant="danger">Delete saved data</button>
+<button id="secondary" class="button fixture-hover" data-bk-button data-bk-variant="secondary">Save backup</button>
+<button id="disabled" class="button primary fixture-hover" data-bk-button data-bk-variant="danger" disabled>Unavailable</button>
+<button id="busy" class="button primary fixture-hover" data-bk-button data-bk-variant="primary" data-bk-state="busy" disabled>Saving...</button>
+<pre id="results" role="status"></pre>
+<script>__BK_UI_JS__</script>
+<script>
+// Simulate hover with :is(), preserving the native selector's specificity.
+// The real browser CSS engine still resolves all competing app/shared rules.
+for (const id of ['app-css','shared-css']) {
+  const style=document.getElementById(id);style.textContent=style.textContent.replace(/:hover/g,':is(:hover,.fixture-hover)');
+}
+const expected={danger:['rgb(140, 29, 24)','rgb(255, 255, 255)'],secondary:['rgb(255, 255, 255)','rgb(32, 40, 35)'],disabled:['rgb(231, 235, 231)','rgb(89, 99, 92)'],busy:['rgb(225, 240, 234)','rgb(22, 98, 79)']};
+const failures=[];
+const lines=Object.entries(expected).map(([id,want])=>{
+  const style=getComputedStyle(document.getElementById(id));
+  const got=[style.backgroundColor,style.color];
+  const pass=got.every((value,index)=>value===want[index])&&style.opacity==='1';
+  if(!pass)failures.push(id);
+  return (pass?'PASS ':'FAIL ')+id+' '+JSON.stringify(got)+' opacity='+style.opacity;
+});
+document.getElementById('results').textContent=lines.join('\n');
+document.documentElement.dataset.testResult=failures.length?'fail':'pass';
+if(failures.length)throw Error('Shared UI cascade regression: '+failures.join(', '));
+</script></body></html>

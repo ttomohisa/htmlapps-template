@@ -47,6 +47,8 @@ Keep translations and state in the app. Changing language must retain inputs, se
 
 The starter demonstrates browser-save failure/retry, literal status, empty-text restoration, explicit language choice and busy clipboard guards. Run `node --test scripts/test-ui-conventions.cjs scripts/test-starter-ui.cjs` for behavior tests; the ordinary PowerShell repository check also runs hash/marker embed regressions without requiring Node.
 
+Run `scripts/build-ui-cascade-fixture.ps1` and open `dist/ui-conventions-cascade.html` for the browser cascade regression. It checks computed foreground/background/opacity against competing app hover rules for danger, secondary, disabled and busy controls. Hover is simulated with `:is(:hover,.fixture-hover)` to preserve specificity. All four lines must report PASS.
+
 ## Fully serverless WebRTC QR pairing
 
 `components/webrtc-qr-pairing.html` is the canonical pattern when a Browser Kitty-style app needs to connect two browsers directly without a signaling server, STUN, TURN, WebSocket, or runtime API. It includes the UI and connection state machine rather than only a low-level helper.

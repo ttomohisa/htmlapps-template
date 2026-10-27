@@ -34,6 +34,8 @@ $template = Expand-BrowserKittyUI -Template $template -ComponentsPath (Join-Path
 
 スターターは保存成功・失敗・再試行、空入力の復元、共通言語切替、コピーの二重実行防止を示します。動作検証は `node --test scripts/test-ui-conventions.cjs scripts/test-starter-ui.cjs`。通常のPowerShell検証はNodeなしでhashとマーカーの回帰検証も実行します。
 
+`scripts/build-ui-cascade-fixture.ps1` の後に `dist/ui-conventions-cascade.html` を開くと、実際のブラウザーCSSエンジンで競合するアプリのhover規則との優先順位を検証します。danger・secondaryのhover、disabled、busyの背景・文字色・opacityの4行がすべてPASSであることを確認します。`:is(:hover,.fixture-hover)` で詳細度を保ったhoverを再現します。
+
 ## 完全サーバーレスWebRTC QRペアリング
 
 `components/webrtc-qr-pairing.html` は、Browser Kitty系アプリで2台のブラウザーを、シグナリングサーバー / STUN / TURN / WebSocket / 外部APIなしで直接つなぐ場合の標準パターンです。低レベル関数だけではなく、接続UIと状態管理をまとめて持ちます。
