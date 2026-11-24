@@ -14,3 +14,7 @@ Use a version bump for changes intended for distribution. An existing published 
 ## 日本語
 
 実リポジトリと一致する owner/name を app.config.json に設定したアプリだけが対象です。リリースごとにバージョンを上げ、`docs/releases/vX.Y.Z.md` を PR に含めてください。PR では読み取り権限で検証し、main へのマージ後に検証済みのコミットへタグを作ります。通常版・自己展開版 HTML と SHA256SUMS を下書き Release に添付してから公開します。公開済み Release は上書きせず、別コミットを指すタグは移動しません。中断時は同じコミットの失敗したワークフローを再実行します。アプリ固有のブラウザ回帰検査を公開前の検証ジョブに追加してください。
+
+Development PRs and pushes without versioned notes are still built but not published. A manual release dispatch on main with real repository metadata fails if the versioned notes are missing. This avoids publishing an initial development version simply because a new app sets its repository metadata.
+
+開発中にバージョン別リリースノートが未作成の場合はビルドだけを行い、公開しません。mainからの手動リリースでノートがなければエラーになります。
