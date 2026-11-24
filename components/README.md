@@ -17,3 +17,8 @@ WebRTC pairing details: [English](../docs/WEBRTC_QR_PAIRING.md) / [日本語](..
 ## WebRTC readiness note
 
 The WebRTC pairing component waits for the designated readiness DataChannel to open before reporting application-ready. Custom DataChannel layouts use `readyChannelLabel` for a reliable control channel.
+
+
+## Media file picker fallback
+
+`media-file-picker.html` is an optional source snippet for image/video tools whose OS media picker may omit files. It provides a smartphone-only secondary button with a separate unrestricted input. Both paths must use the app's actual validation/read handler. Localize `chooseMedia` and `chooseFiles`, narrow the primary accept attribute to the supported media, and handle asynchronous errors in the app's handler. Do not add this component to unrelated apps.

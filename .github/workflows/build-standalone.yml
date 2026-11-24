@@ -8,6 +8,8 @@ on:
     paths:
       - "src/**"
       - "scripts/**"
+      - "tests/**"
+      - "components/**"
       - "app.config.json"
       - "dependencies.json"
       - "dependencies.lock.json"
@@ -37,6 +39,29 @@ jobs:
       - name: Build and verify standalone HTML
         shell: pwsh
         run: ./scripts/check-repository.ps1
+
+      - name: Setup test tooling
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+
+      - name: Release packaging unit tests
+        shell: pwsh
+        run: |
+          node --test tests/release.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Release tests failed.' }
+
+      - name: Starter browser checks
+        shell: pwsh
+        run: |
+          $config = Get-Content app.config.json -Raw | ConvertFrom-Json
+          if ($config.slug -ne 'single-html-app-starter') { exit 0 }
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.58.2
+          if ($LASTEXITCODE -ne 0) { throw 'Playwright install failed.' }
+          npx playwright install chromium
+          if ($LASTEXITCODE -ne 0) { throw 'Chromium install failed.' }
+          node tests/starter-layout.browser.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Starter browser checks failed.' }
 
       - name: Upload standalone artifact
         uses: actions/upload-artifact@v7

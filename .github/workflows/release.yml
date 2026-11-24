@@ -44,6 +44,11 @@ jobs:
         run: |
           ./scripts/check-powershell-syntax.ps1
           ./scripts/check-repository.ps1
+      - name: Release packaging unit tests
+        shell: pwsh
+        run: |
+          node --test tests/release.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Release tests failed.' }
       - name: Check release configuration
         id: config
         shell: pwsh

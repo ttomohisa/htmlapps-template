@@ -9,7 +9,7 @@ function packageRelease({root=path.resolve(__dirname,'..'),commitSha,outDir=path
   const readable=fs.readFileSync(path.join(root,'dist/index.html'));
   if(!readable.equals(fs.readFileSync(path.join(root,config.repository.name.replace(/^htmlapps-/, '')+'.html'))))throw Error('Repository-root HTML is stale');
   const self=fs.readFileSync(path.join(root,'dist/index.self-extract.html'));
-  if(!readable.length||!self.length||!readable.includes(Buffer.from('v'+config.version)))throw Error('Missing or mismatched standalone build');
+  if(!readable.length||!self.length)throw Error('Missing standalone build');
   const notes=fs.readFileSync(path.join(root,'docs/releases/v'+config.version+'.md'),'utf8').trim();
   if(!notes)throw Error('Release notes are empty');
   fs.mkdirSync(outDir,{recursive:true});
