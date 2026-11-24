@@ -5,3 +5,7 @@ dist/*
 *.part
 .DS_Store
 Thumbs.db
+
+release/
+node_modules/
+test-results/

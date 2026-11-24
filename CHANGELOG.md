@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Align app chrome with the recent OneFile Album-based common design: plain local-processing badge, 11px version, compact dialog close, aligned footer and mobile suppression of redundant chrome.
+- Keep intentionally empty text during language changes and reload; stack export controls on narrow screens.
+- Document concise bilingual copy, mobile media-picker fallback, favicon presentation and release verification.
+- Add a read-only PR build / main-only GitHub Release workflow with SHA-256 assets and immutable published releases.
+
 - Added automatic repository-root HTML generation: normal builds copy `dist/index.html` byte-for-byte to `<repository-name-without-htmlapps-prefix>.html`, and repository checks verify the copy exists and matches.
 
 - Split Cloudflare PR Preview creation and PR-close cleanup into separate workflows so normal Preview runs contain only deployment checks and cleanup runs independently on `closed`.

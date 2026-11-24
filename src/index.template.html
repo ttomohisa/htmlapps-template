@@ -77,6 +77,10 @@
     }
     .brand-mark img { width: 100%; height: 100%; display: block; }
     .brand-copy { min-width: 0; }
+    .header-actions { flex-shrink: 0; }
+    #brandName { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .brand-name { display: flex; align-items: center; }
+    .version-badge { flex-shrink: 0; }
     .brand-name {
       margin: 0;
       font-size: 17px;
@@ -95,7 +99,7 @@
       border-radius: 999px;
       color: var(--muted);
       background: var(--surface-muted);
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 650;
       vertical-align: 2px;
     }
@@ -118,7 +122,7 @@
     .button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
     .button:active { transform: translateY(1px); }
     .language-button {
-      min-width: 0;
+      min-width: 48px;
       padding: 5px 1px;
       border: 0;
       background: transparent;
@@ -147,8 +151,8 @@
     .icon-button:active { transform: translateY(1px); }
     .icon-button svg { width: 18px; height: 18px; display: block; }
     .header-icon-button {
-      width: auto;
-      height: auto;
+      width: 40px;
+      height: 40px;
       padding: 5px 1px;
       border: 0;
       border-radius: 0;
@@ -184,13 +188,13 @@
       gap: 7px;
       flex: 0 0 auto;
       margin-top: 3px;
-      padding: 7px 10px;
-      border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
-      border-radius: 999px;
+      padding: 7px 0;
+      border: 0;
+      border-radius: 0;
       color: var(--accent);
-      background: var(--accent-soft);
+      background: transparent;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 500;
       white-space: nowrap;
     }
     .local-badge svg { width: 15px; height: 15px; display: block; }
@@ -294,6 +298,13 @@
       border-bottom: 1px solid var(--line);
     }
     .dialog-header h2 { margin: 0; font-size: 17px; }
+    .dialog-close {
+      display: grid; place-items: center; flex: 0 0 auto;
+      width: 34px; height: 34px; padding: 0; border: 0; border-radius: 9px;
+      background: transparent; color: var(--text); cursor: pointer;
+    }
+    .dialog-close:hover { color: var(--muted); }
+    .dialog-close svg { width: 18px; height: 18px; }
     .dialog-body {
       min-height: 0;
       flex: 1 1 auto;
@@ -337,8 +348,8 @@
     .app-confirm-close {
       display: grid;
       place-items: center;
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       padding: 0;
       border: 0;
       border-radius: 10px;
@@ -346,8 +357,8 @@
       color: var(--text);
       cursor: pointer;
     }
-    .app-confirm-close:hover { background: var(--surface-hover); }
-    .app-confirm-close svg { width: 19px; height: 19px; }
+    .app-confirm-close:hover { opacity: .7; }
+    .app-confirm-close svg { width: 18px; height: 18px; }
     .app-confirm-body { padding: 18px; }
     .app-confirm-message {
       margin: 0;
@@ -390,7 +401,7 @@
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     @media (max-width: 820px) {
       .page-intro { align-items: stretch; flex-direction: column; gap: 10px; }
-      .local-badge { align-self: flex-start; }
+      .local-badge, body > footer { display: none; }
       .workspace-head, .section-head { align-items: stretch; flex-direction: column; }
       .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .build-grid { grid-template-columns: 1fr; }
@@ -413,6 +424,8 @@
       .toolbar, .button-row { width: 100%; }
       .button-row .button { flex: 1 1 auto; }
       .export-row, .export-field { width: 100%; }
+      .export-row { flex-direction: column; align-items: stretch; }
+      .export-field { min-width: 0; }
       .app-toast { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); max-width: none; }
       textarea { min-height: 235px; }
       #helpDialog {
@@ -466,11 +479,11 @@
     <section class="page-intro" aria-labelledby="heroTitle">
       <div>
         <h2 id="heroTitle" data-i18n="introTitle">単一HTMLアプリのスターター</h2>
-        <p data-i18n="lead">PDF Organizerと同じ、固定依存・完全内包・実行時通信なしの構成から、新しいブラウザーアプリを作れます。</p>
+        <p data-i18n="lead">テキストの文字数を数え、コピーやファイル保存ができます。</p>
       </div>
       <div class="local-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>
-        <span data-i18n="localBadge">実行時通信なし</span>
+        <span data-i18n="localBadge">完全ローカル処理</span>
       </div>
     </section>
 
@@ -538,7 +551,7 @@
     </section>
   </main>
 
-  <footer><span id="footerName">Single HTML App Starter</span> · MIT License · <span data-i18n="footer">Generated as one self-contained HTML file</span></footer>
+  <footer><span id="footerName">Single HTML App Starter</span> · MIT License · <span data-i18n="footer">Text is processed in your browser</span></footer>
   <div class="app-toast" id="appToast" role="status" aria-live="polite" aria-atomic="true" data-tone="default">
     <span class="app-toast-message" id="appToastMessage"></span>
     <button class="app-toast-action" id="appToastAction" type="button" hidden></button>
@@ -549,7 +562,7 @@
     <div class="app-confirm-header">
       <h2 class="app-confirm-title" id="appConfirmTitle">確認</h2>
       <button class="app-confirm-close" id="appConfirmClose" type="button" data-i18n-aria-label="close" aria-label="閉じる">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
     </div>
     <div class="app-confirm-body">
@@ -564,8 +577,8 @@
   <dialog id="helpDialog" aria-labelledby="helpTitle">
     <div class="dialog-header">
       <h2 id="helpTitle" data-i18n="helpTitle">使い方と注意事項</h2>
-      <button class="icon-button" id="closeHelpButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
+      <button class="dialog-close" id="closeHelpButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
     </div>
     <div class="dialog-body">
@@ -587,6 +600,8 @@
         <li data-i18n="helpNoteTemplate">この画面はスターターの例です。新しいアプリを作る際は、機能と一緒にこのヘルプも実際の操作へ書き換えます。</li>
       </ul>
       <p class="dialog-note" data-i18n="helpOffline">配布物は dist/index.html ひとつです。ローカルで直接開くことも、GitHub Pagesで公開することもできます。</p>
+      <h3 data-i18n="helpLicenseTitle">ライセンス</h3>
+      <p data-i18n="helpLicenseBody">このスターターは MIT License で公開されています。第三者ライブラリを追加した場合は、そのライセンスと通知も確認してください。</p>
       <!-- APP:HELP:END -->
     </div>
   </dialog>
@@ -709,14 +724,16 @@
           helpStep3: '「サンプルに戻す」や「消去」の直後は、トーストの「元に戻す」から取り消せます。',
           helpPrivacyTitle: 'プライバシー',
           helpPrivacyBody: '入力内容と操作はブラウザー内で処理され、このアプリから外部へ送信されません。必要なコードと依存ファイルも配布用HTMLに内包されます。',
+          helpLicenseTitle: 'ライセンス',
+          helpLicenseBody: 'このスターターは MIT License で公開されています。第三者ライブラリを追加した場合は、そのライセンスと通知も確認してください。',
           helpNotesTitle: '注意事項',
           helpNoteStorage: 'ブラウザーのサイトデータを削除すると、端末内に保存した入力内容も消える場合があります。必要な内容はファイルとして保存してください。',
           helpNoteBrowser: '一部の機能はブラウザーの制限や端末性能の影響を受けます。重要な成果物は保存後に内容を確認してください。',
           helpNoteTemplate: 'この画面はスターターの例です。新しいアプリを作る際は、機能と一緒にこのヘルプも実際の操作へ書き換えます。',
           helpOffline: '配布物は dist/index.html ひとつです。ローカルで直接開くことも、GitHub Pagesで公開することもできます。',
           introTitle: '単一HTMLアプリのスターター',
-          lead: 'PDF Organizerと同じ、固定依存・完全内包・実行時通信なしの構成から、新しいブラウザーアプリを作れます。',
-          localBadge: '実行時通信なし',
+          lead: 'テキストの文字数を数え、コピーやファイル保存ができます。',
+          localBadge: '完全ローカル処理',
           workspaceTitle: 'スターター作業領域',
           workspaceBody: '入力内容はこのブラウザー内だけに保存され、このアプリから送信されません。',
           characters: '文字', words: '単語', lines: '行', editorLabel: 'テキスト入力',
@@ -729,7 +746,7 @@
           card3Title: '実行時通信なし', card3Body: 'Content Security Policyで実行時通信を遮断し、ユーザーデータをページ内に保ちます。',
           card4Title: 'LLM向けの作業契約', card4Body: 'AGENTS.mdとAPP_SPEC.mdで、実装方針、受入条件、完了報告を安定して伝えます。',
           buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数',
-          footer: '完全内包HTMLとして生成', copied: 'コピーしました', copyFailed: 'コピーできませんでした', downloaded: 'テキストを保存しました', cleared: '入力を消去しました', restored: 'サンプルを復元しました'
+          footer: 'テキストはブラウザー内で処理されます', copied: 'コピーしました', copyFailed: 'コピーできませんでした', downloaded: 'テキストを保存しました', cleared: '入力を消去しました', restored: 'サンプルを復元しました'
         },
         en: {
           brandMeta: 'Single file · Local-first · GitHub Pages',
@@ -740,14 +757,16 @@
           helpStep3: 'After Restore sample or Clear, use Undo in the toast to reverse the change.',
           helpPrivacyTitle: 'Privacy',
           helpPrivacyBody: 'Your content and actions are processed in the browser and are not sent outside by this app. Required code and dependencies are embedded in the distributable HTML.',
+          helpLicenseTitle: 'License',
+          helpLicenseBody: 'This starter is distributed under the MIT License. If you add third-party libraries, check their licenses and notices as well.',
           helpNotesTitle: 'Notes',
           helpNoteStorage: 'Clearing browser site data may also remove content saved locally. Download anything important as a file.',
           helpNoteBrowser: 'Some features are affected by browser restrictions and device performance. Review important output after saving it.',
           helpNoteTemplate: 'This screen is a starter example. When building a new app, update this help together with the real features and workflow.',
           helpOffline: 'The deliverable is one dist/index.html file. It can open locally or be published with GitHub Pages.',
           introTitle: 'Single HTML App Starter',
-          lead: 'Build a new browser app from the same pinned-dependency, fully embedded, no-runtime-network foundation used by PDF Organizer.',
-          localBadge: 'No runtime network',
+          lead: 'Count characters, copy text or save it as a file.',
+          localBadge: 'Fully local processing',
           workspaceTitle: 'Starter workspace',
           workspaceBody: 'Text stays in this browser. It is never sent by this app.',
           characters: 'Characters', words: 'Words', lines: 'Lines', editorLabel: 'Text editor',
@@ -760,7 +779,7 @@
           card3Title: 'No runtime network', card3Body: 'Content Security Policy blocks runtime connections. User data stays inside the page.',
           card4Title: 'LLM-ready workflow', card4Body: 'AGENTS.md and APP_SPEC.md give coding agents a stable contract, acceptance criteria, and handoff format.',
           buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies',
-          footer: 'Generated as one self-contained HTML file', copied: 'Copied', copyFailed: 'Could not copy', downloaded: 'Text downloaded', cleared: 'Text cleared', restored: 'Sample restored'
+          footer: 'Text is processed in your browser', copied: 'Copied', copyFailed: 'Could not copy', downloaded: 'Text downloaded', cleared: 'Text cleared', restored: 'Sample restored'
         }
       };
 
@@ -884,7 +903,6 @@
         document.title = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
         $('#brandName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
         $('#footerName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
-        if (!editor.value) editor.value = sampleText[language];
         updateStats();
       }
       function updateStats() {
@@ -965,7 +983,7 @@
         });
       });
 
-      editor.value = readStorage(storageKeys.text) || sampleText[language];
+      editor.value = readStorage(storageKeys.text) ?? sampleText[language];
       outputFilename.value = APP_CONFIG.slug || 'text';
       $('#versionBadge').textContent = `v${APP_CONFIG.version}`;
       $('#buildVersion').textContent = APP_CONFIG.version;

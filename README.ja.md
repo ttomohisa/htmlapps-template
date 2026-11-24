@@ -281,3 +281,8 @@ Copyright © 2026 ttomohisa
 ## WebRTCテンプレート補足
 
 再利用QRペアリングコンポーネントでは、指定したDataChannelが `open` になって初めてアプリ接続済みとします。独自Channel構成ではreliableな制御Channelを `readyChannelLabel` に指定します。
+
+
+## タグと GitHub Release
+
+`app.config.json` の owner/name を実際のリポジトリに設定し、新しい SemVer と `docs/releases/vX.Y.Z.md` を PR に含めます。main への反映後、検証済みの単一HTML 2種類をタグと GitHub Release にまとめます。スターターの仮設定のままでは公開しません。[リリース手順](docs/RELEASING.md) を参照してください。

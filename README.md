@@ -122,6 +122,10 @@ Preview deployment is limited to branches from the same repository so Cloudflare
 
 `wrangler.preview.jsonc` is Preview-only configuration. Production publishing remains on GitHub Pages unless an application intentionally changes its hosting setup.
 
+## Versioned releases
+
+After setting the actual repository owner/name in `app.config.json`, prepare a new stable SemVer and `docs/releases/vX.Y.Z.md` in a PR. The release workflow validates and packages the two standalone HTML files, then creates a tag and GitHub Release on `main` only. The unchanged starter metadata does not publish releases. See [Release workflow](docs/RELEASING.md).
+
 ## Publish with GitHub Pages
 
 The repository includes a workflow that builds the generated HTML and deploys `dist` to GitHub Pages.

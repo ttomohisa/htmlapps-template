@@ -229,3 +229,17 @@ Do not claim a browser, device, build, or network test was performed unless it w
 ## WebRTC application-ready rule
 
 For WebRTC DataChannel apps, never treat raw `RTCPeerConnection.connectionState === 'connected'` as application-ready. Use the reusable component's `onConnected`. When `createDefaultChannel:false`, set `readyChannelLabel` to a reliable control channel.
+
+
+## Common app chrome and user-facing copy (November 2026)
+
+- Use the OneFile Album-style chrome implemented in the starter: unboxed shield + check privacy badge (12px, weight 500, no pill), version badge (11px, weight 650), and a 34px borderless dialog close button with an 18px SVG X. Maintain visible keyboard focus and an accessible name.
+- Hide the introductory local-processing badge and redundant page footer at smartphone widths (starter: 820px and below). Do not hide the privacy details or license information in Help/README. Never use “Fully local processing” for an app that sends user data to another device/server; describe the actual transfer.
+- Keep the same title font size in Japanese and English. Long names may ellipsize; reserve space for version, language and help controls. Use the same content width and horizontal padding for header, main and left-aligned footer. Footer format: app name · actual license(s) · one short privacy fact; preserve all required third-party license notices.
+- Make the hero and its description short and concrete: task/result, then only essential context. Avoid duplicate privacy copy, generic encouragement, technical internals and instructions that merely repeat labels. Hide the intro during an active full-screen/immersive workflow when it would obstruct the task, not automatically for every app.
+- Help should explain the actual steps in order, supported formats, limitations, privacy and data-loss risks. Collapse optional technical detail when helpful; keep all license notices reachable on smartphones. Do not remove necessary warnings just to shorten text.
+- For image/video pickers using `accept="image/*"` or `accept="video/*"`, offer a secondary “ファイルから選択” / “Choose from files” on smartphone layouts when the OS media picker cannot access the desired file. Use a separate unrestricted file input, route through the same validation/read function, reset the input value after handling, and keep cancellation non-destructive. Do not add a second choice to desktop or non-media tools without a demonstrated need.
+- Language switching must preserve selected files, editing state, settings, pending drafts and intentionally empty input. Test switching both ways in the middle of a workflow.
+- Use the canonical favicon artwork without excess internal padding; check actual appearance at 48/96px and keep the favicon/header/self-extract icon payload identical.
+- Test at 320px, 390px and a desktop width around 1360px, with both languages and a short smartphone viewport. Check fixed bars, long names, help scroll, touch actions and no overflow. Update app-specific browser regression tests; the starter's browser tests are examples to replace when changing the demo.
+- For release-ready apps, use the release workflow described in `docs/RELEASING.md`. Prepare a new SemVer and versioned notes in the PR. The validated main commit is tagged/published only after merge; PRs must have read-only permissions. Never move an existing tag or overwrite a published release.
