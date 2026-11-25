@@ -275,7 +275,7 @@
     .app-toast[data-tone="success"] { border-color: color-mix(in srgb, var(--accent) 34%, var(--line)); }
     .app-toast[data-tone="warning"] { border-color: #c58a24; }
     .app-toast-message { min-width: 0; flex: 1 1 auto; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
-    .app-toast-action { flex: 0 0 auto; min-height: 34px; padding: 5px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--accent); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .app-toast-action { flex: 0 0 auto; min-height: 44px; padding: 5px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--accent); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
     .app-toast-action:hover { background: var(--surface-hover); }
     .app-toast-action[hidden] { display: none; }
     dialog {
@@ -756,7 +756,7 @@
           card3Title: '実行時通信なし', card3Body: 'Content Security Policyで実行時通信を遮断し、ユーザーデータをページ内に保ちます。',
           card4Title: 'LLM向けの作業契約', card4Body: 'AGENTS.mdとAPP_SPEC.mdで、実装方針、受入条件、完了報告を安定して伝えます。',
           buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数',
-          footer: 'テキストはブラウザー内で処理されます', copied: 'コピーしました', copyFailed: 'コピーできませんでした', downloaded: 'テキストを保存しました', cleared: '入力を消去しました', restored: 'サンプルを復元しました'
+          footer: 'テキストはブラウザー内で処理されます', copied: 'コピーしました', copyFailed: 'コピーできませんでした', downloaded: 'ダウンロードを開始しました', cleared: '入力を消去しました', restored: 'サンプルを復元しました'
         },
         en: {
           brandMeta: 'Single file · Local-first · GitHub Pages',
@@ -788,7 +788,7 @@
           card3Title: 'No runtime network', card3Body: 'Content Security Policy blocks runtime connections. User data stays inside the page.',
           card4Title: 'LLM-ready workflow', card4Body: 'AGENTS.md and APP_SPEC.md give coding agents a stable contract, acceptance criteria, and handoff format.',
           buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies',
-          footer: 'Text is processed in your browser', copied: 'Copied', copyFailed: 'Could not copy', downloaded: 'Text downloaded', cleared: 'Text cleared', restored: 'Sample restored'
+          footer: 'Text is processed in your browser', copied: 'Copied', copyFailed: 'Could not copy', downloaded: 'Download started', cleared: 'Text cleared', restored: 'Sample restored'
         }
       };
 
@@ -884,6 +884,8 @@
           clearTimeout(timer);
           timer = 0;
           root.classList.remove('show');
+          action.hidden = true;
+          action.textContent = '';
           actionHandler = null;
         }
         function show({ message: text = '', actionLabel = '', onAction = null, duration = 3200, tone = 'default' } = {}) {

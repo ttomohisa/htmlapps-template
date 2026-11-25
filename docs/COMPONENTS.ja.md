@@ -269,3 +269,18 @@ mobileBar.setEnabled('save', true);
 - [`before-after.html`](../components/before-after.html) — 位置合わせ済み画像の比較。
 
 必要なものだけをソースにコピーし、ラベル・エラー文・ファイル検証・処理キャンセルをアプリ側で実装します。accept は検証ではありません。共有は対応環境でだけ表示し、ダウンロード開始は保存完了を保証しません。
+
+### 追加コンポーネントのAPI
+
+| 初期化 | API | 注意 |
+| --- | --- | --- |
+| `AppFilePicker.mount(root, options)` | `submit(files), clear(), setFiles(files), destroy()` | onFiles(files,{isCurrent}) で入力検証と非同期処理の世代確認を行い、拒否時は false を返します。 |
+| `AppFileExport.mount(root, options)` | `setResult(Blob|null), filename(), download(), destroy()` | 入力変更時は直ちに null を設定。onResult の download-started と shared を区別し、onError/onCancel を扱います。 |
+| `AppProgressPanel.mount(root)` | `render({phase,title,message,progress,onCancel,onRetry}), destroy()` | 計測できるときのみ0〜1の進捗を渡し、キャンセルでは実処理も停止します。 |
+| `action-toolbar.html` | `data-action, data-tone, native disabled` | 実際に必要な操作のみを割り当て、リセット・消去は出力操作と区別します。 |
+| `AppMediaPreview.mount(root, options)` | `setSource(blob,{kind,alt}), clear(), destroy()` | onReady で元の幅・高さと isCurrent を受け取り、アプリ側の世代管理と組み合わせます。 |
+| `AppRangeSlider.mount(root, options)` | `get(), set(start,end), setBounds(min,max), destroy()` | 独立したネイティブスライダーを使い、値には単位を付けて表示します。 |
+| `AppSegmentedControl.mount(root, options)` | `get(), set(value), destroy()` | ラジオグループの name はインスタンスごとに一意にし、onChange はユーザー操作で発火します。 |
+| `AppEmptyState.mount(root)` | `render({visible,title,body,actionLabel,onAction}), destroy()` | 対象の入力や結果がない場合のみ表示します。 |
+| `AppFullscreen.mount({target,button,dialog,...})` | `open(), close(), destroy()` | ダイアログ代替時は対象DOMを一時移動するため、動画再生やCanvasの状態はアプリ側で確認します。 |
+| `AppBeforeAfter.mount(root, options)` | `set(value), setImages({beforeUrl,afterUrl,width,height,...}), clear(), destroy()` | 位置合わせ済みのローカル画像を渡し、URLはアプリ側で管理します。 |
