@@ -30,6 +30,17 @@ const config=require('../app.config.json');
           assert.ok(await page.locator('#helpDialog').isVisible());
           await page.locator('[data-i18n="helpLicenseBody"]').scrollIntoViewIfNeeded();
           assert.ok(await page.locator('[data-i18n="helpLicenseBody"]').isVisible());
+          const buildInfo=page.locator('#helpDialog details.help-build-info');
+          assert.equal(await page.locator('main [data-i18n="buildInfo"]').count(),0);
+          assert.equal(await buildInfo.count(),1);
+          if(await buildInfo.evaluate(e=>e.open)) await buildInfo.locator('summary').click();
+          assert.ok(!(await page.locator('#buildVersion').isVisible()));
+          await buildInfo.locator('summary').click();
+          await page.locator('#dependencyCount').scrollIntoViewIfNeeded();
+          assert.equal(await page.locator('#buildVersion').textContent(),config.version);
+          assert.ok(await page.locator('#builtAt').isVisible());
+          assert.ok(await page.locator('#dependencyCount').isVisible());
+          await buildInfo.locator('summary').click();
           await page.keyboard.press('Escape');
           assert.ok(!(await page.locator('#helpDialog').isVisible()));
         }

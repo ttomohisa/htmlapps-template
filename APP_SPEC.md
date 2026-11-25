@@ -40,7 +40,7 @@ A successful replacement app should state here:
 - Use the reusable `AppToast.show()` Undo pattern for reversible Clear / Restore sample operations. Reserve `AppConfirm.ask()` for irreversible or high-risk actions.
 - Switch Japanese and English without reloading.
 - Use a light-only interface; do not add a dark-mode or theme switcher.
-- Expose build version, generation timestamp, and embedded dependency count.
+- Expose build version, generation timestamp, and embedded dependency count in a collapsed section at the end of the Help dialog, not in the main workspace.
 
 ## 5. Data and privacy
 

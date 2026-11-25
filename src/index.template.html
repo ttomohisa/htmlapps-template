@@ -251,6 +251,8 @@
     .card p { margin: 0; color: var(--muted); font-size: 12px; }
     details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; box-shadow: var(--shadow-sm); }
     summary { cursor: pointer; padding: 14px 16px; font-weight: 720; }
+    .help-build-info { margin-top: 20px; box-shadow: none; }
+    .help-build-info summary { font-size: 13px; }
     .build-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 16px 16px; }
     .build-item { padding: 11px; border-radius: 10px; background: var(--surface-muted); }
     .build-item span { display: block; color: var(--muted); font-size: 10px; }
@@ -539,16 +541,6 @@
       </div>
     </section>
 
-    <section class="shell section">
-      <details>
-        <summary data-i18n="buildInfo">Build information</summary>
-        <div class="build-grid">
-          <div class="build-item"><span data-i18n="appVersion">App version</span><strong id="buildVersion">—</strong></div>
-          <div class="build-item"><span data-i18n="builtAt">Built at</span><strong id="builtAt">—</strong></div>
-          <div class="build-item"><span data-i18n="dependencies">Embedded dependencies</span><strong id="dependencyCount">0</strong></div>
-        </div>
-      </details>
-    </section>
   </main>
 
   <footer><span id="footerName">Single HTML App Starter</span> · MIT License · <span data-i18n="footer">Text is processed in your browser</span></footer>
@@ -603,6 +595,14 @@
       <h3 data-i18n="helpLicenseTitle">ライセンス</h3>
       <p data-i18n="helpLicenseBody">このスターターは MIT License で公開されています。第三者ライブラリを追加した場合は、そのライセンスと通知も確認してください。</p>
       <!-- APP:HELP:END -->
+      <details class="help-build-info">
+        <summary data-i18n="buildInfo">Build information</summary>
+        <div class="build-grid">
+          <div class="build-item"><span data-i18n="appVersion">App version</span><strong id="buildVersion">—</strong></div>
+          <div class="build-item"><span data-i18n="builtAt">Built at</span><strong id="builtAt">—</strong></div>
+          <div class="build-item"><span data-i18n="dependencies">Embedded dependencies</span><strong id="dependencyCount">0</strong></div>
+        </div>
+      </details>
     </div>
   </dialog>
 

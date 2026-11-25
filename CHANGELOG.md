@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Move build information into a collapsed section at the end of the bilingual help dialog.
+
 - Align app chrome with the recent OneFile Album-based common design: plain local-processing badge, 11px version, compact dialog close, aligned footer and mobile suppression of redundant chrome.
 - Keep intentionally empty text during language changes and reload; stack export controls on narrow screens.
 - Document concise bilingual copy, mobile media-picker fallback, favicon presentation and release verification.
