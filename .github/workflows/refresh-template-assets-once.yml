@@ -1,5 +1,5 @@
 name: Refresh template assets once
-# Regenerate after the toast and export status correction.
+# Regenerate after final reusable IO and test improvements.
 
 on:
   push:

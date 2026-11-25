@@ -14,6 +14,7 @@ const html=names.map(n=>'<section id="'+n+'">'+fs.readFileSync(path.join(__dirna
   await page.evaluate(()=>{
     const q=s=>document.querySelector(s);window.pending=[];window.events=[];
     window.picker=AppFilePicker.mount(q('[data-file-picker]'),{accept:'image/*',mediaFallback:true,onFiles:(files,{isCurrent})=>new Promise(resolve=>pending.push(()=>resolve(isCurrent()))),onRemove:()=>events.push('removed')});
+    Object.defineProperty(navigator,'canShare',{configurable:true,value:({files})=>files?.length===1});Object.defineProperty(navigator,'share',{configurable:true,value:async({files})=>{events.push('share:'+files[0].name);}});
     window.exporter=AppFileExport.mount(q('[data-file-export]'),{extension:'txt',defaultName:'result',onResult:kind=>events.push(kind)});
     window.progress=AppProgressPanel.mount(q('[data-progress]'));
     window.preview=AppMediaPreview.mount(q('.bk-media-preview'),{onReady:info=>events.push('media:'+info.width+'x'+info.height)});
@@ -35,6 +36,7 @@ const html=names.map(n=>'<section id="'+n+'">'+fs.readFileSync(path.join(__dirna
   await page.locator('[data-name]').fill('bad:name.txt');
   const downloadPromise=page.waitForEvent('download');await page.locator('[data-save]').click();const download=await downloadPromise;
   assert.equal(download.suggestedFilename(),'bad-name.txt');assert.equal(await fsp.readFile(await download.path(),'utf8'),'hello');
+  assert.ok(await page.locator('[data-share]').isVisible());await page.locator('[data-share]').click();await page.waitForFunction(()=>events.includes('shared'));assert.ok(await page.evaluate(()=>events.includes('share:bad-name.txt')));
   await page.evaluate(()=>exporter.setResult(null));assert.ok(await page.locator('[data-save]').isDisabled());
   await page.evaluate(()=>progress.render({phase:'processing',title:'Working',progress:.5,onCancel:()=>events.push('cancel')}));
   assert.equal(await page.locator('[data-percent]').textContent(),'50%');await page.locator('[data-cancel]').click();assert.ok(await page.evaluate(()=>events.includes('cancel')));
@@ -49,6 +51,7 @@ const html=names.map(n=>'<section id="'+n+'">'+fs.readFileSync(path.join(__dirna
   await page.evaluate(()=>empty.render({title:'Empty',body:'Select a file',actionLabel:'Select',onAction:()=>events.push('empty-action')}));await page.locator('[data-empty-action]').click();assert.ok(await page.evaluate(()=>events.includes('empty-action')));
   await page.locator('[data-expand]').click();assert.ok(await page.locator('[data-expanded-dialog]').isVisible());assert.equal(await page.locator('[data-fullscreen-slot] #fullscreen-target').count(),1);
   await page.locator('[data-exit]').click();assert.equal(await page.locator('#fullscreen > #fullscreen-target').count(),1);
+  assert.equal(await page.evaluate(()=>{try{compare.setImages({beforeUrl:'https://example.com/x.png',afterUrl:'https://example.com/y.png',width:1,height:1});return false;}catch{return true;}}),true);
   await page.evaluate(()=>compare.set(35));assert.equal(await page.locator('[data-position]').inputValue(),'35');assert.equal(await page.locator('.bk-compare-stage').evaluate(el=>el.style.getPropertyValue('--compare-position')),'35%');
   assert.equal(await page.locator('.bk-toolbar svg').count(),4);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

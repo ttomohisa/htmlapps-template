@@ -37,3 +37,5 @@ The WebRTC pairing component waits for the designated readiness DataChannel to o
 - [`before-after.html`](before-after.html) — Aligned local image comparison with an accessible slider.
 
 Copy only relevant snippets into the app source; localize labels and supply actual validation, error and cancellation handlers. Accept is a picker hint, not validation. Share appears only on supported environments; download initiation does not guarantee file persistence.
+
+Prefer the new `file-picker.html` for new file-based apps; `media-file-picker.html` remains the compact compatibility snippet for existing implementations. The full picker already supports the optional unrestricted mobile fallback. `before-after.html` accepts local blob/data image URLs only. The common filename normalization bounds both code point length and UTF-8 byte length.

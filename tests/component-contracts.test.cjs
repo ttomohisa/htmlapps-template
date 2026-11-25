@@ -12,7 +12,7 @@ for(const name of names)test(name+' snippet has valid scripts and no external ru
  assert.doesNotMatch(source,/<(?:script|link|iframe)[^>]+(?:src|href)=["']https?:/i);
 });
 test('file export normalization prevents unsafe names and duplicate suffix',()=>{
- const source=read('components/file-export.html'),ctx=vm.createContext({window:{}});
+ const source=read('components/file-export.html'),ctx=vm.createContext({window:{},TextEncoder});
  vm.runInContext(source.match(/<script>([\s\S]*?)<\/script>/)[1],ctx);
  const normalize=ctx.window.AppFileExport.normalize;
  assert.equal(normalize('','txt','fallback'),'fallback.txt');
@@ -22,8 +22,9 @@ test('file export normalization prevents unsafe names and duplicate suffix',()=>
  assert.equal(normalize('a/b\\c'),'a-b-c.txt');
  assert.equal(normalize('...'),'output.txt');
  assert.throws(()=>normalize('x','../bad'));
+ assert.ok(new TextEncoder().encode(normalize('猫'.repeat(120))).length<=240);
 });
-test('starter Japanese and English translation dictionaries contain the same keys',()=>{
+test('starter Japanese and English translation dictionaries contain the same keys',{skip:require('../app.config.json').slug!=='single-html-app-starter'},()=>{
  const src=read('src/index.template.html');const start=src.indexOf('const translations = '),end=src.indexOf('const storageKeys = ',start);
  const c=vm.createContext({});vm.runInContext(src.slice(start,end)+';globalThis.translations=translations;',c);
  assert.deepEqual(Object.keys(c.translations.ja).sort(),Object.keys(c.translations.en).sort());
