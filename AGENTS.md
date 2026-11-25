@@ -244,3 +244,5 @@ For WebRTC DataChannel apps, never treat raw `RTCPeerConnection.connectionState 
 - Use the canonical favicon artwork without excess internal padding; check actual appearance at 48/96px and keep the favicon/header/self-extract icon payload identical.
 - Test at 320px, 390px and a desktop width around 1360px, with both languages and a short smartphone viewport. Check fixed bars, long names, help scroll, touch actions and no overflow. Update app-specific browser regression tests; the starter's browser tests are examples to replace when changing the demo.
 - For release-ready apps, use the release workflow described in `docs/RELEASING.md`. Prepare a new SemVer and versioned notes in the PR. The validated main commit is tagged/published only after merge; PRs must have read-only permissions. Never move an existing tag or overwrite a published release.
+
+- WebRTC QR scanning: keep the guide square, decode the full undistorted frame and invalidate pending camera/decoder work on close or switch. Keep diagnostic details collapsed with practical failure guidance and retain designated-channel readiness.

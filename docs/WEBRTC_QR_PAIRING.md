@@ -333,3 +333,7 @@ const pairing = AppWebRtcQrPairing.mount(root, {
 Do not close pairing UI, switch to the live application state, or tear down the PeerConnection from raw `connectionstatechange` / `iceconnectionstatechange`. Use `onConnected` as the application-ready signal.
 
 `requireReadyChannelOpen: false` is reserved for unusual WebRTC flows that intentionally use no DataChannel.
+
+## Scanner layout and lifecycle
+
+The centered QR guide is square (76% of the shorter preview side), measured on resize and rotation. Decoding still uses the full frame with its aspect ratio preserved. Scanner generation and request IDs invalidate stale camera/decoder work on close or switch. Diagnostic details are collapsed by default and retain the last meaningful candidate-pair statistics. Preserve the generic `readyChannelLabel` contract and `iceServers: []`.

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Port Presentation Remote's square QR scanning guide, camera request cancellation, mobile pairing spacing, collapsed ICE diagnostics and candidate-pair history to the generic WebRTC component without changing its ready-channel API.
+
 - Move build information into a collapsed section at the end of the bilingual help dialog.
 
 - Align app chrome with the recent OneFile Album-based common design: plain local-processing badge, 11px version, compact dialog close, aligned footer and mobile suppression of redundant chrome.
