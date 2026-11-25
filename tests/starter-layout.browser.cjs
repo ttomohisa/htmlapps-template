@@ -5,10 +5,10 @@ const {pathToFileURL}=require('node:url');
 const config=require('../app.config.json');
 (async()=>{
   if(config.slug!=='single-html-app-starter'){console.log('Starter-only UI checks skipped; replace with app-specific checks.');return;}
-  const {chromium}=require('playwright');
-  const browser=await chromium.launch();
+  const engine=process.env.BK_BROWSER||'chromium';
+  const browser=await require('playwright')[engine].launch();
   try {
-    for(const [width,height] of [[320,568],[390,844],[1360,900]]){
+    for(const [width,height] of [[320,568],[390,844],[740,360],[1360,900]]){
       const context=await browser.newContext({viewport:{width,height},locale:'ja-JP',hasTouch:width<820});
       try{
         const page=await context.newPage();

@@ -1,0 +1,58 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const fsp=require('node:fs/promises');
+const names=['file-picker','file-export','progress-panel','action-toolbar','media-preview','range-slider','segmented-control','empty-state','fullscreen','before-after'];
+const html=names.map(n=>'<section id="'+n+'">'+fs.readFileSync(path.join(__dirname,'../components',n+'.html'),'utf8')+'</section>').join('');
+(async()=>{
+ const browser=await require('playwright')[process.env.BK_BROWSER||'chromium'].launch();
+ try{
+  const context=await browser.newContext({viewport:{width:320,height:720},acceptDownloads:true,hasTouch:true});
+  const page=await context.newPage(),errors=[],requests=[];page.on('pageerror',e=>errors.push(String(e)));page.on('request',r=>{if(/^https?:/i.test(r.url()))requests.push(r.url());});
+  await page.setContent('<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}body{font:14px system-ui;margin:8px}section{margin:10px 0}button,input{font:inherit}</style></head><body>'+html+'</body></html>');
+  await page.evaluate(()=>{
+    const q=s=>document.querySelector(s);window.pending=[];window.events=[];
+    window.picker=AppFilePicker.mount(q('[data-file-picker]'),{accept:'image/*',mediaFallback:true,onFiles:(files,{isCurrent})=>new Promise(resolve=>pending.push(()=>resolve(isCurrent()))),onRemove:()=>events.push('removed')});
+    window.exporter=AppFileExport.mount(q('[data-file-export]'),{extension:'txt',defaultName:'result',onResult:kind=>events.push(kind)});
+    window.progress=AppProgressPanel.mount(q('[data-progress]'));
+    window.preview=AppMediaPreview.mount(q('.bk-media-preview'),{onReady:info=>events.push('media:'+info.width+'x'+info.height)});
+    window.range=AppRangeSlider.mount(q('.bk-range'),{min:0,max:10,start:2,end:8});
+    window.segment=AppSegmentedControl.mount(q('.bk-segmented'),{onChange:v=>events.push(v)});
+    window.empty=AppEmptyState.mount(q('.bk-empty'));
+    const target=document.createElement('div');target.id='fullscreen-target';target.textContent='Preview';q('#fullscreen').prepend(target);
+    Object.defineProperty(target,'requestFullscreen',{value:undefined});
+    window.fullscreen=AppFullscreen.mount({target,button:q('[data-expand]'),dialog:q('[data-expanded-dialog]')});
+    window.compare=AppBeforeAfter.mount(q('.bk-compare'));
+  });
+  assert.ok(await page.locator('[data-fallback]').isVisible());
+  await page.evaluate(()=>{window.first=picker.submit([new File(['a'],'old.png')]);window.second=picker.submit([new File(['b'],'new.png')]);pending[1]();});
+  await page.evaluate(()=>second);await page.evaluate(()=>pending[0]());assert.equal(await page.evaluate(()=>first),false);assert.equal(await page.locator('[data-picked]').textContent(),'new.png');
+  await page.locator('[data-remove]').click();assert.ok(!(await page.locator('[data-selected]').isVisible()));
+  assert.ok(await page.locator('[data-save]').isDisabled());
+  await page.evaluate(()=>exporter.setResult(new Blob(['hello'],{type:'text/plain'})));
+  assert.ok(!(await page.locator('[data-save]').isDisabled()));
+  await page.locator('[data-name]').fill('bad:name.txt');
+  const downloadPromise=page.waitForEvent('download');await page.locator('[data-save]').click();const download=await downloadPromise;
+  assert.equal(download.suggestedFilename(),'bad-name.txt');assert.equal(await fsp.readFile(await download.path(),'utf8'),'hello');
+  await page.evaluate(()=>exporter.setResult(null));assert.ok(await page.locator('[data-save]').isDisabled());
+  await page.evaluate(()=>progress.render({phase:'processing',title:'Working',progress:.5,onCancel:()=>events.push('cancel')}));
+  assert.equal(await page.locator('[data-percent]').textContent(),'50%');await page.locator('[data-cancel]').click();assert.ok(await page.evaluate(()=>events.includes('cancel')));
+  await page.evaluate(()=>progress.render({phase:'error',title:'Error',onRetry:()=>events.push('retry')}));await page.locator('[data-retry]').click();assert.ok(await page.evaluate(()=>events.includes('retry')));
+  await page.evaluate(()=>progress.render({phase:'processing'}));assert.equal(await page.locator('[data-meter]').getAttribute('value'),null);
+  await page.evaluate(()=>progress.render({phase:'idle'}));assert.ok(!(await page.locator('[data-progress]').isVisible()));
+  // Generate a valid image in the browser itself to avoid decoder-specific PNG fixture issues.
+  await page.evaluate(async()=>{const c=document.createElement('canvas');c.width=3;c.height=2;const b=await new Promise(resolve=>c.toBlob(resolve));preview.setSource(b,{kind:'image',alt:'Sample'});});
+  await page.waitForFunction(()=>events.includes('media:3x2'));await page.evaluate(()=>preview.clear());assert.ok(!(await page.locator('[data-image]').isVisible()));
+  await page.evaluate(()=>range.set(9,3));assert.deepEqual(await page.evaluate(()=>range.get()),{start:9,end:9});await page.evaluate(()=>range.setBounds(0,4));assert.deepEqual(await page.evaluate(()=>range.get()),{start:4,end:4});
+  await page.locator('.bk-segmented input[value=b]').check();assert.equal(await page.evaluate(()=>segment.get()),'b');
+  await page.evaluate(()=>empty.render({title:'Empty',body:'Select a file',actionLabel:'Select',onAction:()=>events.push('empty-action')}));await page.locator('[data-empty-action]').click();assert.ok(await page.evaluate(()=>events.includes('empty-action')));
+  await page.locator('[data-expand]').click();assert.ok(await page.locator('[data-expanded-dialog]').isVisible());assert.equal(await page.locator('[data-fullscreen-slot] #fullscreen-target').count(),1);
+  await page.locator('[data-exit]').click();assert.equal(await page.locator('#fullscreen > #fullscreen-target').count(),1);
+  await page.evaluate(()=>compare.set(35));assert.equal(await page.locator('[data-position]').inputValue(),'35');assert.equal(await page.locator('.bk-compare-stage').evaluate(el=>el.style.getPropertyValue('--compare-position')),'35%');
+  assert.equal(await page.locator('.bk-toolbar svg').count(),4);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
+  await context.close();
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

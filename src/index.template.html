@@ -534,7 +534,7 @@
             <button class="button quiet danger" id="clearButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg><span data-i18n="clear">消去</span></button>
           </div>
         </div>
-        <span class="save-status" id="saveStatus" role="status" aria-live="polite">Saved locally</span>
+        <span class="save-status" id="saveStatus" role="status" aria-live="polite">未保存</span>
       </div>
     </section>
     <!-- APP:END -->
@@ -946,13 +946,15 @@
           showToast(translate(ok ? 'copied' : 'copyFailed'), {tone:ok?'success':'warning'});
         }
       }
+      function normalize(value,extension='txt',fallback='output'){
+        const ext=String(extension).replace(/^\./,'').toLowerCase();if(!/^[a-z0-9]{1,12}$/.test(ext))throw new TypeError('invalid extension');
+        const clean=s=>String(s??'').replace(/[\\/:*?"<>|\u0000-\u001f\u007f]/g,'-').trim().replace(/[. ]+$/g,'');
+        let base=clean(value);if(base.toLowerCase().endsWith('.'+ext))base=base.slice(0,-ext.length-1).trim().replace(/[. ]+$/g,'');base=base||clean(fallback)||'output';
+        if(/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(base))base+='-file';
+        return Array.from(base).slice(0,120).join('').replace(/[. ]+$/g,'')+'.'+ext;
+      }
       function normalizedFilenameBase() {
-        const fallback = APP_CONFIG.slug || 'text';
-        const cleaned = outputFilename.value.trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-').replace(/\.+$/g, '').trim();
-        let base = cleaned.replace(/\.txt$/i, '') || fallback;
-        if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(base)) base = `${base}-file`;
-        if (!cleaned) outputFilename.value = fallback;
-        return base.slice(0, 120);
+        return normalize(outputFilename.value,'txt',APP_CONFIG.slug||'text').slice(0,-4);
       }
       function downloadText() {
         let url, anchor;
