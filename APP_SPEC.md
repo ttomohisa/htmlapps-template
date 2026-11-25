@@ -134,3 +134,5 @@ When an app uses peer-to-peer WebRTC DataChannels, define which reliable channel
 
 - Report successful local persistence only after a successful write/read. When storage fails, keep the text in memory and offer file export.
 - Invalidate Undo as soon as newer editing occurs; never overwrite newer input. Validate persisted language values. Clipboard fallback exceptions must be handled and focus/selection restored. Revoke download Blob URLs after a grace period and on pagehide.
+
+- Header language/help controls use the compact Pass-the-Phone Vote appearance, transparent touch highlight and 44px touch targets. Keyboard focus remains visible. Character, word and line counts use unboxed inline number/unit pairs and wrap without horizontal overflow.

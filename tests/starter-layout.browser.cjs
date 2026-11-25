@@ -24,6 +24,25 @@ const config=require('../app.config.json');
           assert.equal(await page.locator('#editor').inputValue(),'');
           const language=await page.locator('html').getAttribute('lang');
           assert.equal(await page.locator('#languageButton').textContent(),language==='ja'?'EN':'JA');
+          for(const id of ['languageButton','helpButton']){
+            const control=page.locator('#'+id);
+            const css=await control.evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,bg:s.backgroundColor,tap:s.getPropertyValue('-webkit-tap-highlight-color'),touch:s.touchAction};});
+            assert.equal(css.border,'0px');
+            assert.equal(css.bg,'rgba(0, 0, 0, 0)');
+            if(css.tap)assert.equal(css.tap,'rgba(0, 0, 0, 0)');
+            assert.equal(css.touch,'manipulation');
+            if(width<=680){const bounds=await control.boundingBox();assert.ok(bounds.height>=44&&bounds.width>=44);}
+          }
+          for(const item of await page.locator('.stat').all()){
+            const css=await item.evaluate(el=>{const s=getComputedStyle(el);return {background:s.backgroundColor,border:s.borderTopWidth,radius:s.borderRadius,display:s.display};});
+            assert.equal(css.background,'rgba(0, 0, 0, 0)');
+            assert.equal(css.border,'0px');
+            assert.equal(css.radius,'0px');
+            assert.equal(css.display,'inline-flex');
+          }
+          await page.locator('#languageButton').focus();
+          await page.keyboard.press('Tab');
+          assert.ok(await page.locator('#helpButton').evaluate(el=>el.matches(':focus-visible')&&getComputedStyle(el).outlineStyle!=='none'));
           assert.equal(await page.locator('.page-intro h1,.page-intro h2').count(),0);
           assert.equal(await page.locator('h1.brand-name').count(),1);
           for(const id of ['copyButton','downloadButton','sampleButton','clearButton']){

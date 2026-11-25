@@ -252,3 +252,5 @@ For WebRTC DataChannel apps, never treat raw `RTCPeerConnection.connectionState 
 ## Common IO and state UX
 
 - Reuse the optional file picker, file export, progress panel, action toolbar, media preview, range slider, segmented control, empty state, fullscreen and before/after source snippets as appropriate; do not add irrelevant UI to an app. Use the application-specific file validation and generation guard. Never claim successful persistence or sharing unless the API actually succeeded. Dismiss/invalidate Undo when newer edits occur. Handle denied/unavailable clipboard, storage and sharing; preserve focus and avoid premature Blob URL revocation.
+
+- Match the Pass-the-Phone Vote header controls: text-only EN/JA and unboxed 20px help SVG, 16px desktop gap, 8px mobile gap and at least 44px touch targets. Suppress the WebKit tap highlight on header controls, not keyboard focus-visible outlines. Avoid cards nested inside a workspace solely to display counts: prefer inline number + unit with tabular numerals, muted labels, and wrapping.

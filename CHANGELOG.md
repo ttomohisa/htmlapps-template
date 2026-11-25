@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Align language and help controls with Pass-the-Phone Vote, suppress touch tap highlighting without removing keyboard focus, and replace nested statistic cards with inline counters.
+
 - Correct storage status, invalidate stale Undo, validate saved language, handle clipboard fallback failures, and defer download URL revocation.
 - Add ten reusable UI/IO patterns and expand browser/behavior regression coverage.
 
