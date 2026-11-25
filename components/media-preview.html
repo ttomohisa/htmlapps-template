@@ -11,6 +11,6 @@ window.AppMediaPreview=Object.freeze({mount(root,{onReady=()=>{},onError=()=>{}}
     const event=kind==='image'?'load':'loadedmetadata',ready=()=>{if(id!==generation)return;const width=kind==='image'?image.naturalWidth:video.videoWidth,height=kind==='image'?image.naturalHeight:video.videoHeight;info.textContent=width+' × '+height;onReady({width,height,element:el,isCurrent:()=>id===generation});},error=()=>{if(id===generation)onError(el.error||new Error('media load failed'));};
     el.addEventListener(event,ready,{once:true});el.addEventListener('error',error,{once:true});cleanup=()=>{el.removeEventListener(event,ready);el.removeEventListener('error',error);};el.src=url;
   }
-  window.addEventListener('pagehide',clear);return Object.freeze({setSource,clear,destroy(){window.removeEventListener('pagehide',clear);clear();}});
+  const onPageHide=event=>{if(!event.persisted)clear();};window.addEventListener('pagehide',onPageHide);return Object.freeze({setSource,clear,destroy(){window.removeEventListener('pagehide',onPageHide);clear();}});
 }});
 </script>

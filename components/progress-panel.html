@@ -8,14 +8,14 @@
 </section>
 <script>
 window.AppProgressPanel=Object.freeze({mount(root){
-  const q=s=>root.querySelector(s),meter=q('[data-meter]'),percent=q('[data-percent]'),cancel=q('[data-cancel]'),retry=q('[data-retry]'),ctl=new AbortController();let callbacks={},generation=0,disposed=false;
+  const q=s=>root.querySelector(s),meter=q('[data-meter]'),percent=q('[data-percent]'),cancel=q('[data-cancel]'),retry=q('[data-retry]'),ctl=new AbortController();let callbacks={},generation=0,disposed=false;const pending=new Set();
   function render({phase='idle',title='',message='',progress=null,onCancel,onRetry}={}){
     if(disposed)return;generation++;callbacks={onCancel,onRetry};root.dataset.phase=phase;root.hidden=phase==='idle';q('[data-title]').textContent=title;q('[data-message]').textContent=message;
     const processing=phase==='processing'||phase==='loading-runtime';meter.hidden=!processing;const known=processing&&Number.isFinite(progress);percent.hidden=!known;
     if(known){meter.max=1;meter.value=Math.min(1,Math.max(0,progress));percent.textContent=Math.round(meter.value*100)+'%';}else{meter.removeAttribute('value');percent.textContent='';}
-    cancel.hidden=!processing||typeof onCancel!=='function';retry.hidden=phase!=='error'||typeof onRetry!=='function';cancel.disabled=retry.disabled=false;
+    cancel.hidden=!processing||typeof onCancel!=='function';retry.hidden=phase!=='error'||typeof onRetry!=='function';cancel.disabled=pending.has('onCancel');retry.disabled=pending.has('onRetry');
   }
-  function bind(button,key){button.addEventListener('click',async()=>{const fn=callbacks[key],id=generation;if(typeof fn!=='function'||button.disabled)return;button.disabled=true;try{await fn();}catch(error){if(id===generation&&!disposed){q('[data-message]').textContent=String(error?.message||error);}}finally{if(id===generation&&!disposed)button.disabled=false;}},{signal:ctl.signal});}
+  function bind(button,key){button.addEventListener('click',async()=>{const fn=callbacks[key],id=generation;if(typeof fn!=='function'||button.disabled||pending.has(key))return;pending.add(key);button.disabled=true;try{await fn();}catch(error){if(id===generation&&!disposed){q('[data-message]').textContent=String(error?.message||error);}}finally{pending.delete(key);if(!disposed)button.disabled=false;}},{signal:ctl.signal});}
   bind(cancel,'onCancel');bind(retry,'onRetry');return Object.freeze({render,destroy(){disposed=true;generation++;ctl.abort();}});
 }});
 </script>

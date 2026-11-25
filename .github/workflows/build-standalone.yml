@@ -50,7 +50,7 @@ jobs:
       - name: Release and component unit tests
         shell: pwsh
         run: |
-          node --test tests/release.test.cjs tests/webrtc-scan-guide.test.mjs tests/webrtc-camera.test.mjs tests/component-contracts.test.cjs
+          node --test tests/release.test.cjs tests/webrtc-scan-guide.test.mjs tests/webrtc-camera.test.mjs tests/webrtc-lifecycle.test.mjs tests/component-contracts.test.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Unit tests failed.' }
 
       - name: Install browser test tooling

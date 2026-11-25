@@ -940,10 +940,12 @@
         updateStats();
       }
       async function copyText() {
+        const value=editor.value,generation=editGeneration;
         try {
-          await navigator.clipboard.writeText(editor.value);
+          await navigator.clipboard.writeText(value);
           showToast(translate('copied'));
         } catch {
+          if(generation!==editGeneration){showToast(translate('copyFailed'),{tone:'warning'});return;}
           const previousFocus = document.activeElement;
           const start = editor.selectionStart, end = editor.selectionEnd;
           let ok = false;

@@ -40,6 +40,7 @@ const html=names.map(n=>'<section id="'+n+'">'+fs.readFileSync(path.join(__dirna
   await page.evaluate(()=>exporter.setResult(null));assert.ok(await page.locator('[data-save]').isDisabled());
   await page.evaluate(()=>progress.render({phase:'processing',title:'Working',progress:.5,onCancel:()=>events.push('cancel')}));
   assert.equal(await page.locator('[data-percent]').textContent(),'50%');await page.locator('[data-cancel]').click();assert.ok(await page.evaluate(()=>events.includes('cancel')));
+  await page.evaluate(()=>progress.render({phase:'processing',onCancel:()=>new Promise(resolve=>{events.push('pending-cancel');window.finishCancel=resolve;})}));await page.locator('[data-cancel]').click();await page.evaluate(()=>progress.render({phase:'processing',progress:.8,onCancel:()=>events.push('duplicate')}));assert.ok(await page.locator('[data-cancel]').isDisabled());await page.evaluate(()=>finishCancel());await page.waitForFunction(()=>!document.querySelector('[data-cancel]').disabled);
   await page.evaluate(()=>progress.render({phase:'error',title:'Error',onRetry:()=>events.push('retry')}));await page.locator('[data-retry]').click();assert.ok(await page.evaluate(()=>events.includes('retry')));
   await page.evaluate(()=>progress.render({phase:'processing'}));assert.equal(await page.locator('[data-meter]').getAttribute('value'),null);
   await page.evaluate(()=>progress.render({phase:'idle'}));assert.ok(!(await page.locator('[data-progress]').isVisible()));

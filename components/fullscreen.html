@@ -4,11 +4,11 @@
 <dialog class="bk-fullscreen-dialog" data-expanded-dialog aria-label="Expanded view"><button class="bk-fullscreen-button" type="button" data-exit data-i18n="close">閉じる</button><div data-fullscreen-slot></div></dialog>
 <script>
 window.AppFullscreen=Object.freeze({mount({target,button,dialog,onChange=()=>{},onError=()=>{}}){
-  const slot=dialog.querySelector('[data-fullscreen-slot]'),exit=dialog.querySelector('[data-exit]'),ctl=new AbortController();let anchor=null,busy=false,disposed=false,active=false;
+  const slot=dialog.querySelector('[data-fullscreen-slot]'),exit=dialog.querySelector('[data-exit]'),ctl=new AbortController();let anchor=null,busy=false,disposed=false,active=false,generation=0;
   const update=()=>{const next=document.fullscreenElement===target||dialog.open;button.setAttribute('aria-pressed',String(next));if(next!==active){active=next;onChange(next);}};
   const restore=()=>{if(anchor){anchor.replaceWith(target);anchor=null;}update();if(button.isConnected)button.focus({preventScroll:true});};
-  async function open(){if(busy||disposed||active)return;busy=true;try{if(target.requestFullscreen&&document.fullscreenEnabled){try{await target.requestFullscreen();if(disposed&&document.fullscreenElement===target)await document.exitFullscreen();update();return;}catch{if(disposed)return;}}anchor=document.createComment('fullscreen position');target.before(anchor);slot.append(target);try{dialog.showModal();}catch(error){restore();throw error;}update();}catch(error){onError(error);}finally{busy=false;}}
-  async function close(){if(document.fullscreenElement===target){try{await document.exitFullscreen();}catch(error){onError(error);}}if(dialog.open)dialog.close();restore();}
+  async function open(){if(busy||disposed||active)return;busy=true;const id=++generation;try{if(target.requestFullscreen&&document.fullscreenEnabled){try{await target.requestFullscreen();if((disposed||generation!==id)&&document.fullscreenElement===target)await document.exitFullscreen();update();return;}catch{if(disposed||generation!==id)return;}}if(disposed||generation!==id||!target.isConnected)return;anchor=document.createComment('fullscreen position');target.before(anchor);slot.append(target);try{dialog.showModal();}catch(error){restore();throw error;}update();}catch(error){onError(error);}finally{busy=false;}}
+  async function close(){generation++;if(document.fullscreenElement===target){try{await document.exitFullscreen();}catch(error){onError(error);}}if(dialog.open)dialog.close();restore();}
   button.addEventListener('click',()=>{if(active)void close();else void open();},{signal:ctl.signal});exit.addEventListener('click',()=>void close(),{signal:ctl.signal});dialog.addEventListener('close',restore,{signal:ctl.signal});document.addEventListener('fullscreenchange',update,{signal:ctl.signal});update();
   return Object.freeze({open,close,async destroy(){disposed=true;ctl.abort();await close();}});
 }});
