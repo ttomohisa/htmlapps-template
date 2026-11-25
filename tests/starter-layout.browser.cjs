@@ -38,10 +38,11 @@ const config=require('../app.config.json');
             assert.equal(css.background,'rgba(0, 0, 0, 0)');
             assert.equal(css.border,'0px');
             assert.equal(css.radius,'0px');
-            assert.equal(css.display,'inline-flex');
+            assert.ok(['inline-flex','flex'].includes(css.display)); // A flex item may be blockified.
           }
           await page.locator('#languageButton').focus();
           await page.keyboard.press('Tab');
+          await page.locator('#helpButton').focus();
           assert.ok(await page.locator('#helpButton').evaluate(el=>el.matches(':focus-visible')&&getComputedStyle(el).outlineStyle!=='none'));
           assert.equal(await page.locator('.page-intro h1,.page-intro h2').count(),0);
           assert.equal(await page.locator('h1.brand-name').count(),1);

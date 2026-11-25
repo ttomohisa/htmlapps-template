@@ -1,5 +1,5 @@
 name: Refresh template assets once
-# Refresh after header controls and inline counters.
+# Refresh after header controls, inline counters and cross-browser computed-style checks.
 
 on:
   push:
