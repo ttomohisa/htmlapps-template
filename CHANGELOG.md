@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Use EN / JA in the language switch, remove the duplicate hero heading, and group SVG-labeled output and reset actions with responsive mobile touch targets.
+
 - Port Presentation Remote's square QR scanning guide, camera request cancellation, mobile pairing spacing, collapsed ICE diagnostics and candidate-pair history to the generic WebRTC component without changing its ready-channel API.
 
 - Move build information into a collapsed section at the end of the bilingual help dialog.

@@ -91,6 +91,8 @@ Current stable desktop and mobile versions of Chromium, Firefox, and Safari. Dir
 - The full core user flow works after opening either generated HTML directly.
 - No data leaves the page.
 - Japanese and English copy fit at 320px, 390px and desktop widths, with the same title size at each width. The local badge and redundant footer are hidden on narrow screens; privacy and license information remain reachable in Help/README.
+- The header provides the sole app title, the intro contains only the description, and the language switch uses EN / JA.
+- Copy, download, restore sample and clear have SVG icons and localized visible labels; mobile action rows use two equal-width columns with 44px minimum tap targets.
 - Language switching and reload preserve deliberately empty text and other user input.
 - Clear happens immediately but offers Undo for long enough to recover the previous text.
 - The output filename can be edited before download; invalid filename characters are sanitized and an empty name falls back to the app slug.

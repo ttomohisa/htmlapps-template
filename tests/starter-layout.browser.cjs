@@ -22,6 +22,23 @@ const config=require('../app.config.json');
         for(let i=0;i<2;i++){
           await page.locator('#languageButton').click();
           assert.equal(await page.locator('#editor').inputValue(),'');
+          const language=await page.locator('html').getAttribute('lang');
+          assert.equal(await page.locator('#languageButton').textContent(),language==='ja'?'EN':'JA');
+          assert.equal(await page.locator('.page-intro h1,.page-intro h2').count(),0);
+          assert.equal(await page.locator('h1.brand-name').count(),1);
+          for(const id of ['copyButton','downloadButton','sampleButton','clearButton']){
+            const button=page.locator('#'+id);
+            assert.equal(await button.locator('svg[aria-hidden="true"]').count(),1);
+            assert.ok((await button.locator('span[data-i18n]').textContent()).trim());
+            assert.ok((await button.boundingBox()).height>=44);
+          }
+          if(width<=520){
+            const copy=await page.locator('#copyButton').boundingBox(),download=await page.locator('#downloadButton').boundingBox(),sample=await page.locator('#sampleButton').boundingBox(),clear=await page.locator('#clearButton').boundingBox();
+            assert.ok(Math.abs(copy.y-download.y)<1);
+            assert.ok(Math.abs(sample.y-clear.y)<1);
+            assert.ok(sample.y>copy.y);
+            assert.ok(Math.abs(copy.width-download.width)<1);
+          }
           assert.equal(await page.locator('.brand-name').evaluate(e=>getComputedStyle(e).fontSize),font);
           assert.equal(await page.locator('.local-badge').isVisible(),width>820);
           assert.equal(await page.locator('body > footer').isVisible(),width>820);
