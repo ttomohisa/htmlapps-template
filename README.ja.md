@@ -286,3 +286,7 @@ Copyright © 2026 ttomohisa
 ## タグと GitHub Release
 
 `app.config.json` の owner/name を実際のリポジトリに設定し、新しい SemVer と `docs/releases/vX.Y.Z.md` を PR に含めます。main への反映後、検証済みの単一HTML 2種類をタグと GitHub Release にまとめます。スターターの仮設定のままでは公開しません。[リリース手順](docs/RELEASING.md) を参照してください。
+
+## テンプレートのスクリーンショットとソースZIPの更新
+
+このテンプレートの保守時は通常のビルド後、固定版Playwrightを導入し、`node scripts/capture-template-screenshots.cjs`、`python scripts/package-template-source.py` を実行します。ZIPは追跡済みのソース・隠し設定ファイル・最新のスクリーンショットを含み、ZIP自身と一時更新ワークフローは除外します。生成済み単一HTMLは別途配布します。通常ビルドには引き続きNode.jsやPythonは不要です。

@@ -27,7 +27,7 @@ const url=pathToFileURL(path.resolve(__dirname,'../dist/index.html')).href;
      await page.locator('#sampleButton').click();await editor.fill('latest');assert.ok(!(await undo.isVisible()));
      const filename=page.locator('#outputFilename');await filename.fill('CON.bad:report.txt');
      const waiting=page.waitForEvent('download');await page.locator('#downloadButton').click();const download=await waiting;
-     assert.equal(download.suggestedFilename(),'CON.bad-report-file.txt');assert.equal(await fs.readFile(await download.path(),'utf8'),'latest');
+     assert.equal(download.suggestedFilename(),'CON-file.bad-report.txt');assert.equal(await fs.readFile(await download.path(),'utf8'),'latest');
      await page.reload();assert.equal(await editor.inputValue(),'latest');
      await page.locator('#helpButton').focus();await page.keyboard.press('Enter');assert.ok(await page.locator('#helpDialog').isVisible());await page.keyboard.press('Escape');assert.ok(!(await page.locator('#helpDialog').isVisible()));
      await editor.fill('x'.repeat(100000));assert.equal((await page.locator('#characterCount').textContent()).replace(/[^0-9]/g,''),'100000');

@@ -1,0 +1,76 @@
+name: Refresh template assets once
+
+on:
+  push:
+    branches:
+      - chore/november-common-template
+    paths:
+      - .github/workflows/refresh-template-assets-once.yml
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    if: github.repository == 'ttomohisa/htmlapps-template' && github.ref == 'refs/heads/chore/november-common-template'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Build verified starter
+        shell: pwsh
+        run: ./scripts/check-repository.ps1
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+      - name: Capture actual starter screenshots and source archive
+        shell: pwsh
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.58.2
+          if ($LASTEXITCODE -ne 0) { throw 'Playwright install failed' }
+          npx playwright install chromium
+          if ($LASTEXITCODE -ne 0) { throw 'Chromium install failed' }
+          node scripts/capture-template-screenshots.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Screenshot capture failed' }
+          python scripts/package-template-source.py
+          if ($LASTEXITCODE -ne 0) { throw 'ZIP packaging failed' }
+      - uses: actions/upload-artifact@v7
+        with:
+          name: refreshed-template-assets
+          path: |
+            assets/screenshot.png
+            assets/screenshot-mobile.png
+            htmlapps-template.zip
+          if-no-files-found: error
+          retention-days: 14
+  commit-assets:
+    needs: render
+    if: github.repository == 'ttomohisa/htmlapps-template' && github.ref == 'refs/heads/chore/november-common-template'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/download-artifact@v8
+        with:
+          name: refreshed-template-assets
+          path: .
+      - name: Commit generated assets only to the exact PR branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git ls-remote origin refs/heads/chore/november-common-template | cut -f1)" = "$GITHUB_SHA"
+          test -s assets/screenshot.png
+          test -s assets/screenshot-mobile.png
+          test -s htmlapps-template.zip
+          git add -- assets/screenshot.png assets/screenshot-mobile.png htmlapps-template.zip
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Refresh actual starter screenshots and template source ZIP'
+          git push origin HEAD:refs/heads/chore/november-common-template

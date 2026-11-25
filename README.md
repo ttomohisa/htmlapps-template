@@ -285,3 +285,7 @@ Licensed under the [MIT License](LICENSE). Applications created from this templa
 ## WebRTC template note
 
 The reusable QR pairing component considers the application connected only after the designated DataChannel is `open`. Custom DataChannel layouts use `readyChannelLabel` for a reliable control channel.
+
+## Refresh template screenshots and source ZIP
+
+For this template repository only: build normally, install the pinned Playwright development tooling, run `node scripts/capture-template-screenshots.cjs`, then run `python scripts/package-template-source.py`. The source ZIP contains tracked files including hidden configuration and current screenshots, excluding itself and the temporary asset-refresh workflow. Generated standalone builds are distributed separately. These optional developer tasks do not change the PowerShell-only standard build.

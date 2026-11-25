@@ -16,8 +16,9 @@ test('file export normalization prevents unsafe names and duplicate suffix',()=>
  vm.runInContext(source.match(/<script>([\s\S]*?)<\/script>/)[1],ctx);
  const normalize=ctx.window.AppFileExport.normalize;
  assert.equal(normalize('','txt','fallback'),'fallback.txt');
- assert.equal(normalize('CON.bad:report.txt'),'CON.bad-report-file.txt');
+ assert.equal(normalize('CON.bad:report.txt'),'CON-file.bad-report.txt');
  assert.equal(normalize('test.TXT'),'test.txt');
+ assert.equal(normalize(normalize('CON.bad:report.txt')),'CON-file.bad-report.txt');
  assert.equal(normalize('a/b\\c'),'a-b-c.txt');
  assert.equal(normalize('...'),'output.txt');
  assert.throws(()=>normalize('x','../bad'));
