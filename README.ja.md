@@ -149,6 +149,17 @@ CloudflareのSecretをfork由来のPRへ渡さないよう、Preview deployment�
 │  ├─ popover-menu.html
 │  ├─ setting-field.html
 │  ├─ toast.html
+│  ├─ file-picker.html
+│  ├─ file-export.html
+│  ├─ progress-panel.html
+│  ├─ action-toolbar.html
+│  ├─ media-preview.html
+│  ├─ range-slider.html
+│  ├─ segmented-control.html
+│  ├─ empty-state.html
+│  ├─ fullscreen.html
+│  ├─ before-after.html
+│  ├─ media-file-picker.html
 │  └─ webrtc-qr-pairing.html
 ├─ src/
 │  └─ index.template.html
@@ -243,6 +254,18 @@ build-standalone.bat -ForceDownload
 - `mobile-bottom-bar.html`：Safe Area、ページ切替、セクション移動、主要操作、実際の無効状態に対応したスマホ固定ボトムナビ
 - `webrtc-qr-pairing.html`：QR/カメラ手動シグナリング、ICE診断、完全収集待ち、再試行クリーンアップまで含む完全サーバーレスWebRTC接続UI。`examples/dependencies.webrtc-qr.json` を使用
 
+- `file-picker.html`：ファイル選択、ドラッグ＆ドロップ、スマホのメディア選択補助。
+- `file-export.html`：出力ファイル名、Blob保存、対応環境での共有。
+- `progress-panel.html`：進捗、キャンセル、再試行。
+- `action-toolbar.html`：SVG付き操作ボタン。
+- `media-preview.html`：ローカル画像・動画プレビューと元の寸法。
+- `range-slider.html`：開始・終了の範囲指定。
+- `segmented-control.html`：モード切替。
+- `empty-state.html`：空状態と操作ボタン。
+- `fullscreen.html`：全画面とダイアログ代替。
+- `before-after.html`：位置合わせ済みのローカル画像比較。
+- `media-file-picker.html`：既存実装向けの小型メディア選択補助。
+
 詳しくは [再利用UIコンポーネント](docs/COMPONENTS.ja.md) を参照してください。接続部品の詳細は [WebRTC QRペアリング](docs/WEBRTC_QR_PAIRING.ja.md) にまとめています。
 
 ## プライバシーと実行時通信
@@ -290,3 +313,7 @@ Copyright © 2026 ttomohisa
 ## テンプレートのスクリーンショットとソースZIPの更新
 
 このテンプレートの保守時は通常のビルド後、固定版Playwrightを導入し、`node scripts/capture-template-screenshots.cjs`、`python scripts/package-template-source.py` を実行します。ZIPは追跡済みのソース・隠し設定ファイル・最新のスクリーンショットを含み、ZIP自身と一時更新ワークフローは除外します。生成済み単一HTMLは別途配布します。通常ビルドには引き続きNode.jsやPythonは不要です。
+
+## ブラウザー回帰テスト
+
+GitHub ActionsでChromium、Firefox、WebKitを検査します。スターターでは320/390/740/1360pxの日英表示、保存内容、Undo、権限拒否、10万文字、単一HTMLと自己展開版を確認します。新規アプリはスターター専用テストを実際の操作テストに置き換え、リリース検証でも実行してください。共通部品テストは引き続き利用できます。PlaywrightのWebKitはiPhone Safari実機の代わりではありません。カメラ、共有、ファイル選択、WebRTCは対象実機でも確認してください。

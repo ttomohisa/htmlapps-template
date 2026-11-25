@@ -47,7 +47,7 @@ jobs:
       - name: Release packaging unit tests
         shell: pwsh
         run: |
-          node --test tests/release.test.cjs
+          node --test tests/release.test.cjs tests/component-contracts.test.cjs tests/webrtc-scan-guide.test.mjs tests/webrtc-camera.test.mjs tests/webrtc-lifecycle.test.mjs
           if ($LASTEXITCODE -ne 0) { throw 'Release tests failed.' }
       - name: Check release configuration
         id: config
@@ -67,6 +67,21 @@ jobs:
             Write-Host "Release skipped: configure actual repository owner/name."
           }
           "configured=$($configured.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+      - name: Run browser regressions before packaging
+        if: steps.config.outputs.configured == 'true'
+        shell: pwsh
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.58.2
+          if ($LASTEXITCODE -ne 0) { throw 'Playwright install failed' }
+          npx playwright install chromium firefox webkit
+          if ($LASTEXITCODE -ne 0) { throw 'Browser install failed' }
+          foreach ($engine in @('chromium','firefox','webkit')) {
+            $env:BK_BROWSER = $engine
+            foreach ($test in @('tests/starter-layout.browser.cjs','tests/starter-behavior.browser.cjs','tests/components.browser.cjs')) {
+              node $test
+              if ($LASTEXITCODE -ne 0) { throw "$engine regression failed: $test" }
+            }
+          }
       - name: Package verified HTML
         if: steps.config.outputs.configured == 'true'
         shell: pwsh

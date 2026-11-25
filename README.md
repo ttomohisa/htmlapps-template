@@ -153,6 +153,17 @@ The repository includes a workflow that builds the generated HTML and deploys `d
 │  ├─ popover-menu.html
 │  ├─ setting-field.html
 │  ├─ toast.html
+│  ├─ file-picker.html
+│  ├─ file-export.html
+│  ├─ progress-panel.html
+│  ├─ action-toolbar.html
+│  ├─ media-preview.html
+│  ├─ range-slider.html
+│  ├─ segmented-control.html
+│  ├─ empty-state.html
+│  ├─ fullscreen.html
+│  ├─ before-after.html
+│  ├─ media-file-picker.html
 │  └─ webrtc-qr-pairing.html
 ├─ src/
 │  └─ index.template.html
@@ -247,6 +258,18 @@ To skip the self-extracting file:
 - `mobile-bottom-bar.html`: safe-area-aware smartphone bottom tabs with true page switching, section navigation, workflow actions, and real disabled states
 - `webrtc-qr-pairing.html`: fully serverless WebRTC host/join UI with QR/camera signaling, ICE diagnostics, complete-gathering guards, cleanup, and retry handling; use `examples/dependencies.webrtc-qr.json`
 
+- `file-picker.html`: File selection, drag/drop and optional mobile media fallback.
+- `file-export.html`: Editable filename, Blob download and supported native sharing.
+- `progress-panel.html`: Progress, cancellation and retry.
+- `action-toolbar.html`: SVG-labeled native action buttons.
+- `media-preview.html`: Local image/video preview and intrinsic dimensions.
+- `range-slider.html`: Independent start/end range controls.
+- `segmented-control.html`: Native radio mode selection.
+- `empty-state.html`: Empty state with optional action.
+- `fullscreen.html`: Native fullscreen or dialog fallback.
+- `before-after.html`: Aligned local image comparison.
+- `media-file-picker.html`: Compact legacy-compatible media picker fallback.
+
 See [Reusable UI components](docs/COMPONENTS.md) for usage and UX rules. For the connection component, see [WebRTC QR Pairing](docs/WEBRTC_QR_PAIRING.md).
 
 ## Privacy and runtime network protection
@@ -289,3 +312,7 @@ The reusable QR pairing component considers the application connected only after
 ## Refresh template screenshots and source ZIP
 
 For this template repository only: build normally, install the pinned Playwright development tooling, run `node scripts/capture-template-screenshots.cjs`, then run `python scripts/package-template-source.py`. The source ZIP contains tracked files including hidden configuration and current screenshots, excluding itself and the temporary asset-refresh workflow. Generated standalone builds are distributed separately. These optional developer tasks do not change the PowerShell-only standard build.
+
+## Browser regression tests
+
+GitHub Actions checks Chromium, Firefox and WebKit. Starter checks cover Japanese and English at 320/390/740/1360px, saved content, Undo, denied permissions, 100,000 characters, and both standalone variants. Replace starter-only tests with actual application workflows and run them in release validation. Retain reusable component checks. Playwright WebKit does not replace real iPhone Safari; check camera, sharing, file selection and WebRTC on target devices.

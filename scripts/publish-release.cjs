@@ -1,6 +1,6 @@
 'use strict';
 // Run only in the contents:write job after the read-only validation job succeeds.
-module.exports=async({github,context,core,releaseDir=require('node:path').resolve('release')})=>{
+module.exports=async({github,context,core,releaseDir=require('node:path').resolve('release'),root=process.cwd()})=>{
   const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
   if(context.ref!=='refs/heads/main')throw Error('Releases may only be published from main');
   const meta=JSON.parse(fs.readFileSync(path.join(releaseDir,'release.json'),'utf8'));
@@ -13,8 +13,10 @@ module.exports=async({github,context,core,releaseDir=require('node:path').resolv
     return {...entry,data};
   });
   const {owner,repo}=context.repo;
-  const config=JSON.parse(fs.readFileSync('app.config.json','utf8'));
+  const config=JSON.parse(fs.readFileSync(path.join(root,'app.config.json'),'utf8'));
   if(config.repository.owner.toLowerCase()!==owner.toLowerCase()||config.repository.name.toLowerCase()!==repo.toLowerCase()||config.version!==meta.version||config.name!==meta.name)throw Error('Release configuration does not match this repository');
+  const checkedNotes=fs.readFileSync(path.join(root,'docs/releases/v'+meta.version+'.md'),'utf8').trim();
+  if(!checkedNotes||meta.notes!==checkedNotes)throw Error('Release notes differ from the tested commit');
   const expected=[config.slug+'.html',config.slug+'.self-extract.html','SHA256SUMS'];
   if(!expected.every(name=>meta.assets.some(asset=>asset.name===name)))throw Error('Unexpected release assets');
   const sums=assets.filter(asset=>asset.name!=='SHA256SUMS').map(asset=>asset.sha256+'  '+asset.name).join('\n')+'\n';
@@ -30,6 +32,9 @@ module.exports=async({github,context,core,releaseDir=require('node:path').resolv
     if(object.type!=='commit'||object.sha!==meta.commit)throw Error('Release tag points at another commit; refusing to move it');
   }else await github.rest.git.createRef({owner,repo,ref:'refs/tags/'+meta.tag,sha:meta.commit});
   if(!release)release=(await github.rest.repos.createRelease({owner,repo,tag_name:meta.tag,target_commitish:meta.commit,name:meta.name+' '+meta.tag,body:meta.notes,draft:true,prerelease:false})).data;
+  if(!release.draft)throw Error('Release is no longer a draft');
+  const unexpected=(release.assets||[]).filter(asset=>!expected.includes(asset.name));
+  if(unexpected.length)throw Error('Draft release contains unexpected assets; inspect before publishing');
   for(const asset of assets){
     // Only a draft's expected assets may be replaced to resume an interrupted run.
     const old=(release.assets||[]).find(item=>item.name===asset.name);

@@ -18,3 +18,11 @@ Use a version bump for changes intended for distribution. An existing published 
 Development PRs and pushes without versioned notes are still built but not published. A manual release dispatch on main with real repository metadata fails if the versioned notes are missing. This avoids publishing an initial development version simply because a new app sets its repository metadata.
 
 開発中にバージョン別リリースノートが未作成の場合はビルドだけを行い、公開しません。mainからの手動リリースでノートがなければエラーになります。
+
+## Release constraints and verification / 公開条件と検証
+
+Application publishing requires stable SemVer, the actual owner/name, non-empty versioned notes, a readable build and enabled self-extract build. Output paths must be relative to the checkout. The main release job also runs the common unit tests and three browser engines before packaging. Replace the starter-only test files with app-specific checks; retain the same workflow entrypoints or update both workflows. The publish job verifies release notes against the checked-out commit, refuses unexpected assets on a draft, and never modifies a published release. Publish behavior is covered with mocked GitHub API tests; actual repository permissions and a real release still require a configured repository.
+
+アプリの自動公開には安定版SemVer、実リポジトリのowner/name、空でないバージョン別ノート、通常版と有効化した自己展開版が必要です。出力パスはリポジトリ内の相対パスにします。mainのリリース検証では共通単体検査と3ブラウザーの検査も実施します。スターター専用テストをアプリ固有の検査へ置き換え、実行ファイル名を変える場合は両方のワークフローを更新してください。公開処理ではノートをコミットの内容と照合し、想定外の添付物がある下書きは公開せず、公開済みReleaseは変更しません。GitHub APIは模擬テストで検証しますが、実際の公開権限・Release作成は設定済みのリポジトリで確認が必要です。
+
+The template's placeholder repository metadata deliberately skips application publishing. A template-version change alone does not create a GitHub Release. / テンプレート自体の仮リポジトリ設定ではアプリの自動公開は行いません。テンプレートのバージョン変更だけでGitHub Releaseは作成されません。

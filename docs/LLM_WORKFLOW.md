@@ -55,3 +55,5 @@ Ask for a review at these natural boundaries:
 - PowerShell syntax / encoding preflight passes before the build.
 - Build and no-network verification pass.
 - Smartphone help / modal content remains fully reachable at short viewport heights.
+
+For file-based apps, inspect the new file picker/export and progress/empty-state components before designing the flow. Use generation guards, validate actual inputs, and report cancellation/errors accurately. Replace starter-only tests with the actual workflow and keep them in both PR and release CI. Check the current [component index](../components/README.md) and [release guide](RELEASING.md).

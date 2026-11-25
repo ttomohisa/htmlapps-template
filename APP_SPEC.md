@@ -76,7 +76,7 @@ A successful replacement app should state here:
 
 ## 9. Browser target
 
-Current stable desktop and mobile versions of Chromium, Firefox, and Safari. Direct `file://` opening is required.
+Target current stable desktop and mobile Chromium, Firefox and Safari. Direct `file://` opening is required. Automated checks use Chromium, Firefox and WebKit; device-specific API availability and real-device behavior still need testing.
 
 ## 10. Acceptance criteria
 
@@ -136,3 +136,7 @@ When an app uses peer-to-peer WebRTC DataChannels, define which reliable channel
 - Invalidate Undo as soon as newer editing occurs; never overwrite newer input. Validate persisted language values. Clipboard fallback exceptions must be handled and focus/selection restored. Revoke download Blob URLs after a grace period and on pagehide.
 
 - Header language/help controls use the compact Pass-the-Phone Vote appearance, transparent touch highlight and 44px touch targets. Keyboard focus remains visible. Character, word and line counts use unboxed inline number/unit pairs and wrap without horizontal overflow.
+
+## Release-candidate verification
+
+Test the actual downloaded content, localization, persistence errors, stale Undo, component lifecycle, and 320/390/740/1360px layouts. Direct pairing and native share require additional real-device verification; simulated callbacks are not proof of physical device behavior.

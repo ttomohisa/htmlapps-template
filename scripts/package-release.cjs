@@ -6,9 +6,11 @@ function packageRelease({root=path.resolve(__dirname,'..'),commitSha,outDir=path
   if(!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(config.version)||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.slug))throw Error('Invalid stable release version or slug');
   if(!/^[a-f0-9]{40}$/.test(commitSha||''))throw Error('Release requires the exact tested commit SHA');
   if(!/^[a-zA-Z0-9_.-]+$/.test(config.repository.name))throw Error('Invalid repository name');
-  const readable=fs.readFileSync(path.join(root,'dist/index.html'));
-  if(!readable.equals(fs.readFileSync(path.join(root,config.repository.name.replace(/^htmlapps-/, '')+'.html'))))throw Error('Repository-root HTML is stale');
-  const self=fs.readFileSync(path.join(root,'dist/index.self-extract.html'));
+  if(!config.build?.selfExtract?.enabled)throw Error('Release packaging requires the self-extract variant');
+  const buildPath=value=>{if(typeof value!=='string'||!value.trim()||path.isAbsolute(value))throw Error('Release build paths must be relative to repository root');const resolved=path.resolve(root,value),relative=path.relative(root,resolved);if(!relative||relative==='..'||relative.startsWith('..'+path.sep)||path.isAbsolute(relative))throw Error('Release build path escapes repository root');return resolved;};
+  const readable=fs.readFileSync(buildPath(config.build.output));
+  if(!readable.equals(fs.readFileSync(path.join(root,config.repository.name.replace(/^htmlapps-/i, '')+'.html'))))throw Error('Repository-root HTML is stale');
+  const self=fs.readFileSync(buildPath(config.build.selfExtract.output));
   if(!readable.length||!self.length)throw Error('Missing standalone build');
   const notes=fs.readFileSync(path.join(root,'docs/releases/v'+config.version+'.md'),'utf8').trim();
   if(!notes)throw Error('Release notes are empty');
