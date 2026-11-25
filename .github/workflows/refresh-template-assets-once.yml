@@ -1,5 +1,5 @@
 name: Refresh template assets once
-# Refresh release audit documentation and tests.
+# Refresh after all release-audit documentation and lifecycle checks.
 
 on:
   push:

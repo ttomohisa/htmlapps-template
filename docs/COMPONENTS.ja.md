@@ -284,3 +284,5 @@ mobileBar.setEnabled('save', true);
 | `AppEmptyState.mount(root)` | `render({visible,title,body,actionLabel,onAction}), destroy()` | 対象の入力や結果がない場合のみ表示します。 |
 | `AppFullscreen.mount({target,button,dialog,...})` | `open(), close(), destroy()` | ダイアログ代替時は対象DOMを一時移動するため、動画再生やCanvasの状態はアプリ側で確認します。 |
 | `AppBeforeAfter.mount(root, options)` | `set(value), setImages({beforeUrl,afterUrl,width,height,...}), clear(), destroy()` | 位置合わせ済みのローカル画像を渡し、URLはアプリ側で管理します。 |
+
+ライフサイクル：進捗が更新されてもキャンセル・再試行コールバックの実行中はボタンを無効にします。全画面解除は未完了の全画面要求を無効化します。BFCacheによるページ移動ではメディアプレビューを保持し、実際のページ終了時に解放します。共有は利用者が開始するOSへの引き渡しであり、配信完了を保証しません。対応実機で確認してください。ファイル検証と翻訳済みエラー文はアプリ側で実装します。

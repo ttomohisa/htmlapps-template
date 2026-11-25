@@ -337,3 +337,5 @@ Do not close pairing UI, switch to the live application state, or tear down the 
 ## Scanner layout and lifecycle
 
 The centered QR guide is square (76% of the shorter preview side), measured on resize and rotation. Decoding still uses the full frame with its aspect ratio preserved. Scanner generation and request IDs invalidate stale camera/decoder work on close or switch. Diagnostic details are collapsed by default and retain the last meaningful candidate-pair statistics. Preserve the generic `readyChannelLabel` contract and `iceServers: []`.
+
+Delayed QR encoding/rendering is guarded by the current role, attempt and render request. When the designated readiness channel closes, readiness is invalidated even if transport remains connected; the app receives a disconnected state and callback. Recovery on the current connection emits a connected state with `recovered: true`. Treat `onConnected` as first-ready for that peer attempt. Automated mock tests supplement but do not replace the real-device checklist.

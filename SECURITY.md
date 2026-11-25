@@ -54,3 +54,5 @@ Before adding or upgrading a package:
 - Refresh the selected lock entry with the dependency scripts; never hand-edit a lock hash to bypass a mismatch.
 - Rebuild with a clean cache.
 - Test with the network disabled.
+
+Optional OS sharing is an explicit user-initiated export. Do not automatically send files, interpret `accept` as file validation, or allow remote image URLs in the local comparison component. Release publishing is main-only after read-only validation; unexpected draft assets, mismatched notes, incorrect hashes and mismatched tags must fail closed.

@@ -39,3 +39,7 @@ The WebRTC pairing component waits for the designated readiness DataChannel to o
 Copy only relevant snippets into the app source; localize labels and supply actual validation, error and cancellation handlers. Accept is a picker hint, not validation. Share appears only on supported environments; download initiation does not guarantee file persistence.
 
 Prefer the new `file-picker.html` for new file-based apps; `media-file-picker.html` remains the compact compatibility snippet for existing implementations. The full picker already supports the optional unrestricted mobile fallback. `before-after.html` accepts local blob/data image URLs only. The common filename normalization bounds both code point length and UTF-8 byte length.
+
+## Release checks
+
+The optional components are source snippets, not an automatically loaded library. Run the component contract and browser regression tests after changing them. Keep the app-specific translation keys and real file-processing callbacks in sync. Native fullscreen, sharing, file selection and WebRTC camera behavior need real-device validation.

@@ -266,3 +266,5 @@ Copy only relevant snippets into the app source; localize labels and supply actu
 | `AppEmptyState.mount(root)` | `render({visible,title,body,actionLabel,onAction}), destroy()` | Show only when the relevant input/result is absent. |
 | `AppFullscreen.mount({target,button,dialog,...})` | `open(), close(), destroy()` | Dialog fallback temporarily reparents target; test app-specific media playback and canvas state. |
 | `AppBeforeAfter.mount(root, options)` | `set(value), setImages({beforeUrl,afterUrl,width,height,...}), clear(), destroy()` | Provide aligned local images and manage their URLs in the app. |
+
+Lifecycle: keep cancel/retry disabled while the callback is pending even if progress renders again. Closing fullscreen invalidates pending native entry. Media preview is retained on BFCache navigation and disposed on actual page exit. Share is user-initiated OS transfer, not a guarantee of delivery; test on actual supported devices. Local file validation and application-specific translated error messages remain the integrator's responsibility.

@@ -32,3 +32,7 @@ The starter does not enable WebRTC by default. If the application copies `compon
 
 `connect-src 'none'` remains expected. The direct WebRTC DataChannel is intentional peer-to-peer application traffic, not a hidden runtime dependency.
 
+
+## Additional regression checks
+
+Check actual downloaded bytes and file names, denied storage/clipboard, Undo after a newer edit, no HTTP(S) request from the local page, Japanese/English, and both HTML variants. Native sharing is an explicit user-initiated transfer; it is not background network access or proof of recipient delivery. Verify the OS file picker, camera permission, actual QR handoff and native sharing on supported devices separately from Playwright.
