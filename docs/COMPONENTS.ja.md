@@ -254,3 +254,18 @@ mobileBar.setEnabled('save', true);
 ## WebRTCの接続成立ルール
 
 `webrtc-qr-pairing.html` ではPeerConnectionの `connected` だけをアプリ接続済みとして扱いません。指定した準備完了DataChannelが `open` になって初めて `onConnected` を発火します。独自Channel構成ではreliableな制御Channelを `readyChannelLabel` に指定します。
+
+## 追加の共通UI
+
+- [`file-picker.html`](../components/file-picker.html) — ファイル選択、ドラッグ＆ドロップ、差し替え、スマホのメディア選択補助。
+- [`file-export.html`](../components/file-export.html) — ファイル名編集、Blobの保存、対応端末での共有。
+- [`progress-panel.html`](../components/progress-panel.html) — 進捗率・不定進捗、キャンセル、再試行。
+- [`action-toolbar.html`](../components/action-toolbar.html) — SVG付き操作ボタンとスマホ2列配置。
+- [`media-preview.html`](../components/media-preview.html) — 画像・動画表示、元の寸法、URL解放。
+- [`range-slider.html`](../components/range-slider.html) — 開始・終了の範囲指定。
+- [`segmented-control.html`](../components/segmented-control.html) — キーボード操作可能なモード切替。
+- [`empty-state.html`](../components/empty-state.html) — 空状態と任意の操作ボタン。
+- [`fullscreen.html`](../components/fullscreen.html) — 全画面とダイアログ代替。
+- [`before-after.html`](../components/before-after.html) — 位置合わせ済み画像の比較。
+
+必要なものだけをソースにコピーし、ラベル・エラー文・ファイル検証・処理キャンセルをアプリ側で実装します。accept は検証ではありません。共有は対応環境でだけ表示し、ダウンロード開始は保存完了を保証しません。

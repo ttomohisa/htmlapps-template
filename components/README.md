@@ -22,3 +22,18 @@ The WebRTC pairing component waits for the designated readiness DataChannel to o
 ## Media file picker fallback
 
 `media-file-picker.html` is an optional source snippet for image/video tools whose OS media picker may omit files. It provides a smartphone-only secondary button with a separate unrestricted input. Both paths must use the app's actual validation/read handler. Localize `chooseMedia` and `chooseFiles`, narrow the primary accept attribute to the supported media, and handle asynchronous errors in the app's handler. Do not add this component to unrelated apps.
+
+## Additional reusable UI
+
+- [`file-picker.html`](file-picker.html) — File selection, drag/drop, replacement and optional mobile media fallback; asynchronous selection guard.
+- [`file-export.html`](file-export.html) — Editable filenames, validated Blob results, download and optional native share.
+- [`progress-panel.html`](progress-panel.html) — Determinate/indeterminate progress, cancellation and retry.
+- [`action-toolbar.html`](action-toolbar.html) — Responsive SVG-labeled native action buttons.
+- [`media-preview.html`](media-preview.html) — Local image/video display with intrinsic dimensions and URL cleanup.
+- [`range-slider.html`](range-slider.html) — Accessible native start/end ranges with ordered values.
+- [`segmented-control.html`](segmented-control.html) — Keyboard-accessible native radio mode switch.
+- [`empty-state.html`](empty-state.html) — Localized empty state with optional action.
+- [`fullscreen.html`](fullscreen.html) — Native fullscreen or an in-page dialog fallback.
+- [`before-after.html`](before-after.html) — Aligned local image comparison with an accessible slider.
+
+Copy only relevant snippets into the app source; localize labels and supply actual validation, error and cancellation handlers. Accept is a picker hint, not validation. Share appears only on supported environments; download initiation does not guarantee file persistence.

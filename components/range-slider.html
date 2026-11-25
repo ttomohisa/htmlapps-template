@@ -1,0 +1,13 @@
+<!-- Two native sliders with independent focus, no overlapping thumb ambiguity. -->
+<style>.bk-range{display:grid;gap:10px;min-width:0}.bk-range label{display:grid;grid-template-columns:1fr auto;gap:4px;align-items:center}.bk-range input{grid-column:1/-1;width:100%;min-height:44px;accent-color:var(--accent,#16624f)}.bk-range output{font-variant-numeric:tabular-nums}</style>
+<div class="bk-range"><label><span data-i18n="rangeStart">開始</span><output data-start-value></output><input data-start type="range" min="0" max="100" value="0"></label><label><span data-i18n="rangeEnd">終了</span><output data-end-value></output><input data-end type="range" min="0" max="100" value="100"></label></div>
+<script>
+window.AppRangeSlider=Object.freeze({mount(root,{min=0,max=100,step=1,start=min,end=max,format=String,onChange=()=>{}}={}){
+  const a=root.querySelector('[data-start]'),b=root.querySelector('[data-end]'),ctl=new AbortController();let lo=min,hi=max;
+  if(![min,max,step,start,end].every(Number.isFinite)||max<min||step<=0)throw new RangeError('invalid range');
+  const clamp=v=>Math.max(lo,Math.min(hi,v));let x=clamp(start),y=Math.max(x,clamp(end));
+  function paint(){for(const el of [a,b]){el.min=lo;el.max=hi;el.step=step;}a.value=x;b.value=y;x=a.valueAsNumber;y=b.valueAsNumber;if(x>y){a.value=y;x=a.valueAsNumber;}root.querySelector('[data-start-value]').textContent=format(x);root.querySelector('[data-end-value]').textContent=format(y);}
+  for(const [el,isStart] of [[a,true],[b,false]])el.addEventListener('input',()=>{if(isStart)x=Math.min(a.valueAsNumber,y);else y=Math.max(b.valueAsNumber,x);paint();onChange({start:x,end:y});},{signal:ctl.signal});
+  paint();return Object.freeze({get:()=>({start:x,end:y}),set(start,end){if(![start,end].every(Number.isFinite))throw new TypeError('finite values required');x=clamp(start);y=Math.max(x,clamp(end));paint();},setBounds(min,max){if(![min,max].every(Number.isFinite)||max<min)throw new RangeError('invalid bounds');lo=min;hi=max;x=clamp(x);y=Math.max(x,clamp(y));paint();},destroy(){ctl.abort();}});
+}});
+</script>

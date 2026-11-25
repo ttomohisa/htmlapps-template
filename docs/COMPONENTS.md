@@ -236,3 +236,18 @@ Useful mount options include `initialPage`, `pageTopTarget`, `pageTopOffset`, `o
 ## WebRTC application-ready rule
 
 For `webrtc-qr-pairing.html`, PeerConnection `connected` alone is not application-ready. The designated readiness DataChannel must also be `open`. Custom channel layouts set `readyChannelLabel` to a reliable control channel.
+
+## Additional reusable UI
+
+- [`file-picker.html`](../components/file-picker.html) — File selection, drag/drop, replacement and optional mobile media fallback; asynchronous selection guard.
+- [`file-export.html`](../components/file-export.html) — Editable filenames, validated Blob results, download and optional native share.
+- [`progress-panel.html`](../components/progress-panel.html) — Determinate/indeterminate progress, cancellation and retry.
+- [`action-toolbar.html`](../components/action-toolbar.html) — Responsive SVG-labeled native action buttons.
+- [`media-preview.html`](../components/media-preview.html) — Local image/video display with intrinsic dimensions and URL cleanup.
+- [`range-slider.html`](../components/range-slider.html) — Accessible native start/end ranges with ordered values.
+- [`segmented-control.html`](../components/segmented-control.html) — Keyboard-accessible native radio mode switch.
+- [`empty-state.html`](../components/empty-state.html) — Localized empty state with optional action.
+- [`fullscreen.html`](../components/fullscreen.html) — Native fullscreen or an in-page dialog fallback.
+- [`before-after.html`](../components/before-after.html) — Aligned local image comparison with an accessible slider.
+
+Copy only relevant snippets into the app source; localize labels and supply actual validation, error and cancellation handlers. Accept is a picker hint, not validation. Share appears only on supported environments; download initiation does not guarantee file persistence.
