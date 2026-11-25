@@ -237,6 +237,7 @@
     .button.primary:hover { border-color: var(--accent-hover); background: var(--accent-hover); }
     .button.danger { color: var(--danger); }
     .save-status { align-self: center; color: var(--muted); font-size: 12px; }
+    .save-status.is-warning { color: var(--danger); }
     .export-row { display: flex; align-items: end; gap: 10px; margin-top: 12px; }
     .export-field { display: grid; gap: 5px; min-width: min(100%, 320px); }
     .export-label { color: var(--muted); font-size: 11px; font-weight: 700; }
@@ -533,7 +534,7 @@
             <button class="button quiet danger" id="clearButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg><span data-i18n="clear">消去</span></button>
           </div>
         </div>
-        <span class="save-status" id="saveStatus" data-i18n="savedLocally">Saved locally</span>
+        <span class="save-status" id="saveStatus" role="status" aria-live="polite">Saved locally</span>
       </div>
     </section>
     <!-- APP:END -->
@@ -746,7 +747,7 @@
           workspaceTitle: 'スターター作業領域',
           workspaceBody: '入力内容はこのブラウザー内だけに保存され、このアプリから送信されません。',
           characters: '文字', words: '単語', lines: '行', editorLabel: 'テキスト入力',
-          copy: 'コピー', download: 'テキスト保存', sample: 'サンプルに戻す', clear: '消去', savedLocally: '端末内に保存済み', outputFilename: '出力ファイル名', outputFilenameHint: '拡張子は自動で .txt が付きます', undo: '元に戻す', undone: '元に戻しました',
+          copy: 'コピー', download: 'テキスト保存', sample: 'サンプルに戻す', clear: '消去', savedLocally: '端末内に保存済み', notSaved: '端末内に保存できません。必要な内容はファイルに保存してください。', notYetSaved: '未保存', downloadFailed: 'テキストを保存できませんでした', outputFilename: '出力ファイル名', outputFilenameHint: '拡張子は自動で .txt が付きます', undo: '元に戻す', undone: '元に戻しました',
           confirmTitle: '確認', confirmAction: '実行する', cancel: 'キャンセル',
           guaranteesTitle: 'テンプレートの基本保証',
           guaranteesBody: 'アプリ仕様で明示的に変更しない限り、この制約を維持します。',
@@ -778,7 +779,7 @@
           workspaceTitle: 'Starter workspace',
           workspaceBody: 'Text stays in this browser. It is never sent by this app.',
           characters: 'Characters', words: 'Words', lines: 'Lines', editorLabel: 'Text editor',
-          copy: 'Copy', download: 'Download text', sample: 'Restore sample', clear: 'Clear', savedLocally: 'Saved locally', outputFilename: 'Output filename', outputFilenameHint: 'The .txt extension is added automatically', undo: 'Undo', undone: 'Restored',
+          copy: 'Copy', download: 'Download text', sample: 'Restore sample', clear: 'Clear', savedLocally: 'Saved locally', notSaved: 'Local storage unavailable. Save important text to a file.', notYetSaved: 'Not saved yet', downloadFailed: 'Could not save text', outputFilename: 'Output filename', outputFilenameHint: 'The .txt extension is added automatically', undo: 'Undo', undone: 'Restored',
           confirmTitle: 'Confirm', confirmAction: 'Continue', cancel: 'Cancel',
           guaranteesTitle: 'Template guarantees',
           guaranteesBody: 'Keep these constraints unless the product specification explicitly changes them.',
@@ -803,7 +804,11 @@
       const $ = selector => document.querySelector(selector);
       const editor = $('#editor');
       const outputFilename = $('#outputFilename');
-      let language = readStorage(storageKeys.language) || detectLanguage();
+      const storedLanguage = readStorage(storageKeys.language);
+      let language = ['ja','en'].includes(storedLanguage) ? storedLanguage : detectLanguage();
+      let storageSaved = null;
+      let editGeneration = 0;
+      const downloadUrls = new Set();
 
       // Reusable Promise-based confirmation API. Canonical source: components/confirm-dialog.html.
       const AppConfirm = (() => {
@@ -860,7 +865,7 @@
         try { return localStorage.getItem(key); } catch { return null; }
       }
       function writeStorage(key, value) {
-        try { localStorage.setItem(key, value); } catch { /* Storage may be unavailable in private contexts. */ }
+        try { localStorage.setItem(key, value); return true; } catch { return false; }
       }
       function detectLanguage() {
         if (APP_CONFIG.defaultLanguage === 'ja' || APP_CONFIG.defaultLanguage === 'en') return APP_CONFIG.defaultLanguage;
@@ -920,10 +925,12 @@
         $('#characterCount').textContent = new Intl.NumberFormat(language).format([...value].length);
         $('#wordCount').textContent = new Intl.NumberFormat(language).format(words);
         $('#lineCount').textContent = new Intl.NumberFormat(language).format(value ? value.split(/\r?\n/).length : 0);
-        $('#saveStatus').textContent = translate('savedLocally');
+        $('#saveStatus').textContent = translate(storageSaved === true ? 'savedLocally' : storageSaved === false ? 'notSaved' : 'notYetSaved');
+        $('#saveStatus').classList.toggle('is-warning', storageSaved === false);
       }
       function saveText() {
-        writeStorage(storageKeys.text, editor.value);
+        editGeneration += 1;
+        storageSaved = writeStorage(storageKeys.text, editor.value);
         updateStats();
       }
       async function copyText() {
@@ -931,9 +938,12 @@
           await navigator.clipboard.writeText(editor.value);
           showToast(translate('copied'));
         } catch {
-          editor.select();
-          const ok = document.execCommand('copy');
-          showToast(translate(ok ? 'copied' : 'copyFailed'));
+          const previousFocus = document.activeElement;
+          const start = editor.selectionStart, end = editor.selectionEnd;
+          let ok = false;
+          try { editor.focus(); editor.select(); ok = document.execCommand('copy'); } catch { /* Report failure below. */ }
+          finally { editor.setSelectionRange(start,end); if(previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus({preventScroll:true}); }
+          showToast(translate(ok ? 'copied' : 'copyFailed'), {tone:ok?'success':'warning'});
         }
       }
       function normalizedFilenameBase() {
@@ -945,17 +955,24 @@
         return base.slice(0, 120);
       }
       function downloadText() {
-        const url = URL.createObjectURL(new Blob([editor.value], { type: 'text/plain;charset=utf-8' }));
-        const anchor = document.createElement('a');
-        const filenameBase = normalizedFilenameBase();
-        outputFilename.value = filenameBase;
-        anchor.href = url;
-        anchor.download = `${filenameBase}.txt`;
-        anchor.click();
-        URL.revokeObjectURL(url);
-        showToast(translate('downloaded'), { tone: 'success' });
+        let url, anchor;
+        try {
+          const filenameBase = normalizedFilenameBase();
+          outputFilename.value = filenameBase;
+          url = URL.createObjectURL(new Blob([editor.value], { type: 'text/plain;charset=utf-8' }));
+          downloadUrls.add(url);
+          anchor = document.createElement('a');
+          anchor.href = url; anchor.download = filenameBase + '.txt'; anchor.hidden = true;
+          document.body.append(anchor); anchor.click();
+          showToast(translate('downloaded'), { tone: 'success' });
+        } catch { showToast(translate('downloadFailed'), {tone:'warning'}); }
+        finally {
+          anchor?.remove();
+          if(url) setTimeout(()=>{URL.revokeObjectURL(url);downloadUrls.delete(url);},60000);
+        }
       }
 
+      window.addEventListener('pagehide',()=>{for(const url of downloadUrls) URL.revokeObjectURL(url);downloadUrls.clear();});
       $('#languageButton').addEventListener('click', () => {
         language = language === 'ja' ? 'en' : 'ja';
         writeStorage(storageKeys.language, language);
@@ -969,7 +986,7 @@
         const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
         if (outside) helpDialog.close();
       });
-      editor.addEventListener('input', saveText);
+      editor.addEventListener('input', () => { AppToast.dismiss(); saveText(); });
       outputFilename.addEventListener('blur', () => { outputFilename.value = normalizedFilenameBase(); });
       $('#copyButton').addEventListener('click', copyText);
       $('#downloadButton').addEventListener('click', downloadText);
@@ -977,7 +994,8 @@
         const before = editor.value;
         editor.value = sampleText[language];
         saveText();
-        showToast(translate('restored'), { actionLabel: translate('undo'), onAction: () => { editor.value = before; saveText(); editor.focus(); showToast(translate('undone')); } });
+        const generation=editGeneration;
+        showToast(translate('restored'), { actionLabel: translate('undo'), onAction: () => { if(generation!==editGeneration)return; editor.value = before; saveText(); editor.focus(); showToast(translate('undone')); } });
       });
       $('#clearButton').addEventListener('click', () => {
         if (!editor.value) return;
@@ -985,14 +1003,17 @@
         editor.value = '';
         saveText();
         editor.focus();
+        const generation=editGeneration;
         showToast(translate('cleared'), {
           actionLabel: translate('undo'),
-          onAction: () => { editor.value = before; saveText(); editor.focus(); showToast(translate('undone')); },
+          onAction: () => { if(generation!==editGeneration)return; editor.value = before; saveText(); editor.focus(); showToast(translate('undone')); },
           duration: 5000
         });
       });
 
-      editor.value = readStorage(storageKeys.text) ?? sampleText[language];
+      const storedText = readStorage(storageKeys.text);
+      editor.value = storedText ?? sampleText[language];
+      storageSaved = storedText !== null ? true : null;
       outputFilename.value = APP_CONFIG.slug || 'text';
       $('#versionBadge').textContent = `v${APP_CONFIG.version}`;
       $('#buildVersion').textContent = APP_CONFIG.version;

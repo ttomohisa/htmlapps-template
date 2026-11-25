@@ -248,3 +248,7 @@ For WebRTC DataChannel apps, never treat raw `RTCPeerConnection.connectionState 
 - For release-ready apps, use the release workflow described in `docs/RELEASING.md`. Prepare a new SemVer and versioned notes in the PR. The validated main commit is tagged/published only after merge; PRs must have read-only permissions. Never move an existing tag or overwrite a published release.
 
 - WebRTC QR scanning: keep the guide square, decode the full undistorted frame and invalidate pending camera/decoder work on close or switch. Keep diagnostic details collapsed with practical failure guidance and retain designated-channel readiness.
+
+## Common IO and state UX
+
+- Reuse the optional file picker, file export, progress panel, action toolbar, media preview, range slider, segmented control, empty state, fullscreen and before/after source snippets as appropriate; do not add irrelevant UI to an app. Use the application-specific file validation and generation guard. Never claim successful persistence or sharing unless the API actually succeeded. Dismiss/invalidate Undo when newer edits occur. Handle denied/unavailable clipboard, storage and sharing; preserve focus and avoid premature Blob URL revocation.

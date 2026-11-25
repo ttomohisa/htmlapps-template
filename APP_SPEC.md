@@ -129,3 +129,8 @@ Acceptance criteria: help content is updated together with each user-facing beha
 ## WebRTC readiness requirement
 
 When an app uses peer-to-peer WebRTC DataChannels, define which reliable channel represents application readiness. Custom channel layouts must set `readyChannelLabel`; do not define application-ready from ICE/PeerConnection `connected` alone.
+
+## Storage and export failure behavior
+
+- Report successful local persistence only after a successful write/read. When storage fails, keep the text in memory and offer file export.
+- Invalidate Undo as soon as newer editing occurs; never overwrite newer input. Validate persisted language values. Clipboard fallback exceptions must be handled and focus/selection restored. Revoke download Blob URLs after a grace period and on pagehide.

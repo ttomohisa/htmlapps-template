@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Correct storage status, invalidate stale Undo, validate saved language, handle clipboard fallback failures, and defer download URL revocation.
+- Add ten reusable UI/IO patterns and expand browser/behavior regression coverage.
+
 - Use EN / JA in the language switch, remove the duplicate hero heading, and group SVG-labeled output and reset actions with responsive mobile touch targets.
 
 - Port Presentation Remote's square QR scanning guide, camera request cancellation, mobile pairing spacing, collapsed ICE diagnostics and candidate-pair history to the generic WebRTC component without changing its ready-channel API.
