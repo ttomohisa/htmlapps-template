@@ -1,0 +1,38 @@
+<!-- Optional smartphone fallback for image/video inputs. Copy/adapt, do not load at runtime.
+     Keep a visible primary media picker and a separate unrestricted file input.
+     Replace the demo handler with the app's shared file validation/read function. -->
+<style>
+  .media-file-fallback { display: none; }
+  @media (max-width: 767px), (pointer: coarse) and (max-height: 600px) {
+    .media-file-fallback {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 44px; padding: 8px 12px; border: 0; background: transparent;
+      color: var(--accent, #16624f); font: inherit; cursor: pointer;
+    }
+  }
+  .media-file-fallback:focus-visible { outline: 2px solid var(--accent, #16624f); outline-offset: 2px; }
+</style>
+<button type="button" id="mediaPickerButton" data-i18n="chooseMedia">画像・動画を選択</button>
+<input type="file" id="mediaPickerInput" accept="image/*,video/*" hidden>
+<button type="button" class="media-file-fallback" id="mediaFilesButton" data-i18n="chooseFiles">ファイルから選択</button>
+<input type="file" id="mediaFilesInput" hidden>
+<script>
+  // Usage: bindMediaPicker({ onFiles: async files => validateAndRead(files) });
+  // Both paths share validation; accept is a hint, never a validation boundary.
+  function bindMediaPicker({ onFiles, multiple = false }) {
+    for (const [buttonId, inputId] of [
+      ['mediaPickerButton', 'mediaPickerInput'],
+      ['mediaFilesButton', 'mediaFilesInput']
+    ]) {
+      const button = document.getElementById(buttonId);
+      const input = document.getElementById(inputId);
+      input.multiple = multiple;
+      button.addEventListener('click', () => input.click());
+      input.addEventListener('change', () => {
+        const files = Array.from(input.files || []);
+        input.value = '';
+        if (files.length) onFiles(files);
+      });
+    }
+  }
+</script>

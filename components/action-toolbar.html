@@ -1,0 +1,14 @@
+<!-- Reusable output/utility toolbar; buttons stay native and localized text stays outside SVG. -->
+<style>
+.bk-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;min-width:0}.bk-toolbar-group{display:flex;flex-wrap:wrap;gap:8px;min-width:0}.bk-toolbar-group+.bk-toolbar-group{padding-left:12px;border-left:1px solid var(--line,#d8dfdb)}.bk-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 14px;border:1px solid var(--line,#d8dfdb);border-radius:10px;background:var(--surface,#fff);color:inherit;font:inherit;font-size:13px;font-weight:650;cursor:pointer;min-width:0}.bk-toolbar svg{width:18px;height:18px;flex:none}.bk-toolbar button span{min-width:0;overflow-wrap:anywhere}.bk-toolbar button[data-tone=primary]{background:var(--accent,#16624f);border-color:var(--accent,#16624f);color:#fff}.bk-toolbar button[data-tone=secondary]{background:color-mix(in srgb,var(--accent,#16624f) 6%,white);color:var(--accent,#16624f)}.bk-toolbar button[data-tone=quiet],.bk-toolbar button[data-tone=danger]{border-color:transparent;background:transparent}.bk-toolbar button[data-tone=danger]{color:var(--danger,#b54545)}.bk-toolbar button:disabled{opacity:.5;cursor:not-allowed}.bk-toolbar button:focus-visible{outline:2px solid var(--accent,#16624f);outline-offset:2px}@media(max-width:520px){.bk-toolbar{display:grid;gap:6px}.bk-toolbar-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.bk-toolbar-group+.bk-toolbar-group{border:0;padding:0}.bk-toolbar button{padding-inline:8px;gap:6px}}
+</style>
+<div class="bk-toolbar">
+  <div class="bk-toolbar-group">
+    <button type="button" data-action="copy" data-tone="primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg><span data-i18n="copy">コピー</span></button>
+    <button type="button" data-action="save" data-tone="secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span data-i18n="save">保存</span></button>
+  </div>
+  <div class="bk-toolbar-group">
+    <button type="button" data-action="reset" data-tone="quiet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2.6 6.4M3 4v7h7"/></svg><span data-i18n="reset">リセット</span></button>
+    <button type="button" data-action="clear" data-tone="danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span data-i18n="clear">消去</span></button>
+  </div>
+</div>

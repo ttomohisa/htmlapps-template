@@ -31,8 +31,8 @@
   .app-confirm-close {
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     padding: 0;
     border: 0;
     border-radius: 10px;
@@ -40,8 +40,8 @@
     color: var(--text, #20211f);
     cursor: pointer;
   }
-  .app-confirm-close:hover { background: var(--surface-hover, #e9e9e5); }
-  .app-confirm-close svg { width: 19px; height: 19px; }
+  .app-confirm-close:hover { opacity: .7; }
+  .app-confirm-close svg { width: 18px; height: 18px; }
   .app-confirm-body { padding: 18px; }
   .app-confirm-message {
     margin: 0;
@@ -123,8 +123,8 @@
   <div class="app-confirm-header">
     <h2 class="app-confirm-title" id="appConfirmTitle">Confirm</h2>
     <button class="app-confirm-close" id="appConfirmClose" type="button" aria-label="Close">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-        <path d="M6 6l12 12M18 6 6 18"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18"/>
       </svg>
     </button>
   </div>

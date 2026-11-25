@@ -1,0 +1,33 @@
+<!-- Optional source snippet. Copy CSS/HTML/script, assign app-specific accept and validation. -->
+<style>
+.bk-file-picker{display:grid;gap:8px;min-width:0}.bk-file-drop{display:grid;justify-items:center;gap:9px;padding:22px 12px;border:1px dashed var(--line-strong,#adb8b4);border-radius:14px;background:var(--surface-muted,#f5f7f6);text-align:center}.bk-file-drop[data-dragging]{border-color:var(--accent,#16624f);background:#16624f12}.bk-file-drop svg{width:24px;height:24px;color:var(--accent,#16624f)}.bk-file-controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.bk-file-picker button{min-height:44px;padding:8px 12px;border:1px solid var(--line,#d8dfdb);border-radius:9px;background:var(--surface,#fff);color:inherit;cursor:pointer;font:inherit}.bk-file-picker [data-pick]{background:var(--accent,#16624f);color:white}.bk-file-picker [data-fallback]{display:none}.bk-file-picker [data-picked]{overflow-wrap:anywhere;font-size:13px}.bk-file-picker [hidden]{display:none!important}@media(max-width:820px),(pointer:coarse){.bk-file-picker [data-fallback]:not([hidden]){display:inline-flex;align-items:center}.bk-file-picker [data-drop-hint]{display:none}}.bk-file-picker [role=status]{font-size:12px;color:var(--muted,#596762)}
+</style>
+<div class="bk-file-picker" data-file-picker>
+  <div class="bk-file-drop" data-drop>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 16v4h16v-4"/></svg>
+    <div class="bk-file-controls"><button type="button" data-pick data-i18n="chooseFile">ファイルを選択</button><button type="button" data-fallback hidden data-i18n="chooseFiles">ファイルから選択</button></div>
+    <span data-drop-hint data-i18n="dropHint">ここにドラッグ＆ドロップ</span>
+    <input type="file" data-input hidden><input type="file" data-unrestricted hidden>
+  </div>
+  <div data-selected hidden><span data-picked></span> <button type="button" data-remove data-i18n="removeFile">解除</button></div>
+  <div role="status" aria-live="polite" data-picker-status></div>
+</div>
+<script>
+window.AppFilePicker=Object.freeze({mount(root,{accept='',multiple=false,mediaFallback=false,onFiles,onRemove=()=>{},onError=()=>{}}={}){
+  if(typeof onFiles!=='function')throw new TypeError('onFiles required');
+  const q=s=>root.querySelector(s),primary=q('[data-input]'),fallback=q('[data-unrestricted]'),drop=q('[data-drop]'),picked=q('[data-picked]'),selected=q('[data-selected]'),status=q('[data-picker-status]'),ctl=new AbortController();let generation=0,depth=0,disposed=false;
+  const listen=(el,event,fn)=>el.addEventListener(event,fn,{signal:ctl.signal});
+  primary.accept=accept;primary.multiple=fallback.multiple=multiple;q('[data-fallback]').hidden=!mediaFallback;
+  const setFiles=files=>{picked.textContent=files.map(f=>f.name).join(' · ');selected.hidden=!files.length;};
+  const submit=async files=>{if(disposed||!files.length)return false;const id=++generation,chosen=multiple?Array.from(files):[files[0]],current=()=>!disposed&&generation===id;status.textContent='';try{const result=await onFiles(chosen,{isCurrent:current});if(!current()||result===false)return false;setFiles(chosen);return true;}catch(error){if(current())onError(error,{status,isCurrent:current});return false;}};
+  for(const [button,input] of [[q('[data-pick]'),primary],[q('[data-fallback]'),fallback]]){listen(button,'click',()=>input.click());listen(input,'change',()=>{const files=Array.from(input.files||[]);input.value='';void submit(files);});}
+  const fileDrag=e=>Array.from(e.dataTransfer?.types||[]).includes('Files');
+  listen(drop,'dragenter',e=>{if(!fileDrag(e))return;e.preventDefault();depth++;drop.setAttribute('data-dragging','');});
+  listen(drop,'dragover',e=>{if(fileDrag(e)){e.preventDefault();e.dataTransfer.dropEffect='copy';}});
+  listen(drop,'dragleave',()=>{depth=Math.max(0,depth-1);if(!depth)drop.removeAttribute('data-dragging');});
+  listen(drop,'drop',e=>{if(!fileDrag(e))return;e.preventDefault();depth=0;drop.removeAttribute('data-dragging');void submit(Array.from(e.dataTransfer.files||[]));});
+  const clear=()=>{generation++;setFiles([]);status.textContent='';primary.value=fallback.value='';onRemove();};
+  listen(q('[data-remove]'),'click',clear);
+  return Object.freeze({submit,clear,setFiles,destroy(){disposed=true;generation++;ctl.abort();drop.removeAttribute('data-dragging');}});
+}});
+</script>

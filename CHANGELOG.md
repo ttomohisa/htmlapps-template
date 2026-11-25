@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+## 1.4.0 - Shared UI, WebRTC reliability, and release validation - 2026-11-25
+
+- Harden WebRTC QR generation and designated-channel closure, progress cancellation, fullscreen request cancellation and clipboard races; expand lifecycle and mocked publish tests.
+- Align the component inventory, quick-start instructions, browser test scope and release requirements across the bilingual documentation.
+
+- Align language and help controls with Pass-the-Phone Vote, suppress touch tap highlighting without removing keyboard focus, and replace nested statistic cards with inline counters.
+
+- Correct storage status, invalidate stale Undo, validate saved language, handle clipboard fallback failures, and defer download URL revocation.
+- Add ten reusable UI/IO patterns and expand browser/behavior regression coverage.
+
+- Use EN / JA in the language switch, remove the duplicate hero heading, and group SVG-labeled output and reset actions with responsive mobile touch targets.
+
+- Port Presentation Remote's square QR scanning guide, camera request cancellation, mobile pairing spacing, collapsed ICE diagnostics and candidate-pair history to the generic WebRTC component without changing its ready-channel API.
+
+- Move build information into a collapsed section at the end of the bilingual help dialog.
+
+- Align app chrome with the recent OneFile Album-based common design: plain local-processing badge, 11px version, compact dialog close, aligned footer and mobile suppression of redundant chrome.
+- Keep intentionally empty text during language changes and reload; stack export controls on narrow screens.
+- Document concise bilingual copy, mobile media-picker fallback, favicon presentation and release verification.
+- Add a read-only PR build / main-only GitHub Release workflow with SHA-256 assets and immutable published releases.
+
 - Added automatic repository-root HTML generation: normal builds copy `dist/index.html` byte-for-byte to `<repository-name-without-htmlapps-prefix>.html`, and repository checks verify the copy exists and matches.
 
 - Split Cloudflare PR Preview creation and PR-close cleanup into separate workflows so normal Preview runs contain only deployment checks and cleanup runs independently on `closed`.

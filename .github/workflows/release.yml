@@ -1,0 +1,117 @@
+name: Validate and release standalone app
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - app.config.json
+      - docs/releases/**
+      - scripts/package-release.cjs
+      - scripts/publish-release.cjs
+      - .github/workflows/release.yml
+  push:
+    branches: [main]
+    paths:
+      - app.config.json
+      - docs/releases/**
+      - scripts/package-release.cjs
+      - scripts/publish-release.cjs
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: standalone-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    outputs:
+      configured: ${{ steps.config.outputs.configured }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+      - name: Validate build
+        shell: pwsh
+        run: |
+          ./scripts/check-powershell-syntax.ps1
+          ./scripts/check-repository.ps1
+      - name: Release packaging unit tests
+        shell: pwsh
+        run: |
+          node --test tests/release.test.cjs tests/component-contracts.test.cjs tests/webrtc-scan-guide.test.mjs tests/webrtc-camera.test.mjs tests/webrtc-lifecycle.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Release tests failed.' }
+      - name: Check release configuration
+        id: config
+        shell: pwsh
+        run: |
+          $config = Get-Content app.config.json -Raw | ConvertFrom-Json
+          $configured = ("$($config.repository.owner)/$($config.repository.name)" -eq $env:GITHUB_REPOSITORY)
+          if ($configured) {
+            if ($config.version -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Expected stable SemVer.' }
+            $notes = "docs/releases/v$($config.version).md"
+            if (-not (Test-Path -LiteralPath $notes -PathType Leaf)) {
+              if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and $env:GITHUB_REF -eq 'refs/heads/main') { throw "Missing release notes: $notes" }
+              Write-Host "Release skipped: no versioned release notes ($notes)."
+              $configured = $false
+            }
+          } else {
+            Write-Host "Release skipped: configure actual repository owner/name."
+          }
+          "configured=$($configured.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+      - name: Run browser regressions before packaging
+        if: steps.config.outputs.configured == 'true'
+        shell: pwsh
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.58.2
+          if ($LASTEXITCODE -ne 0) { throw 'Playwright install failed' }
+          npx playwright install chromium firefox webkit
+          if ($LASTEXITCODE -ne 0) { throw 'Browser install failed' }
+          foreach ($engine in @('chromium','firefox','webkit')) {
+            $env:BK_BROWSER = $engine
+            foreach ($test in @('tests/starter-layout.browser.cjs','tests/starter-behavior.browser.cjs','tests/components.browser.cjs')) {
+              node $test
+              if ($LASTEXITCODE -ne 0) { throw "$engine regression failed: $test" }
+            }
+          }
+      - name: Package verified HTML
+        if: steps.config.outputs.configured == 'true'
+        shell: pwsh
+        run: |
+          node scripts/package-release.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Release packaging failed.' }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: steps.config.outputs.configured == 'true'
+        with:
+          name: standalone-release-${{ github.sha }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 7
+  publish:
+    needs: validate
+    if: needs.validate.outputs.configured == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: standalone-release-${{ github.sha }}
+          path: release/
+      - name: Publish tested commit
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        with:
+          script: await require('./scripts/publish-release.cjs')({ github, context, core });

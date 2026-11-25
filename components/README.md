@@ -17,3 +17,29 @@ WebRTC pairing details: [English](../docs/WEBRTC_QR_PAIRING.md) / [日本語](..
 ## WebRTC readiness note
 
 The WebRTC pairing component waits for the designated readiness DataChannel to open before reporting application-ready. Custom DataChannel layouts use `readyChannelLabel` for a reliable control channel.
+
+
+## Media file picker fallback
+
+`media-file-picker.html` is an optional source snippet for image/video tools whose OS media picker may omit files. It provides a smartphone-only secondary button with a separate unrestricted input. Both paths must use the app's actual validation/read handler. Localize `chooseMedia` and `chooseFiles`, narrow the primary accept attribute to the supported media, and handle asynchronous errors in the app's handler. Do not add this component to unrelated apps.
+
+## Additional reusable UI
+
+- [`file-picker.html`](file-picker.html) — File selection, drag/drop, replacement and optional mobile media fallback; asynchronous selection guard.
+- [`file-export.html`](file-export.html) — Editable filenames, validated Blob results, download and optional native share.
+- [`progress-panel.html`](progress-panel.html) — Determinate/indeterminate progress, cancellation and retry.
+- [`action-toolbar.html`](action-toolbar.html) — Responsive SVG-labeled native action buttons.
+- [`media-preview.html`](media-preview.html) — Local image/video display with intrinsic dimensions and URL cleanup.
+- [`range-slider.html`](range-slider.html) — Accessible native start/end ranges with ordered values.
+- [`segmented-control.html`](segmented-control.html) — Keyboard-accessible native radio mode switch.
+- [`empty-state.html`](empty-state.html) — Localized empty state with optional action.
+- [`fullscreen.html`](fullscreen.html) — Native fullscreen or an in-page dialog fallback.
+- [`before-after.html`](before-after.html) — Aligned local image comparison with an accessible slider.
+
+Copy only relevant snippets into the app source; localize labels and supply actual validation, error and cancellation handlers. Accept is a picker hint, not validation. Share appears only on supported environments; download initiation does not guarantee file persistence.
+
+Prefer the new `file-picker.html` for new file-based apps; `media-file-picker.html` remains the compact compatibility snippet for existing implementations. The full picker already supports the optional unrestricted mobile fallback. `before-after.html` accepts local blob/data image URLs only. The common filename normalization bounds both code point length and UTF-8 byte length.
+
+## Release checks
+
+The optional components are source snippets, not an automatically loaded library. Run the component contract and browser regression tests after changing them. Keep the app-specific translation keys and real file-processing callbacks in sync. Native fullscreen, sharing, file selection and WebRTC camera behavior need real-device validation.

@@ -358,3 +358,9 @@ const pairing = AppWebRtcQrPairing.mount(root, {
 生の `connectionstatechange` / `iceconnectionstatechange` を見て接続UIを閉じたり、ライブ画面へ切り替えたり、PeerConnectionを破棄したりしないでください。アプリが利用可能になった合図は `onConnected` を使います。
 
 DataChannelを使わない特殊用途だけ `requireReadyChannelOpen: false` を指定できます。
+
+## QR読み取りと接続診断
+
+読み取り枠は映像領域の短辺の76%を使う中央の正方形です。画面回転・サイズ変更に追従し、解析は縦横比を保った映像全体を対象にします。カメラ許可待ち、カメラ切替、デコーダー初期化・解析結果は世代番号とリクエスト番号で管理し、古い処理の反映を防ぎます。接続診断は初期状態で折りたたみ、直前の有効なICE候補ペア統計を保持します。`readyChannelLabel` と `iceServers: []` は維持します。
+
+遅延したQRエンコード・描画は現在の役割・試行・描画要求を確認してから反映します。準備完了用チャネルが閉じた場合は、経路が接続中でも準備完了状態を解除し、切断状態とコールバックを通知します。同じ接続が復旧した場合は `recovered: true` の接続状態を通知します。`onConnected` はその試行で最初に準備完了したときの通知です。模擬自動検査は実機チェックを補うもので、代替ではありません。

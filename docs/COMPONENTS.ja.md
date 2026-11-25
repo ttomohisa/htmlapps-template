@@ -254,3 +254,35 @@ mobileBar.setEnabled('save', true);
 ## WebRTCの接続成立ルール
 
 `webrtc-qr-pairing.html` ではPeerConnectionの `connected` だけをアプリ接続済みとして扱いません。指定した準備完了DataChannelが `open` になって初めて `onConnected` を発火します。独自Channel構成ではreliableな制御Channelを `readyChannelLabel` に指定します。
+
+## 追加の共通UI
+
+- [`file-picker.html`](../components/file-picker.html) — ファイル選択、ドラッグ＆ドロップ、差し替え、スマホのメディア選択補助。
+- [`file-export.html`](../components/file-export.html) — ファイル名編集、Blobの保存、対応端末での共有。
+- [`progress-panel.html`](../components/progress-panel.html) — 進捗率・不定進捗、キャンセル、再試行。
+- [`action-toolbar.html`](../components/action-toolbar.html) — SVG付き操作ボタンとスマホ2列配置。
+- [`media-preview.html`](../components/media-preview.html) — 画像・動画表示、元の寸法、URL解放。
+- [`range-slider.html`](../components/range-slider.html) — 開始・終了の範囲指定。
+- [`segmented-control.html`](../components/segmented-control.html) — キーボード操作可能なモード切替。
+- [`empty-state.html`](../components/empty-state.html) — 空状態と任意の操作ボタン。
+- [`fullscreen.html`](../components/fullscreen.html) — 全画面とダイアログ代替。
+- [`before-after.html`](../components/before-after.html) — 位置合わせ済み画像の比較。
+
+必要なものだけをソースにコピーし、ラベル・エラー文・ファイル検証・処理キャンセルをアプリ側で実装します。accept は検証ではありません。共有は対応環境でだけ表示し、ダウンロード開始は保存完了を保証しません。
+
+### 追加コンポーネントのAPI
+
+| 初期化 | API | 注意 |
+| --- | --- | --- |
+| `AppFilePicker.mount(root, options)` | `submit(files), clear(), setFiles(files), destroy()` | onFiles(files,{isCurrent}) で入力検証と非同期処理の世代確認を行い、拒否時は false を返します。 |
+| `AppFileExport.mount(root, options)` | `setResult(Blob|null), filename(), download(), destroy()` | 入力変更時は直ちに null を設定。onResult の download-started と shared を区別し、onError/onCancel を扱います。 |
+| `AppProgressPanel.mount(root)` | `render({phase,title,message,progress,onCancel,onRetry}), destroy()` | 計測できるときのみ0〜1の進捗を渡し、キャンセルでは実処理も停止します。 |
+| `action-toolbar.html` | `data-action, data-tone, native disabled` | 実際に必要な操作のみを割り当て、リセット・消去は出力操作と区別します。 |
+| `AppMediaPreview.mount(root, options)` | `setSource(blob,{kind,alt}), clear(), destroy()` | onReady で元の幅・高さと isCurrent を受け取り、アプリ側の世代管理と組み合わせます。 |
+| `AppRangeSlider.mount(root, options)` | `get(), set(start,end), setBounds(min,max), destroy()` | 独立したネイティブスライダーを使い、値には単位を付けて表示します。 |
+| `AppSegmentedControl.mount(root, options)` | `get(), set(value), destroy()` | ラジオグループの name はインスタンスごとに一意にし、onChange はユーザー操作で発火します。 |
+| `AppEmptyState.mount(root)` | `render({visible,title,body,actionLabel,onAction}), destroy()` | 対象の入力や結果がない場合のみ表示します。 |
+| `AppFullscreen.mount({target,button,dialog,...})` | `open(), close(), destroy()` | ダイアログ代替時は対象DOMを一時移動するため、動画再生やCanvasの状態はアプリ側で確認します。 |
+| `AppBeforeAfter.mount(root, options)` | `set(value), setImages({beforeUrl,afterUrl,width,height,...}), clear(), destroy()` | 位置合わせ済みのローカル画像を渡し、URLはアプリ側で管理します。 |
+
+ライフサイクル：進捗が更新されてもキャンセル・再試行コールバックの実行中はボタンを無効にします。全画面解除は未完了の全画面要求を無効化します。BFCacheによるページ移動ではメディアプレビューを保持し、実際のページ終了時に解放します。共有は利用者が開始するOSへの引き渡しであり、配信完了を保証しません。対応実機で確認してください。ファイル検証と翻訳済みエラー文はアプリ側で実装します。

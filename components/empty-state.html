@@ -1,0 +1,8 @@
+<!-- Present only when no current source/result exists. Action can be omitted. -->
+<style>.bk-empty{display:grid;justify-items:center;gap:8px;text-align:center;padding:26px 16px;border:1px dashed var(--line,#d8dfdb);border-radius:12px;color:var(--muted,#596762)}.bk-empty[hidden],.bk-empty [hidden]{display:none!important}.bk-empty svg{width:30px;height:30px;color:var(--accent,#16624f)}.bk-empty strong{color:var(--text,#222);font-size:14px}.bk-empty p{margin:0;font-size:13px;overflow-wrap:anywhere}.bk-empty button{min-height:44px;border:0;border-radius:9px;background:var(--accent,#16624f);color:white;padding:8px 15px;font:inherit;cursor:pointer}</style>
+<div class="bk-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h7l2 2h9v13H3z"/></svg><strong data-empty-title>ファイルが選択されていません</strong><p data-empty-body>ファイルを選択するとここに表示します。</p><button type="button" data-empty-action hidden></button></div>
+<script>
+window.AppEmptyState=Object.freeze({mount(root){
+  const action=root.querySelector('[data-empty-action]'),ctl=new AbortController();let callback=null;action.addEventListener('click',()=>callback?.(),{signal:ctl.signal});return Object.freeze({render({visible=true,title='',body='',actionLabel='',onAction}={}){root.hidden=!visible;root.querySelector('[data-empty-title]').textContent=title;root.querySelector('[data-empty-body]').textContent=body;callback=typeof onAction==='function'?onAction:null;action.hidden=!callback||!actionLabel;action.textContent=actionLabel;},destroy(){callback=null;ctl.abort();}});
+}});
+</script>

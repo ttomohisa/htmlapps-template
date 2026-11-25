@@ -236,3 +236,35 @@ Useful mount options include `initialPage`, `pageTopTarget`, `pageTopOffset`, `o
 ## WebRTC application-ready rule
 
 For `webrtc-qr-pairing.html`, PeerConnection `connected` alone is not application-ready. The designated readiness DataChannel must also be `open`. Custom channel layouts set `readyChannelLabel` to a reliable control channel.
+
+## Additional reusable UI
+
+- [`file-picker.html`](../components/file-picker.html) — File selection, drag/drop, replacement and optional mobile media fallback; asynchronous selection guard.
+- [`file-export.html`](../components/file-export.html) — Editable filenames, validated Blob results, download and optional native share.
+- [`progress-panel.html`](../components/progress-panel.html) — Determinate/indeterminate progress, cancellation and retry.
+- [`action-toolbar.html`](../components/action-toolbar.html) — Responsive SVG-labeled native action buttons.
+- [`media-preview.html`](../components/media-preview.html) — Local image/video display with intrinsic dimensions and URL cleanup.
+- [`range-slider.html`](../components/range-slider.html) — Accessible native start/end ranges with ordered values.
+- [`segmented-control.html`](../components/segmented-control.html) — Keyboard-accessible native radio mode switch.
+- [`empty-state.html`](../components/empty-state.html) — Localized empty state with optional action.
+- [`fullscreen.html`](../components/fullscreen.html) — Native fullscreen or an in-page dialog fallback.
+- [`before-after.html`](../components/before-after.html) — Aligned local image comparison with an accessible slider.
+
+Copy only relevant snippets into the app source; localize labels and supply actual validation, error and cancellation handlers. Accept is a picker hint, not validation. Share appears only on supported environments; download initiation does not guarantee file persistence.
+
+### Additional component API reference
+
+| Mount | API | Notes |
+| --- | --- | --- |
+| `AppFilePicker.mount(root, options)` | `submit(files), clear(), setFiles(files), destroy()` | onFiles(files,{isCurrent}) must validate inputs and guard its own async writes; return false on rejection. |
+| `AppFileExport.mount(root, options)` | `setResult(Blob|null), filename(), download(), destroy()` | Set null immediately when a source changes; onResult distinguishes download-started from shared; handle onError/onCancel. |
+| `AppProgressPanel.mount(root)` | `render({phase,title,message,progress,onCancel,onRetry}), destroy()` | Use progress 0–1 only when measured; cancel actual work, not only the UI. |
+| `action-toolbar.html` | `data-action, data-tone, native disabled` | Bind only relevant app actions; reset/clear are separate from primary output. |
+| `AppMediaPreview.mount(root, options)` | `setSource(blob,{kind,alt}), clear(), destroy()` | onReady receives intrinsic width/height and isCurrent; pair with app generation guard. |
+| `AppRangeSlider.mount(root, options)` | `get(), set(start,end), setBounds(min,max), destroy()` | Use native independent sliders and format values with units. |
+| `AppSegmentedControl.mount(root, options)` | `get(), set(value), destroy()` | Use unique radio group names; onChange fires for user action. |
+| `AppEmptyState.mount(root)` | `render({visible,title,body,actionLabel,onAction}), destroy()` | Show only when the relevant input/result is absent. |
+| `AppFullscreen.mount({target,button,dialog,...})` | `open(), close(), destroy()` | Dialog fallback temporarily reparents target; test app-specific media playback and canvas state. |
+| `AppBeforeAfter.mount(root, options)` | `set(value), setImages({beforeUrl,afterUrl,width,height,...}), clear(), destroy()` | Provide aligned local images and manage their URLs in the app. |
+
+Lifecycle: keep cancel/retry disabled while the callback is pending even if progress renders again. Closing fullscreen invalidates pending native entry. Media preview is retained on BFCache navigation and disposed on actual page exit. Share is user-initiated OS transfer, not a guarantee of delivery; test on actual supported devices. Local file validation and application-specific translated error messages remain the integrator's responsibility.

@@ -1,0 +1,10 @@
+<!-- Native radio inputs give keyboard navigation and accessible selection. Use unique group names per instance. -->
+<style>.bk-segmented{display:flex;flex-wrap:wrap;gap:4px;border:1px solid var(--line,#d8dfdb);border-radius:11px;background:var(--surface-muted,#f5f7f6);padding:4px;min-width:0}.bk-segmented legend{font-size:12px}.bk-segmented label{flex:1 1 auto;position:relative;min-width:0;cursor:pointer}.bk-segmented input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}.bk-segmented span{display:grid;place-items:center;min-height:44px;padding:6px 10px;border-radius:7px;overflow-wrap:anywhere;text-align:center;font-size:13px}.bk-segmented input:checked+span{background:var(--surface,#fff);color:var(--accent,#16624f);box-shadow:0 1px 4px #0002;font-weight:650}.bk-segmented input:focus-visible+span{outline:2px solid var(--accent,#16624f);outline-offset:1px}.bk-segmented input:disabled+span{opacity:.5}</style>
+<fieldset class="bk-segmented"><legend data-i18n="mode">モード</legend><label><input type="radio" name="example-mode" value="a" checked><span data-i18n="modeA">標準</span></label><label><input type="radio" name="example-mode" value="b"><span data-i18n="modeB">詳細</span></label></fieldset>
+<script>
+window.AppSegmentedControl=Object.freeze({mount(root,{onChange=()=>{}}={}){
+  const inputs=Array.from(root.querySelectorAll('input[type=radio]')),ctl=new AbortController();if(!inputs.length)throw new Error('radio options required');
+  root.addEventListener('change',e=>{if(inputs.includes(e.target)&&e.target.checked)onChange(e.target.value);},{signal:ctl.signal});
+  return Object.freeze({get:()=>inputs.find(i=>i.checked)?.value??null,set(value){const input=inputs.find(i=>i.value===value&&!i.disabled);if(!input)return false;input.checked=true;return true;},destroy(){ctl.abort();}});
+}});
+</script>

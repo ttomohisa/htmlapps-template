@@ -111,3 +111,7 @@ Keep source in one HTML while it remains understandable. When an app grows subst
 - No runtime external resource.
 - Clear state ownership.
 - A build that fails on missing input.
+
+## Release and component verification
+
+File picker/export, progress, action toolbar, media preview, range, segmented, empty state, fullscreen and image comparison snippets extend the same source-copy architecture. They are not new runtime dependencies. See the component API references and release guide. Cross-browser CI covers common contracts and representative starter flows; native OS integrations and real WebRTC pairing need device validation.

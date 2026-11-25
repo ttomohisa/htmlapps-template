@@ -40,7 +40,7 @@ A successful replacement app should state here:
 - Use the reusable `AppToast.show()` Undo pattern for reversible Clear / Restore sample operations. Reserve `AppConfirm.ask()` for irreversible or high-risk actions.
 - Switch Japanese and English without reloading.
 - Use a light-only interface; do not add a dark-mode or theme switcher.
-- Expose build version, generation timestamp, and embedded dependency count.
+- Expose build version, generation timestamp, and embedded dependency count in a collapsed section at the end of the Help dialog, not in the main workspace.
 
 ## 5. Data and privacy
 
@@ -76,7 +76,7 @@ A successful replacement app should state here:
 
 ## 9. Browser target
 
-Current stable desktop and mobile versions of Chromium, Firefox, and Safari. Direct `file://` opening is required.
+Target current stable desktop and mobile Chromium, Firefox and Safari. Direct `file://` opening is required. Automated checks use Chromium, Firefox and WebKit; device-specific API availability and real-device behavior still need testing.
 
 ## 10. Acceptance criteria
 
@@ -90,7 +90,10 @@ Current stable desktop and mobile versions of Chromium, Firefox, and Safari. Dir
 - Runtime CSP includes `connect-src 'none'`.
 - The full core user flow works after opening either generated HTML directly.
 - No data leaves the page.
-- Japanese and English copy both fit at 360px width.
+- Japanese and English copy fit at 320px, 390px and desktop widths, with the same title size at each width. The local badge and redundant footer are hidden on narrow screens; privacy and license information remain reachable in Help/README.
+- The header provides the sole app title, the intro contains only the description, and the language switch uses EN / JA.
+- Copy, download, restore sample and clear have SVG icons and localized visible labels; mobile action rows use two equal-width columns with 44px minimum tap targets.
+- Language switching and reload preserve deliberately empty text and other user input.
 - Clear happens immediately but offers Undo for long enough to recover the previous text.
 - The output filename can be edited before download; invalid filename characters are sanitized and an empty name falls back to the app slug.
 
@@ -126,3 +129,14 @@ Acceptance criteria: help content is updated together with each user-facing beha
 ## WebRTC readiness requirement
 
 When an app uses peer-to-peer WebRTC DataChannels, define which reliable channel represents application readiness. Custom channel layouts must set `readyChannelLabel`; do not define application-ready from ICE/PeerConnection `connected` alone.
+
+## Storage and export failure behavior
+
+- Report successful local persistence only after a successful write/read. When storage fails, keep the text in memory and offer file export.
+- Invalidate Undo as soon as newer editing occurs; never overwrite newer input. Validate persisted language values. Clipboard fallback exceptions must be handled and focus/selection restored. Revoke download Blob URLs after a grace period and on pagehide.
+
+- Header language/help controls use the compact Pass-the-Phone Vote appearance, transparent touch highlight and 44px touch targets. Keyboard focus remains visible. Character, word and line counts use unboxed inline number/unit pairs and wrap without horizontal overflow.
+
+## Release-candidate verification
+
+Test the actual downloaded content, localization, persistence errors, stale Undo, component lifecycle, and 320/390/740/1360px layouts. Direct pairing and native share require additional real-device verification; simulated callbacks are not proof of physical device behavior.

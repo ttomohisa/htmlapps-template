@@ -8,7 +8,14 @@ on:
     paths:
       - "src/**"
       - "scripts/**"
+      - "tests/**"
+      - "components/**"
       - "app.config.json"
+      - "assets/**"
+      - "htmlapps-template.zip"
+      - "**/*.md"
+      - "README-FIRST.txt"
+      - "schemas/app-config.schema.json"
       - "dependencies.json"
       - "dependencies.lock.json"
       - "schemas/dependencies*.json"
@@ -37,6 +44,43 @@ jobs:
       - name: Build and verify standalone HTML
         shell: pwsh
         run: ./scripts/check-repository.ps1
+
+      - name: Setup test tooling
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+
+      - name: Release and component unit tests
+        shell: pwsh
+        run: |
+          node --test tests/release.test.cjs tests/webrtc-scan-guide.test.mjs tests/webrtc-camera.test.mjs tests/webrtc-lifecycle.test.mjs tests/component-contracts.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Unit tests failed.' }
+
+      - name: Install browser test tooling
+        shell: pwsh
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.58.2
+          if ($LASTEXITCODE -ne 0) { throw 'Playwright install failed.' }
+          npx playwright install chromium firefox webkit
+          if ($LASTEXITCODE -ne 0) { throw 'Browser install failed.' }
+
+      - name: Cross-browser regression tests
+        shell: pwsh
+        run: |
+          foreach ($engine in @('chromium','firefox','webkit')) {
+            $env:BK_BROWSER = $engine
+            foreach ($test in @('tests/starter-layout.browser.cjs','tests/starter-behavior.browser.cjs','tests/components.browser.cjs')) {
+              node $test
+              if ($LASTEXITCODE -ne 0) { throw "$engine regression failed: $test" }
+            }
+          }
+
+      - name: Verify template source ZIP
+        if: github.repository == 'ttomohisa/htmlapps-template'
+        shell: pwsh
+        run: |
+          python scripts/package-template-source.py --check
+          if ($LASTEXITCODE -ne 0) { throw 'Template ZIP differs from tracked sources.' }
 
       - name: Upload standalone artifact
         uses: actions/upload-artifact@v7

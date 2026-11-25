@@ -1,0 +1,16 @@
+<!-- Single image/video preview; media source remains local. Pair with AppAsyncState for derived work. -->
+<style>
+.bk-media-preview{display:grid;gap:8px;min-width:0}.bk-media-stage{position:relative;display:grid;place-items:center;background:#141918;border-radius:12px;overflow:hidden;min-height:100px}.bk-media-stage img,.bk-media-stage video{display:block;max-width:100%;width:100%;max-height:min(65dvh,640px);object-fit:contain}.bk-media-stage [hidden]{display:none!important}.bk-media-preview [data-media-info]{font-size:12px;color:var(--muted,#596762);overflow-wrap:anywhere}
+</style>
+<div class="bk-media-preview"><div class="bk-media-stage"><img data-image alt="" hidden><video data-video playsinline controls preload="metadata" hidden></video></div><div data-media-info role="status" aria-live="polite"></div></div>
+<script>
+window.AppMediaPreview=Object.freeze({mount(root,{onReady=()=>{},onError=()=>{}}={}){
+  const image=root.querySelector('[data-image]'),video=root.querySelector('[data-video]'),info=root.querySelector('[data-media-info]');let url=null,generation=0,cleanup=()=>{};
+  function clear(){generation++;cleanup();cleanup=()=>{};video.pause();video.removeAttribute('src');video.load();image.removeAttribute('src');image.hidden=video.hidden=true;info.textContent='';if(url){URL.revokeObjectURL(url);url=null;}}
+  function setSource(blob,{kind,alt=''}={}){if(!(blob instanceof Blob)||!['image','video'].includes(kind))throw new TypeError('Blob and image/video kind required');clear();const id=generation,el=kind==='image'?image:video;url=URL.createObjectURL(blob);image.alt=alt;el.hidden=false;
+    const event=kind==='image'?'load':'loadedmetadata',ready=()=>{if(id!==generation)return;const width=kind==='image'?image.naturalWidth:video.videoWidth,height=kind==='image'?image.naturalHeight:video.videoHeight;info.textContent=width+' × '+height;onReady({width,height,element:el,isCurrent:()=>id===generation});},error=()=>{if(id===generation)onError(el.error||new Error('media load failed'));};
+    el.addEventListener(event,ready,{once:true});el.addEventListener('error',error,{once:true});cleanup=()=>{el.removeEventListener(event,ready);el.removeEventListener('error',error);};el.src=url;
+  }
+  const onPageHide=event=>{if(!event.persisted)clear();};window.addEventListener('pagehide',onPageHide);return Object.freeze({setSource,clear,destroy(){window.removeEventListener('pagehide',onPageHide);clear();}});
+}});
+</script>

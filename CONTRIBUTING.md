@@ -37,3 +37,5 @@ A pull request should not add a remote runtime resource, unpinned package, gener
 ## Help content checklist
 
 When a pull request changes the user workflow, also update the in-app help section between `APP:HELP:BEGIN` and `APP:HELP:END`. Confirm the dialog opens from the upper-right button, follows the selected language, closes by button / `Esc` / backdrop click, and remains usable on a narrow mobile viewport.
+
+Run the common Node unit tests and Chromium/Firefox/WebKit regression checks when touching shared UI, release scripts or WebRTC. Replace starter-only checks with application-specific workflows in derived apps. Real-device camera/QR/OS share behavior remains a separate release check. Keep both READMEs, the component API guides, and actual screenshots/source ZIP synchronized.
