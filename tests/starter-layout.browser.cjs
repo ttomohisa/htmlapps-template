@@ -17,6 +17,7 @@ const config=require('../app.config.json');
         page.on('request',r=>{if(/^https?:/i.test(r.url()))requests.push(r.url());});
         await page.goto(pathToFileURL(path.resolve(__dirname,'../dist/index.html')).href);
         await page.locator('#editor').waitFor();
+        assert.equal(await page.locator('#versionBadge').textContent(),'v'+config.version);
         const font=await page.locator('.brand-name').evaluate(e=>getComputedStyle(e).fontSize);
         await page.locator('#editor').fill('');
         for(let i=0;i<2;i++){
@@ -85,6 +86,7 @@ const config=require('../app.config.json');
         assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
         await page.goto(pathToFileURL(path.resolve(__dirname,'../dist/index.self-extract.html')).href);
         await page.locator('#editor').waitFor({timeout:20000});
+        assert.equal(await page.locator('#versionBadge').textContent(),'v'+config.version);
         assert.ok(await page.locator('#editor').isVisible());
         assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
       }finally{await context.close();}

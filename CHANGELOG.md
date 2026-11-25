@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.4.0 - Shared UI, WebRTC reliability, and release validation - 2026-11-25
+
 - Harden WebRTC QR generation and designated-channel closure, progress cancellation, fullscreen request cancellation and clipboard races; expand lifecycle and mocked publish tests.
 - Align the component inventory, quick-start instructions, browser test scope and release requirements across the bilingual documentation.
 

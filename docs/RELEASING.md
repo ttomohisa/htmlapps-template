@@ -26,3 +26,9 @@ Application publishing requires stable SemVer, the actual owner/name, non-empty 
 アプリの自動公開には安定版SemVer、実リポジトリのowner/name、空でないバージョン別ノート、通常版と有効化した自己展開版が必要です。出力パスはリポジトリ内の相対パスにします。mainのリリース検証では共通単体検査と3ブラウザーの検査も実施します。スターター専用テストをアプリ固有の検査へ置き換え、実行ファイル名を変える場合は両方のワークフローを更新してください。公開処理ではノートをコミットの内容と照合し、想定外の添付物がある下書きは公開せず、公開済みReleaseは変更しません。GitHub APIは模擬テストで検証しますが、実際の公開権限・Release作成は設定済みのリポジトリで確認が必要です。
 
 The template's placeholder repository metadata deliberately skips application publishing. A template-version change alone does not create a GitHub Release. / テンプレート自体の仮リポジトリ設定ではアプリの自動公開は行いません。テンプレートのバージョン変更だけでGitHub Releaseは作成されません。
+
+## Template maintenance release / テンプレート本体のリリース
+
+The template itself keeps placeholder application metadata. Prepare its version in app.config.json, CHANGELOG and a note under `docs/template-releases/` (separate from derived apps' `docs/releases/`). Refresh actual screenshots and the source ZIP, then run the template CI including `python scripts/package-template-source.py --check`. After the maintainer merges, Pages follows its existing deployment workflow. If a versioned GitHub Release is desired for the template itself, the maintainer creates the tag and Release at the verified main commit using the template note and source ZIP. The derived-app workflow deliberately does not publish it automatically.
+
+テンプレート本体はアプリの仮リポジトリ設定を保持します。app.config.json、CHANGELOG、`docs/template-releases/` のノートを更新し（派生アプリ用の `docs/releases/` とは分離）、実スクリーンショットとソースZIPを再生成します。CIでは `python scripts/package-template-source.py --check` も実行します。管理者がマージした後は既存のPages公開フローが動きます。テンプレート本体のバージョン付きGitHub Releaseが必要な場合は、確認済みmainコミットに管理者がタグを作り、テンプレート用ノートとソースZIPでReleaseを作成します。派生アプリ用の自動公開ワークフローはテンプレート自体を公開しません。

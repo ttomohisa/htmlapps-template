@@ -317,3 +317,5 @@ Copyright © 2026 ttomohisa
 ## ブラウザー回帰テスト
 
 GitHub ActionsでChromium、Firefox、WebKitを検査します。スターターでは320/390/740/1360pxの日英表示、保存内容、Undo、権限拒否、10万文字、単一HTMLと自己展開版を確認します。新規アプリはスターター専用テストを実際の操作テストに置き換え、リリース検証でも実行してください。共通部品テストは引き続き利用できます。PlaywrightのWebKitはiPhone Safari実機の代わりではありません。カメラ、共有、ファイル選択、WebRTCは対象実機でも確認してください。
+
+派生アプリではなくテンプレート本体をリリースするときは、[テンプレートのリリース手順](docs/RELEASING.md#template-maintenance-release--テンプレート本体のリリース)を参照してください。既存ZIPの整合性だけを確認する場合は `python scripts/package-template-source.py --check` を実行します。

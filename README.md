@@ -316,3 +316,5 @@ For this template repository only: build normally, install the pinned Playwright
 ## Browser regression tests
 
 GitHub Actions checks Chromium, Firefox and WebKit. Starter checks cover Japanese and English at 320/390/740/1360px, saved content, Undo, denied permissions, 100,000 characters, and both standalone variants. Replace starter-only tests with actual application workflows and run them in release validation. Retain reusable component checks. Playwright WebKit does not replace real iPhone Safari; check camera, sharing, file selection and WebRTC on target devices.
+
+For a versioned template release (rather than a derived application), see the [template maintenance release procedure](docs/RELEASING.md#template-maintenance-release--テンプレート本体のリリース). Verify the existing source ZIP without rewriting it using `python scripts/package-template-source.py --check`.
